@@ -27,10 +27,10 @@ public class ContainmentTest {
 			PamelaModelFactory factory = new PamelaModelFactory(PamelaMetaModelLibrary.retrieveMetaModel(TestContainerA.class, TestContainerB.class,
 					TestEmbeddedA.class, TestEmbeddedB.class));
 
-			ModelEntity<TestContainerA> containerAEntity = factory.getModelContext().getModelEntity(TestContainerA.class);
-			ModelEntity<TestContainerB> containerBEntity = factory.getModelContext().getModelEntity(TestContainerB.class);
-			ModelEntity<TestEmbeddedA> embeddedAEntity = factory.getModelContext().getModelEntity(TestEmbeddedA.class);
-			ModelEntity<TestEmbeddedB> embeddedBEntity = factory.getModelContext().getModelEntity(TestEmbeddedB.class);
+			ModelEntity<TestContainerA> containerAEntity = factory.getPamelaMetaModel().getModelEntity(TestContainerA.class);
+			ModelEntity<TestContainerB> containerBEntity = factory.getPamelaMetaModel().getModelEntity(TestContainerB.class);
+			ModelEntity<TestEmbeddedA> embeddedAEntity = factory.getPamelaMetaModel().getModelEntity(TestEmbeddedA.class);
+			ModelEntity<TestEmbeddedB> embeddedBEntity = factory.getPamelaMetaModel().getModelEntity(TestEmbeddedB.class);
 
 			assertNotNull(containerAEntity);
 			assertNotNull(containerBEntity);

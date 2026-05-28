@@ -2,6 +2,8 @@ Par Victor Gambier.
 
 Veuillez d'abord lire cette introduction : https://pamela.openflexo.org/SNAPSHOT/pamela-core/index.html
 
+//TODO why
+
 # Comment créer un modèle simple
 
 Pour créer un modèle Pamela, il suffit de créer une interface et de définir implicitement autant d'attributs que vous le souhaitez :
@@ -123,30 +125,27 @@ où `projectModel` est une instance du modèle à sérialiser, et `fos` est un F
 
 ```
 File xmlFile = new File(xmlPath);
-mlFile.createNewFile();
+xmlFile.createNewFile();
 FileOutputStream fos = new FileOutputStream(xmlFile);
 ```
 
 Il est également possible de désérialiser un fichier XML en modèle Pamela :
 
 ```
-ProjectModel projectModel = (ProjectModel) projectFactory.deserialize(fis, DeserializationPolicy.RESTRICTIVE);
-```
-
-où `fis` est un FileInputStream, par exemple :
-
-```
+// ...
 FileInputStream fis = new FileInputStream(xmlFile);
+ProjectModel projectModel = (ProjectModel) projectFactory.deserialize(fis, DeserializationPolicy.RESTRICTIVE);
 ```
 
 # updateWith method
 
-Pamela contient une méthode nommée `updateWith` qui permet de mettre un jour un modèle A à partir d'un modèle B. Suite à cette opération, les informations stockées dans le modèle A seront identiques à celles du modèle B, mais contrairement à un simple `ClassModel modelA = modelB;`, les pointers, références, etc. du modèle A ne seront pas affectés.
+Pamela contient une méthode nommée `updateWith` qui permet de mettre à jour un modèle A à partir d'un modèle B.
+Suite à cette opération, les informations stockées dans le modèle A seront identiques à celles du modèle B, mais contrairement à un simple `ClassModel modelA = modelB;`, les pointers, références, etc. du modèle A ne seront pas affectés.
+
+//TODO idf
 
 Exemple d'utilisation :
 
 ```
 oldModel.updateWith(newModel);
 ```
-
-

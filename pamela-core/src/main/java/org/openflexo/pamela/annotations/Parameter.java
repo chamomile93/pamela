@@ -51,6 +51,7 @@ import org.openflexo.pamela.model.ModelProperty;
  * 
  * This annotation should be placed on a constructor parameter to indicate that this value has to be assigned to related
  * {@link ModelProperty}
+ * //TODO idf 
  * 
  * @author sylvain
  *

@@ -59,6 +59,7 @@ import org.openflexo.toolbox.HasPropertyChangeSupport;
  *
  */
 public class IProxyMethodHandler {
+	//TODO idf the comment says "interface but the "Java" type is "class", should I change the type to reflect this ? this is probably a breaking change. I need to try. And it seems to act as an "interface"
 
 	public static Method PERFORM_SUPER_GETTER;
 	public static Method PERFORM_SUPER_SETTER;
@@ -105,6 +106,10 @@ public class IProxyMethodHandler {
 	public static Method GET_TYPE_FOR_KEY;
 	public static Method ENABLE_ASSERTION_CHECKING;
 	public static Method DISABLE_ASSERTION_CHECKING;
+	// TODO added following methods declaration to AccessibleProxyObject, probably should be moved to a more specific interface ?
+	public static Method REGISTER_RUNTIME_METHOD;
+	public static Method HAS_RUNTIME_METHOD;
+	public static Method INVOKE_RUNTIME_METHOD;
 
 	public static final String DELETED = "deleted";
 	public static final String UNDELETED = "undeleted";
@@ -138,6 +143,7 @@ public class IProxyMethodHandler {
 					Class.class);
 			IS_SERIALIZING = AccessibleProxyObject.class.getMethod("isSerializing");
 			IS_DESERIALIZING = AccessibleProxyObject.class.getMethod("isDeserializing");
+			//TODO why
 			IS_MODIFIED = AccessibleProxyObject.class.getMethod("isModified");
 			IS_DELETED = DeletableProxyObject.class.getMethod("isDeleted");
 			SET_MODIFIED = AccessibleProxyObject.class.getMethod("setModified", boolean.class);
@@ -167,6 +173,10 @@ public class IProxyMethodHandler {
 			GET_TYPE_FOR_KEY = KeyValueCoding.class.getMethod("getTypeForKey", String.class);
 			ENABLE_ASSERTION_CHECKING = SpecifiableProxyObject.class.getMethod("enableAssertionChecking");
 			DISABLE_ASSERTION_CHECKING = SpecifiableProxyObject.class.getMethod("disableAssertionChecking");
+			REGISTER_RUNTIME_METHOD = AccessibleProxyObject.class.getMethod("registerRuntimeMethod", String.class,
+					org.openflexo.pamela.RuntimeMethod.class);
+			HAS_RUNTIME_METHOD = AccessibleProxyObject.class.getMethod("hasRuntimeMethod", String.class);
+			INVOKE_RUNTIME_METHOD = AccessibleProxyObject.class.getMethod("invokeRuntimeMethod", String.class, Object[].class);
 
 		} catch (SecurityException e) {
 			e.printStackTrace();

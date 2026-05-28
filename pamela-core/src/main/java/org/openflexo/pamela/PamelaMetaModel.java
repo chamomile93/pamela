@@ -97,19 +97,27 @@ public class PamelaMetaModel {
 		modelEntitiesByXmlTag = new HashMap<>();
 		modelPropertiesByXmlTag = new HashMap<>();
 		ModelEntity<?> modelEntity = ModelEntityLibrary.importEntity(baseClass);
+		//TODO idf why "modelEntity" ? could it be that the baseClass is "FlexoProcess" in my testing case ?
+		//TODO idf what "importEntity(baseClass)" returns. first guess is that it's creating a modelEntity of a 'pojo' FlexoProcess interface class
+		
 		appendEntity(modelEntity, new HashSet<>());
 		modelEntities = Collections.unmodifiableMap(modelEntities);
 		modelEntitiesByXmlTag = Collections.unmodifiableMap(modelEntitiesByXmlTag);
 		executionMonitors = new HashSet<>();
 		if (isFinalModel) {
+			//TODO idf why "isFinalModel=true" should do the following
 			for (ModelEntity entity : modelEntities.values()) {
 				entity.finalizeImport();
+				//TODO idf do I need to understand this ?
 			}
 			discoverPatterns();
+			//TODO idf do I look into it ?
 		}
 	}
 
 	public PamelaMetaModel(Class<?> baseClass, List<PamelaMetaModel> metaModels) throws ModelDefinitionException {
+		//TODO idf if I am using this constructor in my test case, probably have other uses elsewhere
+		//TODO i came here since I had a match for "importEntity" which happened in my trace at some point when initializing objects
 		this.baseClass = baseClass;
 		modelEntities = new HashMap<>();
 		modelEntitiesByXmlTag = new HashMap<>();
@@ -160,31 +168,40 @@ public class PamelaMetaModel {
 	}
 
 	private void appendEntity(ModelEntity<?> modelEntity, Set<ModelEntity<?>> visited) throws ModelDefinitionException {
+		//TODO this modify the "modelEntities" field, what is it doing ?
+		//TODO idf 
 		visited.add(modelEntity);
 		modelEntities.put(modelEntity.getImplementedInterface(), modelEntity);
-		ModelEntity<?> put = modelEntitiesByXmlTag.put(modelEntity.getXMLTag(), modelEntity);
-		if (put != null && put != modelEntity) {
+		ModelEntity<?> theModelEntityFromXmlTagReturnedByPut = modelEntitiesByXmlTag.put(modelEntity.getXMLTag(), modelEntity);
+		if (theModelEntityFromXmlTagReturnedByPut != null && theModelEntityFromXmlTagReturnedByPut != modelEntity) {
 			throw new ModelDefinitionException(
 					"Two entities define the same XMLTag '" + modelEntity.getXMLTag() + "'. Implemented interfaces: "
-							+ modelEntity.getImplementedInterface().getName() + " " + put.getImplementedInterface().getName());
+							+ modelEntity.getImplementedInterface().getName() + " " + theModelEntityFromXmlTagReturnedByPut.getImplementedInterface().getName());
 		}
 		if (!modelEntity.isAbstract()) {
+			//TODO idf should I look into this ? this seems to be about parsing the xml tags used as an annotation ?
+			//TODO idf why it look for deprecatedTags in case the modelEntity is "not abstract"
 			if (modelEntity.getXMLElement() != null && StringUtils.isNotEmpty(modelEntity.getXMLElement().deprecatedXMLTags())) {
 				StringTokenizer st = new StringTokenizer(modelEntity.getXMLElement().deprecatedXMLTags(), ",");
+				//TODO idf why do we need a stringtokenizer ? I suppose that field of a class annotated with "xmltag" are being concatenated with a comma in a single string and we need to split them to get the different fields
 				while (st.hasMoreTokens()) {
 					String deprecatedTag = st.nextToken();
-					ModelEntity<?> put2 = modelEntitiesByXmlTag.put(deprecatedTag, modelEntity);
-					if (put2 != null && put2 != modelEntity) {
+					//TODO idf what value it is
+					ModelEntity<?> anotherModelEntityByXmlTagReturnedByPut = modelEntitiesByXmlTag.put(deprecatedTag, modelEntity);
+					if (anotherModelEntityByXmlTagReturnedByPut != null && anotherModelEntityByXmlTagReturnedByPut != modelEntity) {
 						throw new ModelDefinitionException(
-								"Two entities define the same XMLTag '" + deprecatedTag + "'. Implemented interfaces: "
-										+ modelEntity.getImplementedInterface().getName() + " " + put2.getImplementedInterface().getName());
+								"Two entities define the same deprecatedXMLTag '" + deprecatedTag + "'. Implemented interfaces: "
+										+ modelEntity.getImplementedInterface().getName() + " " + anotherModelEntityByXmlTagReturnedByPut.getImplementedInterface().getName());
 					}
 				}
 			}
 		}
 		for (ModelEntity<?> e : modelEntity.getEmbeddedEntities()) {
+			//TODO idf what are the values of "embeddedEntities" ?
+			//TODO idf from it's usage, it seems like the it fetch the "superclass" or those referenced in "Imports" annotation
 			if (!visited.contains(e)) {
 				appendEntity(e, visited);
+				//OK start again with every "embeddedEntity" of the current "modelEntity"
 			}
 		}
 	}
@@ -207,6 +224,7 @@ public class PamelaMetaModel {
 
 	public <I> ModelEntity<I> getModelEntity(Class<I> implementedInterface) {
 		return modelEntities.get(implementedInterface);
+		//TODO idf this map seems to contain a class like FlexoProcess, and associated  modelEntity instance reference
 	}
 
 	/**
@@ -272,6 +290,7 @@ public class PamelaMetaModel {
 	}
 
 	public List<ModelEntity<?>> getUpperEntities(Object object) {
+		//TODO idf, do I need to look into ? it seems related to XML Serialization process Extensive and Permissive case
 		List<ModelEntity<?>> entities = new ArrayList<>();
 		for (Class<?> i : object.getClass().getInterfaces()) {
 			appendKnownEntities(entities, i);
@@ -280,6 +299,7 @@ public class PamelaMetaModel {
 	}
 
 	private void appendKnownEntities(List<ModelEntity<?>> entities, Class<?> i) {
+		//TODO idf, do I need to look into ?
 		ModelEntity<?> modelEntity = getModelEntity(i);
 		if (modelEntity != null && !entities.contains(i)) {
 			entities.add(modelEntity);
@@ -334,6 +354,7 @@ public class PamelaMetaModel {
 	 * @throws ModelDefinitionException
 	 */
 	private void discoverPatterns() throws ModelDefinitionException {
+		//TODO I might need to look into this when working with the AuthenticatorPattern
 		ServiceLoader<PatternLibrary> loader = ServiceLoader.load(PatternLibrary.class);
 
 		List<Class<? extends AbstractPatternFactory<?>>> factories = new ArrayList<>();

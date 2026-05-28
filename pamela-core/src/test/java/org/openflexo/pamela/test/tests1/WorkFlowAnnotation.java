@@ -11,17 +11,17 @@ import org.openflexo.pamela.factory.PamelaModelFactory;
 import org.openflexo.pamela.model.StringConverterLibrary.Converter;
 
 @ModelEntity
-public interface WKFAnnotation extends TestModelObject {
+public interface WorkFlowAnnotation extends TestModelObject {
 
 	public static final String TEXT = "text";
 
 	@Override
 	@Initializer
-	public WKFAnnotation init();
+	public WorkFlowAnnotation init();
 
 	@Override
 	@Initializer
-	public WKFAnnotation init(@Parameter(TEXT) String text);
+	public WorkFlowAnnotation init(@Parameter(TEXT) String text);
 
 	@Getter(TEXT)
 	public String getText();
@@ -30,21 +30,21 @@ public interface WKFAnnotation extends TestModelObject {
 	public void setText(String s);
 
 	@StringConverter
-	public static final Converter<WKFAnnotation> CONVERTER = new WKFAnnotationConverter();
+	public static final Converter<WorkFlowAnnotation> CONVERTER = new WKFAnnotationConverter();
 
-	public static class WKFAnnotationConverter extends Converter<WKFAnnotation> {
+	public static class WKFAnnotationConverter extends Converter<WorkFlowAnnotation> {
 
 		public WKFAnnotationConverter() {
-			super(WKFAnnotation.class);
+			super(WorkFlowAnnotation.class);
 		}
 
 		@Override
-		public WKFAnnotation convertFromString(String value, PamelaModelFactory factory) throws InvalidDataException {
-			return factory.newInstance(WKFAnnotation.class, value);
+		public WorkFlowAnnotation convertFromString(String value, PamelaModelFactory factory) throws InvalidDataException {
+			return factory.newInstance(WorkFlowAnnotation.class, value);
 		}
 
 		@Override
-		public String convertToString(WKFAnnotation value) {
+		public String convertToString(WorkFlowAnnotation value) {
 			return value.getText();
 		}
 

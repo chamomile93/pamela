@@ -23,7 +23,7 @@ import org.openflexo.toolbox.FileUtils;
 
 /**
  * Basic tests regarding a sample PAMELA model
- * 
+ *
  * @author sylvain
  *
  */
@@ -31,10 +31,11 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 
 	private PamelaModelFactory factory;
 	private PamelaMetaModel pamelaMetaModel;
+	private FlexoProcess process;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-
+		new File("/tmp").mkdirs();
 	}
 
 	@AfterClass
@@ -44,64 +45,92 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 	@Override
 	@Before
 	public void setUp() throws Exception {
-		new File("/tmp").mkdirs();
-		pamelaMetaModel = new PamelaMetaModel(FlexoProcess.class);
-		factory = new PamelaModelFactory(pamelaMetaModel);
+		initializeFactory();
+		process = factory.newInstance(FlexoProcess.class);
+		process.init("234XX");
+		process.setName("NewProcess");
+		process.setFoo(8);
 	}
 
 	@Override
 	@After
 	public void tearDown() throws Exception {
+		initializeFactory();
+		process = factory.newInstance(FlexoProcess.class);
+		process.init("234XX");
+		process.setName("NewProcess");
+		process.setFoo(8);
+	}
+
+	private void initializeFactory() throws Exception {
+		if (factory == null) {
+			new File("/tmp").mkdirs();
+			pamelaMetaModel = new PamelaMetaModel(FlexoProcess.class); // this is a dummy class for testing
+			factory = new PamelaModelFactory(pamelaMetaModel);
+		}
 	}
 
 	/**
 	 * We declare here a basic mapping model, and we check that the model construction is right
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test1() throws Exception {
-
 		System.out.println(pamelaMetaModel.debug());
-
 		assertEquals(11, pamelaMetaModel.getEntityCount());
-
+		//TODO idf why 11, I expect One entity, namely a FlexoProcess
 		validateBasicModelContext(pamelaMetaModel);
 	}
 
-	public void test2() throws Exception {
-
-		FlexoProcess process = factory.newInstance(FlexoProcess.class);
-		assertTrue(process instanceof FlexoProcess);
+	public void initializedProcessFromPamelaFactoryShouldSerializeToXML() throws Exception {
+		//TODO this doesn't test the serialization but something else, like how to construct a model of a class using Pamela factory
+		//GIVEN
+		FlexoProcess aProcess = factory.newInstance(FlexoProcess.class);
 		try {
-			process.getName();
+			aProcess.getName();
 			fail("getName() should not be invokable until init() has been called");
 		} catch (UnitializedEntityException e) {
 			// OK this on purpose.
 		}
-		process.init("234XX");
-		System.out.println("process=" + process);
-		System.out.println("Id=" + process.getFlexoID());
-		process.setName("NewProcess");
-		process.setFoo(8);
-		assertEquals("NewProcess", process.getName());
-		assertEquals("234XX", process.getFlexoID());
-		assertEquals(8, process.getFoo());
+		//WHEN
+		aProcess.init("234XX");
+		aProcess.setName("NewProcess");
+		aProcess.setFoo(8);
+		//THEN
+		assertTrue(aProcess instanceof FlexoProcess);
+		assertEquals("NewProcess", aProcess.getName());
+		assertEquals("234XX", aProcess.getFlexoID());
+		assertEquals(8, aProcess.getFoo());
+	}
 
+	public void initializedProcessWithOneInitializedActivityNodeShouldSerializeToXML() throws Exception {
+		//TODO this doesn't test the serialization but something else about the model construction using Pamela factory
 		ActivityNode activityNode = factory.newInstance(ActivityNode.class);
 		activityNode.init();
 		assertTrue(activityNode instanceof ActivityNode);
 		assertEquals("0000", activityNode.getFlexoID());
+		//TODO idf why in the xml the node has id=1
+		// assertEquals("1", activityNode.getFlexoID());
 
 		activityNode.setName("MyActivity");
 		process.addToNodes(activityNode);
 
-		System.out.println("activityNode=" + activityNode);
+
 		assertEquals("MyActivity", activityNode.getName());
 		assertTrue(process.getNodes().contains(activityNode));
 		assertEquals(process, activityNode.getProcess());
-		System.out.println("process: " + activityNode.getProcess());
+	}
 
+	public void initializedProcessWithOneInitializedStartNodeShouldSerializeToXML() throws Exception {
+		//TODO this doesn't test the serialization but something else about the model construction using Pamela factory
+		ActivityNode activityNode = factory.newInstance(ActivityNode.class);
+		activityNode.init();
 		StartNode startNode = factory.newInstance(StartNode.class);
+
+		//TODO the following comment might not hold anymore since I split the test
+		//TODO why id=3? my expectation was id=2 since this seems to be an internal identifier generated on object creation and this is the second object created after the process itself
+		// but here id=2 is an OutgoingTokenEdge being a successor to this node id=3
+
 		startNode.setName("Start");
 		process.addToNodes(startNode);
 
@@ -109,39 +138,43 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 		endNode.init();
 		endNode.setName("End");
 		process.addToNodes(endNode);
-
-		System.out.println("process=" + process);
+		//TODO the following comment might not hold anymore since I split the test
+		//TODO id=5 idem, expect id=3
+		//maybe this has to do with the way nodes are "serialized" ? doesn't seem to hold,
+		// if this was the case that this is DFS then
+		// the first incomingTokenEdge not yet created at this point would have id=2
+		// 		but in the xml doesn't have one, that's because it doesn't belong to this activity node but is a "reference" thus the "idref=2" in the xml which refer to the edge with id=2 but "belong to" the startNode above
+		//		and moreover the node after is id=4; this is normal, since it was affected has "belong to" this "activity node" and there's not "idRef" on this one.
+		// that does not follow.
 
 		TokenEdge edge1 = (TokenEdge) factory.newInstance(TokenEdge.class).init(startNode, activityNode);
 		edge1.setName("edge1");
-		// startNode.addToOutgoingEdges(edge1);
-		// activityNode.addToIncomingEdges(edge1);
-		System.out.println("edge1=" + edge1);
-		System.out.println("startNode=" + edge1.getStartNode());
-		System.out.println("endNode=" + edge1.getEndNode());
-		System.out.println("startNode.getProcess()=" + edge1.getStartNode().getProcess());
+		startNode.addToOutgoingEdges(edge1);
+		activityNode.addToIncomingEdges(edge1);
 
 		assertEquals(process, edge1.getProcess());
 
 		TokenEdge edge2 = factory.newInstance(TokenEdge.class, "edge2", activityNode, endNode);
-		// edge2.setStartNode(activityNode);
-		// edge2.setEndNode(endNode);
+		edge2.setStartNode(activityNode);
+		//TODO i don't follow why the polymorphic constructor is given activityNode, endNode as parameters
+		// it seems that the first node is "start" and the second one is "end"
+		edge2.setEndNode(endNode);
 
-		System.out.println("edge2=" + edge2);
 		assertEquals(process, edge2.getProcess());
 
 		try (FileOutputStream fos = new FileOutputStream("/tmp/TestFile.xml")) {
 			factory.serialize(process, fos);
+			//TODO this suppose this is the root element
 			fos.flush();
 		} catch (FileNotFoundException e) {
 			fail(e.getMessage());
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}
-
 	}
 
 	public void test3() throws Exception {
+		//TODO too long, should be split in several tests, each testing a specific aspect of the model construction and serialization
 		File file = File.createTempFile("Pamela.test3TestFile", ".xml");
 		FlexoProcess process = factory.newInstance(FlexoProcess.class);
 		process.init("234XX");
@@ -168,8 +201,8 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 		assertEquals(1, startNode.getOutgoingEdges().size());
 		assertEquals(1, activityNode.getOutgoingEdges().size());
 
-		WKFAnnotation annotation1 = factory.newInstance(WKFAnnotation.class, "Annotation 1");
-		WKFAnnotation annotation2 = factory.newInstance(WKFAnnotation.class, "Annotation 2");
+		WorkFlowAnnotation annotation1 = factory.newInstance(WorkFlowAnnotation.class, "Annotation 1");
+		WorkFlowAnnotation annotation2 = factory.newInstance(WorkFlowAnnotation.class, "Annotation 2");
 		startNode.setMasterAnnotation(annotation1);
 		startNode.addToOtherAnnotations(annotation2);
 
@@ -266,6 +299,7 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 	}
 
 	public void test5() throws Exception {
+		//TODO what is this ?
 		/*
 		 * FlexoProcess process = loadProcessFromFile(); ActivityNode activityNode = (ActivityNode) process.getNodeNamed("MyActivity");
 		 * StartNode startNode = (StartNode) process.getNodeNamed("Start"); WKFAnnotation annotation1 = startNode.getMasterAnnotation();
@@ -279,10 +313,11 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 
 	/**
 	 * Testing getEmbeddedObjects()
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test6() throws Exception {
+		//TODO too long, should be split in several tests, each testing a specific aspect of the model construction and serialization
 		FlexoProcess process = factory.newInstance(FlexoProcess.class);
 		process.init("234XX");
 		process.setName("NewProcess");
@@ -332,10 +367,12 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 
 	/**
 	 * Testing cloning
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test7() throws Exception {
+		//TODO too long, should be split in several tests, each testing a specific aspect of the model construction and serialization
+		//TODO observe the result of this test
 		File file = File.createTempFile("PAMELA.test7", ".xml");
 		FlexoProcess process = factory.newInstance(FlexoProcess.class);
 		process.init("234XX");
@@ -388,6 +425,7 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 		assertNotSame(edge2, edge2Copy);
 		try (FileOutputStream fos = new FileOutputStream(file)) {
 			factory.serialize(processCopy, fos);
+			//TODO why after assertion ? does it help init certain fields of the model at compile time ? the same thing is done in test below for cloning, pasting
 		} catch (FileNotFoundException e) {
 			fail(e.getMessage());
 		} catch (IOException e) {
@@ -399,10 +437,11 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 
 	/**
 	 * Testing cloning (with and without context)
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test8() throws Exception {
+		//TODO too long, should be split in several tests, each testing a specific aspect of the model construction and serialization
 		FlexoProcess process = factory.newInstance(FlexoProcess.class);
 		process.init("234XX");
 		process.setName("NewProcess");
@@ -461,10 +500,11 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 
 	/**
 	 * Testing copy paste
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test9() throws Exception {
+		//TODO too long, should be split in several tests, each testing a specific aspect of the model construction and serialization
 		FlexoProcess process = factory.newInstance(FlexoProcess.class);
 		process.init("234XX");
 		process.setName("NewProcess");
@@ -510,10 +550,11 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 
 	/**
 	 * Testing copy paste
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void test10() throws Exception {
+		//TODO too long, should be split in several tests, each testing a specific aspect of the model construction and serialization
 		FlexoProcess process = factory.newInstance(FlexoProcess.class);
 		process.init("234XX");
 		process.setName("NewProcess");
@@ -581,6 +622,7 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 	}
 
 	public void testModify() {
+		//TODO too long, should be split in several tests, each testing a specific aspect of the model construction and serialization
 		FlexoProcess process = factory.newInstance(FlexoProcess.class);
 		process.init("234XX");
 		assertTrue(process.isModified());

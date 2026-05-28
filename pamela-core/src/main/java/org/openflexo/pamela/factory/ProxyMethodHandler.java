@@ -6,14 +6,14 @@
  * Copyright (c) 2013-2015, Openflexo
  * Copyright (c) 2011-2012, AgileBirds
  *
- * This file is part of Pamela-core, a component of the software infrastructure 
+ * This file is part of Pamela-core, a component of the software infrastructure
  * developed at Openflexo.
  *
  *
- * Openflexo is dual-licensed under the European Union Public License (EUPL, either 
- * version 1.1 of the License, or any later version ), which is available at 
+ * Openflexo is dual-licensed under the European Union Public License (EUPL, either
+ * version 1.1 of the License, or any later version ), which is available at
  * https://joinup.ec.europa.eu/software/page/eupl/licence-eupl
- * and the GNU General Public License (GPL, either version 3 of the License, or any 
+ * and the GNU General Public License (GPL, either version 3 of the License, or any
  * later version), which is available at http://www.gnu.org/licenses/gpl.html .
  *
  * You can redistribute it and/or modify under the terms of either of these licenses
@@ -23,14 +23,14 @@
  *
  *          Additional permission under GNU GPL version 3 section 7
  *
- *          If you modify this Program, or any covered work, by linking or 
- *          combining it with software containing parts covered by the terms 
+ *          If you modify this Program, or any covered work, by linking or
+ *          combining it with software containing parts covered by the terms
  *          of EPL 1.0, the licensors of this Program grant you additional permission
- *          to convey the resulting work. * 
+ *          to convey the resulting work. *
  *
- * This software is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. 
+ * This software is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE.
  *
  * See http://www.openflexo.org/license.html for details.
  *
@@ -75,6 +75,7 @@ import org.openflexo.pamela.AccessibleProxyObject;
 import org.openflexo.pamela.CloneableProxyObject;
 import org.openflexo.pamela.DeletableProxyObject;
 import org.openflexo.pamela.PamelaMetaModel;
+import org.openflexo.pamela.RuntimeMethod;
 import org.openflexo.pamela.annotations.Adder;
 import org.openflexo.pamela.annotations.CloningStrategy.StrategyType;
 import org.openflexo.pamela.annotations.ComplexEmbedded;
@@ -133,9 +134,9 @@ import javassist.util.proxy.ProxyObject;
 
 /**
  * Invocation handler in the core of PAMELA: main class for PAMELA interpreter<br>
- * 
+ *
  * This is the class where method call dispatching is performed.
- * 
+ *
  * @author sylvain
  *
  * @param <I>
@@ -173,6 +174,7 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 
 	private final PAMELAProxyFactory<I> pamelaProxyFactory;
 	private final EditingContext editingContext;
+	private final Map<String, RuntimeMethod> runtimeMethods = new HashMap<>();
 
 	private Stack<Method> assertionCheckingStack = new Stack<>();
 	private Map<Method, Map<String, Object>> historyValues;
@@ -255,7 +257,7 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 	}
 
 	private PamelaMetaModel getModelContext() {
-		return getModelFactory().getModelContext();
+		return getModelFactory().getPamelaMetaModel();
 	}
 
 	public boolean isDeleting() {
@@ -276,6 +278,21 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 
 	@Override
 	public Object invoke(Object self, Method method, Method proceed, Object[] args) throws Throwable {
+		//TODO it's marked override, but override what ? the JVM default invoke ?
+		//TODO do I need to understand this ?
+		if (PamelaUtils.methodIsEquivalentTo(method, IProxyMethodHandler.REGISTER_RUNTIME_METHOD)) {
+			registerRuntimeMethod((String) args[0], (RuntimeMethod) args[1]);
+			return null;
+		}
+		if (PamelaUtils.methodIsEquivalentTo(method, IProxyMethodHandler.HAS_RUNTIME_METHOD)) {
+			return hasRuntimeMethod((String) args[0]);
+		}
+		if (PamelaUtils.methodIsEquivalentTo(method, IProxyMethodHandler.INVOKE_RUNTIME_METHOD)) {
+			return invokeRuntimeMethod((String) args[0], args != null && args.length > 1 ? (Object[]) args[1] : new Object[0]);
+		}
+
+		// :TODO review the args in above code
+
 		boolean assertionChecking = false;
 		boolean keepGoing = true;
 		Object invoke = null;
@@ -284,14 +301,14 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 			assertionChecking = checkOnEntry(method, args);
 		}
 
-		for (ExecutionMonitor monitor : getModelFactory().getModelContext().getExecutionMonitors()) {
+		for (ExecutionMonitor monitor : getModelFactory().getPamelaMetaModel().getExecutionMonitors()) {
 			monitor.enteringMethod(self, method, args);
 		}
 
-		Set<PatternInstance<?>> patternInstances = getModelFactory().getModelContext().getPatternInstances(self);
+		Set<PatternInstance<?>> patternInstances = getModelFactory().getPamelaMetaModel().getPatternInstances(self);
 		if (patternInstances != null) {
 			for (PatternInstance<?> patternInstance : patternInstances) {
-				// TODO: Perf issue : implement a cache here
+				// :TODO: Perf issue : implement a cache here
 				List<Requires> preconditions = patternInstance.getPatternDefinition().getPreconditions(method);
 				if (preconditions != null) {
 					System.out.println("Invoking preconditions for " + method + " in pattern instance : " + patternInstance);
@@ -320,7 +337,7 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 					}
 				} catch (InvocationTargetException e) {
 					e.getTargetException().printStackTrace();
-					for (ExecutionMonitor monitor : getModelFactory().getModelContext().getExecutionMonitors()) {
+					for (ExecutionMonitor monitor : getModelFactory().getPamelaMetaModel().getExecutionMonitors()) {
 						monitor.throwingException(self, method, args, e);
 					}
 					throw e.getTargetException();
@@ -338,7 +355,7 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		}*/
 
 		if (keepGoing) {
-			invoke = _invoke(self, method, proceed, args);
+			invoke = _invoke(self, method, proceed, args); //TODO idf why we get here, in the trace that makes the SerializationTest fails
 			if (method.getReturnType().isPrimitive() && invoke == null) {
 				// Avoids an NPE
 				invoke = Defaults.defaultValue(method.getReturnType());
@@ -351,7 +368,7 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 					patternInstance.processMethodAfterInvoke(self, method, invoke, args);
 				} catch (InvocationTargetException e) {
 					e.getTargetException().printStackTrace();
-					for (ExecutionMonitor monitor : getModelFactory().getModelContext().getExecutionMonitors()) {
+					for (ExecutionMonitor monitor : getModelFactory().getPamelaMetaModel().getExecutionMonitors()) {
 						monitor.throwingException(self, method, args, e);
 					}
 					throw e.getTargetException();
@@ -380,7 +397,7 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 			}
 		}
 
-		for (ExecutionMonitor monitor : getModelFactory().getModelContext().getExecutionMonitors()) {
+		for (ExecutionMonitor monitor : getModelFactory().getPamelaMetaModel().getExecutionMonitors()) {
 			monitor.leavingMethod(self, method, args, invoke);
 		}
 
@@ -396,6 +413,7 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 	}
 
 	private Object _invoke(Object self, Method method, Method proceed, Object[] args) throws Throwable {
+		//TODO why is this "underscored" ? the naming convention seems unusual
 
 		// System.out.println("_invoke " + method);
 
@@ -455,6 +473,7 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 			try {
 				// Now we invoke the found concrete implementation
 				Object returned = proceed.invoke(self, args);
+				//TODO idf why this raises an exception while debugging the SerializationTest case setup of process.init()
 				// Then we call setModified() if required
 				if (callSetModifiedAtTheEnd) {
 					invokeSetModified(true);
@@ -484,7 +503,7 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		// System.out.println("Invoke " + method);
 		Initializer initializer = method.getAnnotation(Initializer.class);
 		if (initializer != null) {
-			internallyInvokeInitializer(getModelEntity().getInitializers(method), args);
+			internallyInvokeInitializer(getModelEntity().getInitializers(method), args);//TODO idf why we get here from "process.init" in SerializationTest setUp
 			return self;
 		}
 		if (!initialized && !initializing) {
@@ -764,6 +783,33 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		return null;
 	}
 
+	public void registerRuntimeMethod(String methodName, RuntimeMethod runtimeMethod) {
+		if (methodName == null || methodName.isBlank()) {
+			throw new IllegalArgumentException("Runtime method name must not be blank");
+		}
+		if (runtimeMethod == null) {
+			runtimeMethods.remove(methodName);
+			return;
+		}
+		runtimeMethods.put(methodName, runtimeMethod);
+	}
+
+	public boolean hasRuntimeMethod(String methodName) {
+		return methodName != null && runtimeMethods.containsKey(methodName);
+	}
+
+	public Object invokeRuntimeMethod(String methodName, Object... args) {
+		RuntimeMethod runtimeMethod = runtimeMethods.get(methodName);
+		if (runtimeMethod == null) {
+			throw new ModelExecutionException("No runtime method registered for name '" + methodName + "'");
+		}
+		try {
+			return runtimeMethod.invoke(getObject(), args != null ? args : new Object[0]);
+		} catch (Throwable e) {
+			throw new ModelExecutionException("Error while invoking runtime method '" + methodName + "'", e);
+		}
+	}
+
 	private PropertyChangeSupport getPropertyChangeSuppport() {
 		if (propertyChangeSupport == null) {
 			propertyChangeSupport = new PropertyChangeSupport(getObject());
@@ -1011,12 +1057,12 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 				/*
 				// We retrieve and store old value for a potential undelete
 				Object oldValue = invokeGetter(property);
-				
+
 				List<Object> oldValuesList = null;
 				if (property.getCardinality() == Cardinality.LIST) {
 					oldValuesList = new ArrayList<>((List) oldValue);
 				}
-				
+
 				oldValues.put(property.getPropertyIdentifier(), oldValue);
 				// Otherwise nullify using setter
 				if (property.getSetterMethod() != null) {
@@ -1025,7 +1071,7 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 				else {
 					internallyInvokeSetter(property, null, true);
 				}
-				
+
 				if (property.getCardinality() == Cardinality.SINGLE) {
 					if ((oldValue instanceof DeletableProxyObject) && embeddedObjects.contains(oldValue)) {
 						// By the way, this object was embedded, delete it
@@ -1033,7 +1079,7 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 						embeddedObjects.remove(oldValue);
 					}
 				}
-				
+
 				else if (property.getCardinality() == Cardinality.LIST) {
 					if (oldValuesList != null) {
 						for (Object toBeDeleted : oldValuesList) {
@@ -1077,13 +1123,13 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 
 		// Also notify using core PropertyChangeSupport
 
-		// TODO: maybe we have to check that is is not the same PropertyChangeSupport ???
+		// :TODO: maybe we have to check that is is not the same PropertyChangeSupport ???
 		getPropertyChangeSuppport().firePropertyChange(DELETED, false, true);
 
-		// TODO ASK Syl if we should not remove all the listeners from pcSupport here?!?
+		// :TODO ASK Syl if we should not remove all the listeners from pcSupport here?!?
 		// Did it by default
 		for (PropertyChangeListener cl : propertyChangeSupport.getPropertyChangeListeners()) {
-			// TODO => notify the listener when it forgot to stop listening
+			// :TODO => notify the listener when it forgot to stop listening
 			propertyChangeSupport.removePropertyChangeListener(cl);
 		}
 
@@ -1298,8 +1344,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		invokeReindexer(getModelEntity().getModelProperty(propertyIdentifier), value, index);
 	}
 
-	// TODO: why do we need this ?
 	public void invokeSetterForDeserialization(ModelProperty<? super I> property, Object value) throws ModelDefinitionException {
+		// TODO: why do we need this ?
 		if (property.getSetterMethod() != null) {
 			invokeSetter(property, value);
 		}
@@ -2478,6 +2524,11 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 				}
 				else {
 					s = ((ProxyMethodHandler) ((ProxyObject) obj).getHandler()).getModelEntity().getImplementedInterface().getSimpleName();
+					/*
+						* TODO this is how we can get a ProxyObject instance at runtime
+						* TODO why in invokeToString ?
+					*/
+
 				}
 
 			}

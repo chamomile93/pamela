@@ -21,7 +21,7 @@ public class UndoRedoTests extends AbstractPAMELATest {
 	@Override
 	@Before
 	public void setUp() throws Exception {
-		pamelaMetaModel = new PamelaMetaModel(WKFObject.class);
+		pamelaMetaModel = new PamelaMetaModel(WorkFlowObject.class);
 		factory = new PamelaModelFactory(pamelaMetaModel);
 
 		final EditingContextImpl editingContext = new EditingContextImpl();

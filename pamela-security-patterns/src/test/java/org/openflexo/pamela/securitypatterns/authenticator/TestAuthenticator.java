@@ -6,7 +6,7 @@ import org.openflexo.pamela.PamelaMetaModelLibrary;
 import org.openflexo.pamela.exceptions.ModelExecutionException;
 import org.openflexo.pamela.factory.PamelaModelFactory;
 import org.openflexo.pamela.securitypatterns.authenticator.model.IAuthenticator;
-import org.openflexo.pamela.securitypatterns.authenticator.model.Subject;
+import org.openflexo.pamela.securitypatterns.authenticator.model.ISubject;
 
 import junit.framework.TestCase;
 
@@ -14,84 +14,84 @@ public class TestAuthenticator extends TestCase {
 
 	@Test
 	public void testPatternAnalysis() throws Exception {
-		PamelaMetaModel context = new PamelaMetaModel(Subject.class);
+		PamelaMetaModel context = new PamelaMetaModel(ISubject.class);
 		assertEquals(1, context.getPatternDefinitions(AuthenticatorPatternDefinition.class).size());
 		AuthenticatorPatternDefinition patternDefinition = context.getPatternDefinitions(AuthenticatorPatternDefinition.class).get(0);
-		assertEquals(Subject.PATTERN_ID, patternDefinition.getIdentifier());
+		assertEquals(ISubject.PATTERN_ID, patternDefinition.getIdentifier());
 
 		assertEquals(IAuthenticator.class, patternDefinition.authenticatorModelEntity.getImplementedInterface());
 		assertEquals(IAuthenticator.class.getMethod("request", String.class), patternDefinition.requestAuthentificationMethod);
 
-		assertEquals(Subject.class, patternDefinition.subjectModelEntity.getImplementedInterface());
-		assertEquals(Subject.class.getMethod("getAuthInfo"), patternDefinition.authentificationInfoMethod);
-		assertEquals(Subject.class.getMethod("setIdProof", int.class), patternDefinition.proofOfIdentitySetterMethod);
-		assertEquals(Subject.class.getMethod("getManager"), patternDefinition.authenticatorGetterMethod);
-		assertEquals(Subject.class.getMethod("authenticate"), patternDefinition.authenticateMethod);
+		assertEquals(ISubject.class, patternDefinition.subjectModelEntity.getImplementedInterface());
+		assertEquals(ISubject.class.getMethod("getAuthInfo"), patternDefinition.authentificationInfoMethod);
+		assertEquals(ISubject.class.getMethod("setIdProof", int.class), patternDefinition.proofOfIdentitySetterMethod);
+		assertEquals(ISubject.class.getMethod("getManager"), patternDefinition.authenticatorGetterMethod);
+		assertEquals(ISubject.class.getMethod("authenticate"), patternDefinition.authenticateMethod);
 
 	}
 
 	@Test
 	public void testAuthenticateValid() throws Exception {
-		PamelaMetaModel context = new PamelaMetaModel(Subject.class);
+		PamelaMetaModel context = new PamelaMetaModel(ISubject.class);
 		PamelaModelFactory factory = new PamelaModelFactory(context);
 		IAuthenticator manager = factory.newInstance(IAuthenticator.class);
-		Subject subject = factory.newInstance(Subject.class, "id1");
-		subject.setManager(manager);
-		manager.addUser(subject.getAuthInfo());
-		subject.authenticate();
-		assertEquals(subject.getIDProof(), manager.generateFromAuthInfo(subject.getAuthInfo()));
-		System.out.println("IDProof=" + subject.getIDProof());
+		ISubject iSubject = factory.newInstance(ISubject.class, "id1");
+		iSubject.setManager(manager);
+		manager.addUser(iSubject.getAuthInfo());
+		iSubject.authenticate();
+		assertEquals(iSubject.getIDProof(), manager.generateFromAuthInfo(iSubject.getAuthInfo()));
+		System.out.println("IDProof=" + iSubject.getIDProof());
 	}
 
 	@Test
 	public void testRequiresAuthentication() throws Exception {
-		PamelaMetaModel context = new PamelaMetaModel(Subject.class);
+		PamelaMetaModel context = new PamelaMetaModel(ISubject.class);
 		PamelaModelFactory factory = new PamelaModelFactory(context);
 		IAuthenticator manager = factory.newInstance(IAuthenticator.class);
-		Subject subject = factory.newInstance(Subject.class, "id1");
-		subject.setManager(manager);
-		manager.addUser(subject.getAuthInfo());
+		ISubject iSubject = factory.newInstance(ISubject.class, "id1");
+		iSubject.setManager(manager);
+		manager.addUser(iSubject.getAuthInfo());
 		// We haven't call the authenticate() method, but this method is tagged with "@RequiresAuthentication", thus this call the
 		// authenticate() method
-		subject.thisMethodRequiresToBeAuthenticated();
-		assertEquals(subject.getIDProof(), manager.generateFromAuthInfo(subject.getAuthInfo()));
+		iSubject.thisMethodRequiresToBeAuthenticated();
+		assertEquals(iSubject.getIDProof(), manager.generateFromAuthInfo(iSubject.getAuthInfo()));
 	}
 
 	@Test
 	public void testAuthenticatorInvalidReturn() throws Exception {
-		PamelaMetaModel context = new PamelaMetaModel(Subject.class);
+		PamelaMetaModel context = new PamelaMetaModel(ISubject.class);
 		PamelaModelFactory factory = new PamelaModelFactory(context);
 		IAuthenticator manager = factory.newInstance(IAuthenticator.class);
-		Subject subject = factory.newInstance(Subject.class, "id");
-		subject.setManager(manager);
-		subject.authenticate();
-		assertEquals(subject.getIDProof(), manager.getDefaultToken());
+		ISubject iSubject = factory.newInstance(ISubject.class, "id");
+		iSubject.setManager(manager);
+		iSubject.authenticate();
+		assertEquals(iSubject.getIDProof(), manager.getDefaultToken());
 	}
 
 	@Test
 	public void testInstanceDiscovery() throws Exception {
-		PamelaMetaModel context = new PamelaMetaModel(Subject.class);
+		PamelaMetaModel context = new PamelaMetaModel(ISubject.class);
 		PamelaModelFactory factory = new PamelaModelFactory(context);
 		IAuthenticator manager = factory.newInstance(IAuthenticator.class);
 		assertNull(context.getPatternInstances(manager));
-		Subject subject = factory.newInstance(Subject.class, "id");
+		ISubject iSubject = factory.newInstance(ISubject.class, "id");
 		assertNull(context.getPatternInstances(manager));
-		assertEquals(1, context.getPatternInstances(subject).size());
-		subject.setManager(manager);
+		assertEquals(1, context.getPatternInstances(iSubject).size());
+		iSubject.setManager(manager);
 		assertEquals(1, context.getPatternInstances(manager).size());
-		assertEquals(1, context.getPatternInstances(subject).size());
-		assertSame(context.getPatternInstances(manager).iterator().next(), context.getPatternInstances(subject).iterator().next());
+		assertEquals(1, context.getPatternInstances(iSubject).size());
+		assertSame(context.getPatternInstances(manager).iterator().next(), context.getPatternInstances(iSubject).iterator().next());
 	}
 
 	@Test
 	public void testAuthInfoUniqueness() throws Exception {
-		PamelaMetaModel context = new PamelaMetaModel(Subject.class);
+		PamelaMetaModel context = new PamelaMetaModel(ISubject.class);
 		PamelaModelFactory factory = new PamelaModelFactory(context);
 		IAuthenticator manager = factory.newInstance(IAuthenticator.class);
-		Subject subject = factory.newInstance(Subject.class, manager, "id");
-		Subject subject2 = factory.newInstance(Subject.class, manager, "id2");
+		ISubject iSubject = factory.newInstance(ISubject.class, manager, "id");
+		ISubject iSubject2 = factory.newInstance(ISubject.class, manager, "id2");
 		try {
-			Subject subject3 = factory.newInstance(Subject.class, manager, "id");
+			ISubject iSubject3 = factory.newInstance(ISubject.class, manager, "id");
 			fail();
 		} catch (ModelExecutionException e) {
 			assertTrue(e.getMessage().contains("Subject Invariant Violation: Authentication information are not unique"));
@@ -100,13 +100,13 @@ public class TestAuthenticator extends TestCase {
 
 	@Test
 	public void testAuthenticatorInvariant() throws Exception {
-		PamelaMetaModel context = new PamelaMetaModel(Subject.class);
+		PamelaMetaModel context = new PamelaMetaModel(ISubject.class);
 		PamelaModelFactory factory = new PamelaModelFactory(context);
 		IAuthenticator manager = factory.newInstance(IAuthenticator.class);
-		Subject subject = factory.newInstance(Subject.class, manager, "id");
-		subject.setManager(manager);
+		ISubject iSubject = factory.newInstance(ISubject.class, manager, "id");
+		iSubject.setManager(manager);
 		try {
-			subject.setManager(factory.newInstance(IAuthenticator.class));
+			iSubject.setManager(factory.newInstance(IAuthenticator.class));
 			fail();
 		} catch (ModelExecutionException e) {
 			e.printStackTrace();
@@ -118,13 +118,13 @@ public class TestAuthenticator extends TestCase {
 
 	@Test
 	public void testAuthInfoInvariant() throws Exception {
-		PamelaMetaModel context = new PamelaMetaModel(Subject.class);
+		PamelaMetaModel context = new PamelaMetaModel(ISubject.class);
 		PamelaModelFactory factory = new PamelaModelFactory(context);
 		IAuthenticator manager = factory.newInstance(IAuthenticator.class);
-		Subject subject = factory.newInstance(Subject.class, manager, "id");
-		subject.setAuthInfo("id");
+		ISubject iSubject = factory.newInstance(ISubject.class, manager, "id");
+		iSubject.setAuthInfo("id");
 		try {
-			subject.setAuthInfo(null);
+			iSubject.setAuthInfo(null);
 			fail();
 		} catch (ModelExecutionException e) {
 			e.printStackTrace();
@@ -136,15 +136,15 @@ public class TestAuthenticator extends TestCase {
 
 	@Test
 	public void testIdProofForgery() throws Exception {
-		PamelaMetaModel context = new PamelaMetaModel(Subject.class);
+		PamelaMetaModel context = new PamelaMetaModel(ISubject.class);
 		PamelaModelFactory factory = new PamelaModelFactory(context);
 		IAuthenticator manager = factory.newInstance(IAuthenticator.class);
-		Subject subject = factory.newInstance(Subject.class, manager, "id");
-		subject.setIdProof(-1);
-		subject.authenticate();
-		subject.setIdProof(subject.getIDProof());
+		ISubject iSubject = factory.newInstance(ISubject.class, manager, "id");
+		iSubject.setIdProof(-1);
+		iSubject.authenticate();
+		iSubject.setIdProof(iSubject.getIDProof());
 		try {
-			subject.setIdProof(subject.getIDProof() + 1);
+			iSubject.setIdProof(iSubject.getIDProof() + 1);
 			fail();
 		} catch (ModelExecutionException e) {
 			e.printStackTrace();
@@ -156,24 +156,24 @@ public class TestAuthenticator extends TestCase {
 
 	@Test
 	public void testInvariantValidityWithDynamicPrivilegeRules() throws Exception {
-		PamelaMetaModel context = new PamelaMetaModel(Subject.class);
+		PamelaMetaModel context = new PamelaMetaModel(ISubject.class);
 		PamelaModelFactory factory = new PamelaModelFactory(context);
 		IAuthenticator manager = factory.newInstance(IAuthenticator.class);
-		Subject subject = factory.newInstance(Subject.class, manager, "id");
-		subject.authenticate();
-		assertEquals(subject.getIDProof(), manager.getDefaultToken());
-		manager.addUser(subject.getAuthInfo());
-		subject.getAuthInfo();
-		subject.authenticate();
+		ISubject iSubject = factory.newInstance(ISubject.class, manager, "id");
+		iSubject.authenticate();
+		assertEquals(iSubject.getIDProof(), manager.getDefaultToken());
+		manager.addUser(iSubject.getAuthInfo());
+		iSubject.getAuthInfo();
+		iSubject.authenticate();
 	}
 
 	@Test
 	public void testCoucou() throws Exception {
-		PamelaMetaModel context = PamelaMetaModelLibrary.retrieveMetaModel(Subject.class);
+		PamelaMetaModel context = PamelaMetaModelLibrary.retrieveMetaModel(ISubject.class);
 		PamelaModelFactory factory = new PamelaModelFactory(context);
 		IAuthenticator manager = factory.newInstance(IAuthenticator.class);
-		Subject subject = factory.newInstance(Subject.class, "id");
-		subject.setManager(manager);
+		ISubject iSubject = factory.newInstance(ISubject.class, "id");
+		iSubject.setManager(manager);
 		// TODO: write a test
 		manager.aMethodGuardedWithAPrecondition();
 	}

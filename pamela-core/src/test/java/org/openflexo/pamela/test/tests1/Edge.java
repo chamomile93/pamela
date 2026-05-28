@@ -13,7 +13,7 @@ import org.openflexo.pamela.annotations.CloningStrategy.StrategyType;
 
 @ModelEntity(isAbstract = true)
 @ImplementationClass(EdgeImpl.class)
-public interface Edge extends WKFObject {
+public interface Edge extends WorkFlowObject {
 
 	public static final String START_NODE = "startNode";
 	public static final String END_NODE = "endNode";
@@ -22,7 +22,9 @@ public interface Edge extends WKFObject {
 	public Edge init(@Parameter(START_NODE) AbstractNode start, @Parameter(END_NODE) AbstractNode end);
 
 	@Initializer
-	public Edge init(@Parameter(TestModelObject.NAME) String name, @Parameter(START_NODE) AbstractNode start,
+	public Edge init(@Parameter(TestModelObject.NAME) String name, @Parameter(START_NODE) AbstractNode start,//TODO idf why need to "annotate" with "@Parameter" ?
+	//TODO idf what's different from having used "@Getter" on the method "getStartNode" below ?
+	//TODO this seems to say that the value given here should be assigned to method annotated with "@Getter" or another "ModelProperty" else ?
 			@Parameter(END_NODE) AbstractNode end);
 
 	@Override

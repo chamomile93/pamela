@@ -121,7 +121,7 @@ public class XMLSaxDeserializer extends DefaultHandler {
 	public XMLSaxDeserializer(PamelaModelFactory factory, DeserializationPolicy policy) {
 		this.factory = factory;
 		this.policy = policy;
-		this.context = factory.getModelContext();
+		this.context = factory.getPamelaMetaModel();
 	}
 
 	public Object deserializeDocument(String xml) throws Exception {
@@ -175,7 +175,7 @@ public class XMLSaxDeserializer extends DefaultHandler {
 		ModelProperty<Object> leadingProperty = null;
 		Object parent = null;
 		if (stackEmpty()) {
-			modelEntity = (ModelEntity<Object>) factory.getModelContext().getModelEntity(qName);
+			modelEntity = (ModelEntity<Object>) factory.getPamelaMetaModel().getModelEntity(qName);
 		}
 		else {
 			try {
@@ -354,7 +354,7 @@ public class XMLSaxDeserializer extends DefaultHandler {
 					concreteEntity = factory.getExtendedContext().getModelEntity(implementedInterface);
 				}
 				else {
-					concreteEntity = factory.getModelContext().getModelEntity(implementedInterface);
+					concreteEntity = factory.getPamelaMetaModel().getModelEntity(implementedInterface);
 				}
 			}
 			if (concreteEntity == null && policy == DeserializationPolicy.RESTRICTIVE) {

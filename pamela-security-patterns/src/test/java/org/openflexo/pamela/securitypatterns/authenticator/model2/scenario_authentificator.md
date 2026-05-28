@@ -1,0 +1,40 @@
+- [Scénario]] d'un [[Prototype]] :
+	- quoi
+		- [[Acteur]]
+			- 1 [[Expert]] dans le modèle respectivement utilisé
+			- 1 [[Expert en sécurité]]
+			- 1 [[Expert du domaine]]
+		- [[Activité]]
+			- Conception du système
+			- Ajout des annotations
+			- Observation du comportement
+			- Modification/adaptation
+			- Partage/Distribution
+		- [[Concept]]
+			- [[Annotation]] de [[Sécurité]]
+				- [[Authenticator]]
+			- [[Modèle]]
+				- Niveau
+					- Système
+						- [[Java]]
+							- concepts tels que Utilisateur, Livre,
+							- par :
+								- expert du domaine + Java + en sécurité
+						- [[Alloy]]
+							- idem
+					- Méta-système
+						- [[Java]]
+							- concepts tels que Attribut, Méthode, Class
+							- par
+								- expert Java + en sécurité
+						- [[Alloy]]
+							- idem
+					- Méta-méta-système
+						- [[Java]]
+							- concepts tels que Object, Relation
+						- [[Alloy]]
+							- idem
+		- [[Resultat]]
+			- concepts
+			- observations
+			- traces

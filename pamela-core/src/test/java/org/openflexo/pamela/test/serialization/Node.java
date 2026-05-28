@@ -123,5 +123,4 @@ public interface Node extends AccessibleProxyObject {
 			System.out.println("Finalize deserialization for Node " + getName());
 		}
 	}
-
 }

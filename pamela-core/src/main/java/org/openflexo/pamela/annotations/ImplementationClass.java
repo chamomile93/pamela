@@ -48,13 +48,28 @@ import java.lang.annotation.Target;
 import org.openflexo.pamela.model.ModelEntity;
 
 /**
- * Used in a {@link ModelEntity} definition to indicate the class to use as base implementation
+ * Used in a {@link ModelEntity} definition to indicate the class to use as base
+ * implementation
  * 
  * @author sylvain
  *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
+/**
+ * //TODO idf, la définition de ImplementationClass est indiqué être "hérité",
+ * cependant,
+ * l'utilisation de ce signe ici semble être contradictoire.
+ * Ca ne semble pas adapté.
+ * ce signe d'après la documentation de Java n'est pas supposé avoir d'effet sur
+ * les interfaces.
+ * Ce que je comprends actuellement de "l'intention",
+ * c'est de dire que
+ * {@link ImplementationClass} est une annotation qui est "héritable".
+ * Par exemple, l'interface {@link TestModelObject}, indique son
+ * ImplementationClass={@link FlexoModelObjectImpl}.
+ * donc par héritage, une interface {@link WorkflowObject} qui hérite de {@link TestModelObject} devrait aussi avoir pour ImplementationClass={@link FlexoModelObjectImpl}, etc.
+ */
 @Target(value = ElementType.TYPE)
 public @interface ImplementationClass {
 

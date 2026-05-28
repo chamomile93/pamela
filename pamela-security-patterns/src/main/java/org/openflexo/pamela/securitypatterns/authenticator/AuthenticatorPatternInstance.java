@@ -91,6 +91,12 @@ public class AuthenticatorPatternInstance<A, S, AI, PI> extends PatternInstance<
 		if (subject instanceof HasPropertyChangeSupport) {
 			((HasPropertyChangeSupport) subject).getPropertyChangeSupport().addPropertyChangeListener(this);
 		}
+		if (this instanceof org.openflexo.pamela.AccessibleProxyObject) {
+			((org.openflexo.pamela.AccessibleProxyObject) this).registerRuntimeMethod("checkAuthInfoIsFinal", (receiver, args) -> {
+				((AuthenticatorPatternInstance<?, ?, ?, ?>) receiver).checkAuthInfoIsFinal();
+				return null;
+			});
+		}
 		checkAuthenticator();
 	}
 
@@ -314,8 +320,15 @@ public class AuthenticatorPatternInstance<A, S, AI, PI> extends PatternInstance<
 		// System.out.println("checkInvariant() for " + this);
 		this.checkAuthInfoUniqueness();
 		this.checkAuthenticatorIsFinal();
-		this.checkAuthInfoIsFinal();
 		this.checkIdProofIsValid();
+		// if (this instanceof org.openflexo.pamela.AccessibleProxyObject) {
+		// 	((org.openflexo.pamela.AccessibleProxyObject) this).invokeRuntimeMethod("checkAuthInfoIsFinal");
+		// }
+		// else {
+		// 	checkAuthInfoIsFinal();
+		// }
+		// TODO maybe here our purposes it better to not assume checkAuthInfoIsFinal then add it and conclude it holds at runtime.
+
 	}
 
 	/**
@@ -340,7 +353,7 @@ public class AuthenticatorPatternInstance<A, S, AI, PI> extends PatternInstance<
 	/**
 	 * Method checking the invariant ensuring all <code>Authentication Information</code> does not change throughout runtime.
 	 */
-	private void checkAuthInfoIsFinal() {
+	void checkAuthInfoIsFinal() {
 		try {
 			AI currentAuthInfo = retrieveAuthentificationInformation();
 			if (authInfo != null && currentAuthInfo != authInfo) {
@@ -370,9 +383,9 @@ public class AuthenticatorPatternInstance<A, S, AI, PI> extends PatternInstance<
 			}
 		} catch (IllegalAccessException | InvocationTargetException e) {
 			e.printStackTrace();
-		}*/
+		}
+		*/
 	}
-
 	/**
 	 * Method checking the invariant ensuring the <code>authenticator</code> does not change throughout runtime.
 	 */

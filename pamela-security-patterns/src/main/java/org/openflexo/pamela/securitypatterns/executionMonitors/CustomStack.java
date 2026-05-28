@@ -81,5 +81,6 @@ public class CustomStack extends ExecutionMonitor {
 
     private boolean isMonitored(Object instance) {
         return !this.pamelaMetaModel.getUpperEntities(instance).isEmpty();
+        //TODO idf, do I need to look into ?
     }
 }

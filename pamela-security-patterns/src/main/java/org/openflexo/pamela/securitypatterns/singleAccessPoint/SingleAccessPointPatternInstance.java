@@ -24,6 +24,7 @@ public class SingleAccessPointPatternInstance<S> extends PatternInstance<SingleA
 
     @Override
     public ReturnWrapper processMethodBeforeInvoke(Object instance, Method method, Object[] args) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        //TODO idf, do I need to look into ? i came here once when working on the XML SerializationTest, but I don't know if it's related to the test or not
         if (!this.checking){
             this.checking = true;
             CustomStack.Frame callingFrame = this.getPatternDefinition().customStack.getFrame(1);
@@ -38,6 +39,7 @@ public class SingleAccessPointPatternInstance<S> extends PatternInstance<SingleA
             }
             SingleAccessPointPatternDefinition.AccessorWrapper callerWrapper = null;
             for (ModelEntity<?> modelEntity : this.getModelContext().getUpperEntities(callingInstance)){
+                //TODO idf, do I need to look into ?
                 callerWrapper = this.getPatternDefinition().getAccessorEntities().get(modelEntity);
             }
             if (callerWrapper == null){

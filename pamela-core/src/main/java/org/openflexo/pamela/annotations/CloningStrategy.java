@@ -55,7 +55,8 @@ import java.lang.annotation.Target;
 public @interface CloningStrategy {
 
 	enum StrategyType {
-		CLONE, REFERENCE, IGNORE, FACTORY, CUSTOM_CLONE
+		CLONE, //TODO semantic ? guessing it's a one-to-one
+		REFERENCE, IGNORE, FACTORY, CUSTOM_CLONE
     }
 
 	String UNDEFINED = "";

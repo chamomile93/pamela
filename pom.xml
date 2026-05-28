@@ -8,7 +8,7 @@
     <!-- ************
    	Component identity and specific information
       -->
-    <version>1.6.1-SNAPSHOT</version>
+    <version>1.6.1-alloy-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>pamela</artifactId>
     <name>Pamela</name>
@@ -213,4 +213,3 @@
         </profile>
     </profiles>
 </project>
-

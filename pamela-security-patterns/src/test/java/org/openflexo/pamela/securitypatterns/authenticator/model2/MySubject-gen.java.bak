@@ -1,0 +1,8 @@
+class MySubject {
+    String PATTERN_ID = "patternIDValue";
+    String AUTH_INFO = "auth_infoValue";
+    String MANAGER = "manager";
+    String ID_PROOF = "id_proof";
+    int idProof;
+    MyAuthenticator manager;
+}

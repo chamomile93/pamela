@@ -24,8 +24,10 @@ import org.openflexo.pamela.annotations.XMLElement;
 @ImplementationClass(FlexoProcessImpl.class)
 @XMLElement(xmlTag = "FlexoProcess")
 @Imports({ @Import(ActivityNode.class), @Import(StartNode.class), @Import(EndNode.class), @Import(TokenEdge.class),
-		@Import(WKFAnnotation.class) })
-public interface FlexoProcess extends WKFObject {
+		@Import(WorkFlowAnnotation.class) })
+		//TODO idf why these classes are "imported" and considered to be "embedded" in the "FlexoProcess" class
+		//TODO it seems to follow from the fact that AbstractNode, the parent class of this imports is "enclosed" by FlexoProcess and has the "@Embedded" annotation
+public interface FlexoProcess extends WorkFlowObject {
 
 	String FOO = "foo";
 	String NODES = "nodes";
@@ -41,7 +43,7 @@ public interface FlexoProcess extends WKFObject {
 	@Setter(FOO)
 	void setFoo(int foo);
 
-	@Getter(value = NODES, cardinality = Cardinality.LIST, inverse = WKFObject.PROCESS)
+	@Getter(value = NODES, cardinality = Cardinality.LIST, inverse = WorkFlowObject.PROCESS)
 	@XMLElement(primary = true)
 	@CloningStrategy(StrategyType.CLONE)
 	@Embedded

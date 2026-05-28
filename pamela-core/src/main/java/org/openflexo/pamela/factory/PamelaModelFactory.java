@@ -1,40 +1,40 @@
 /**
- * 
+ *
  * Copyright (c) 2013-2015, Openflexo
  * Copyright (c) 2011-2012, AgileBirds
- * 
- * This file is part of Pamela-core, a component of the software infrastructure 
+ *
+ * This file is part of Pamela-core, a component of the software infrastructure
  * developed at Openflexo.
- * 
- * 
- * Openflexo is dual-licensed under the European Union Public License (EUPL, either 
- * version 1.1 of the License, or any later version ), which is available at 
+ *
+ *
+ * Openflexo is dual-licensed under the European Union Public License (EUPL, either
+ * version 1.1 of the License, or any later version ), which is available at
  * https://joinup.ec.europa.eu/software/page/eupl/licence-eupl
- * and the GNU General Public License (GPL, either version 3 of the License, or any 
+ * and the GNU General Public License (GPL, either version 3 of the License, or any
  * later version), which is available at http://www.gnu.org/licenses/gpl.html .
- * 
+ *
  * You can redistribute it and/or modify under the terms of either of these licenses
- * 
+ *
  * If you choose to redistribute it and/or modify under the terms of the GNU GPL, you
  * must include the following additional permission.
  *
  *          Additional permission under GNU GPL version 3 section 7
  *
- *          If you modify this Program, or any covered work, by linking or 
- *          combining it with software containing parts covered by the terms 
+ *          If you modify this Program, or any covered work, by linking or
+ *          combining it with software containing parts covered by the terms
  *          of EPL 1.0, the licensors of this Program grant you additional permission
- *          to convey the resulting work. * 
- * 
- * This software is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. 
+ *          to convey the resulting work. *
+ *
+ * This software is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE.
  *
  * See http://www.openflexo.org/license.html for details.
- * 
- * 
+ *
+ *
  * Please contact Openflexo (openflexo-contacts@openflexo.org)
  * or visit www.openflexo.org if you need additional information.
- * 
+ *
  */
 
 package org.openflexo.pamela.factory;
@@ -43,6 +43,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.annotation.Documented;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -75,18 +76,19 @@ import javassist.CtClass;
 import javassist.NotFoundException;
 import javassist.util.proxy.MethodFilter;
 import javassist.util.proxy.ProxyFactory;
+//TODO is the used to define a PamelaModelFactory
 import javassist.util.proxy.ProxyObject;
 
 /**
  * The {@link PamelaModelFactory} is responsible for creating new instances of PAMELA entities.<br>
- * 
+ *
  * This class should be considered stateless, regarding to the state of handled instances.<br>
- * 
+ *
  * Note that a {@link PamelaModelFactory} might refer to an {@link EditingContext}. When so, new instances are automatically registered in
  * this {@link EditingContext}.
- * 
+ *
  * @author sylvain
- * 
+ *
  */
 public class PamelaModelFactory {
 
@@ -109,8 +111,10 @@ public class PamelaModelFactory {
 		return proxyFactories;
 	}
 
+
 	public class PAMELAProxyFactory<I> extends ProxyFactory {
-		private final ModelEntity<I> modelEntity;
+		//TODO idf why we need to define this. What is separating from the main class ?
+	private final ModelEntity<I> modelEntity;
 		private boolean locked = false;
 		private boolean overridingSuperClass = false;
 
@@ -143,7 +147,7 @@ public class PamelaModelFactory {
 						}
 					}*/
 
-					// TODO perf issue ??? Check this !
+					// :TODO perf issue ??? Check this !
 					if (modelEntity.getPropertyForMethod(method) != null) {
 						return true;
 					}
@@ -195,7 +199,7 @@ public class PamelaModelFactory {
 
 		/**
 		 * Internally used to set a proxy base implementation class in the right package
-		 * 
+		 *
 		 * @param clazz
 		 */
 		private void setProxySuperClass(Class clazz) {
@@ -217,15 +221,15 @@ public class PamelaModelFactory {
 			}
 			locked = true;
 			ProxyMethodHandler<I> handler = new ProxyMethodHandler<>(this, getEditingContext());
-		
+
 			if (args == null) {
 				args = new Object[0];
 			}
-		
+
 			I returned = null;
 			if (modelEntity.isSimplePamelaInstrumentation()) {
 				Class<?>[] paramTypesArray = new Class<?>[args.length];
-				for (int i = 0; i < args.length; i++) {
+				for (int I = 0; I < args.length; i++) {
 					paramTypesArray[i] = args[i].getClass();
 				}
 				returned = (I) create(paramTypesArray, args, handler);
@@ -264,27 +268,46 @@ public class PamelaModelFactory {
 									sb.append(',');
 								}
 								sb.append(c != null ? c.getName() : "<null>");
-		
+
 							}
 							throw new NoSuchMethodException("Could not find any initializer with args " + sb.toString());
 						}
 					}
 				}
 			}
-		
+
 			// looks for property to initialize
 			for (ModelProperty<? super I> property : modelEntity.getPropertyIterable()) {
 				if (property.getInitialize() != null) {
 					handler.invokeSetter(property, PamelaModelFactory.this.newInstance(property.getType()));
 				}
 			}
-		
+
 			objectHasBeenCreated(returned, modelEntity.getImplementedInterface());
 			return returned;
 		}*/
 
+		/**
+		 * Creates a new model instance.
+		 * This is a hidden wrapper for {@link #newInstance}.
+		 * The wrapper name is meant to accomodate myself with the multiple overloading of {@link #newInstance}.
+		 * @param args the arguments to pass to the initializer of the created instance
+		 * @return the created instance
+		 * @throws IllegalArgumentException
+		 * @throws NoSuchMethodException
+		 * @throws InstantiationException
+		 * @throws IllegalAccessException
+		 * @throws InvocationTargetException
+		 * @throws ModelDefinitionException if the model definition is invalid
+		*/
+		private I newInstanceOfModelEntity(Object... args) throws IllegalArgumentException, NoSuchMethodException, InstantiationException,
+				IllegalAccessException, InvocationTargetException, ModelDefinitionException {
+					return newInstance(args);
+				}
+		
 		public I newInstance(Object... args) throws IllegalArgumentException, NoSuchMethodException, InstantiationException,
 				IllegalAccessException, InvocationTargetException, ModelDefinitionException {
+			//TODO this seems to be the base definition for creating an instance of a class probably annotated with @ModelEntity
 			if (modelEntity.isAbstract()) {
 				throw new InstantiationException(modelEntity + " is declared as an abstract entity, cannot instantiate it");
 			}
@@ -370,7 +393,7 @@ public class PamelaModelFactory {
 		/**
 		 * Generate (return when already existant) a base implementation class proxying the declared base implementation class, but in the
 		 * right package (the same as the implemented interface)
-		 * 
+		 *
 		 * @param implementedInterface
 		 * @param superClass
 		 * @return
@@ -411,19 +434,24 @@ public class PamelaModelFactory {
 		}
 
 	}
-
 	public PamelaModelFactory(Class<?> baseClass) throws ModelDefinitionException {
 		this(PamelaMetaModelLibrary.retrieveMetaModel(baseClass));
+		//TODO given this "baseClass" e.g. an interface like FlexoProcess, this is simply initializing a PamelaMetaModel if it doesn't exists yet and dispatch it to the other constructor 
 	}
 
 	public PamelaModelFactory(PamelaMetaModel pamelaMetaModel) {
 		this.pamelaMetaModel = pamelaMetaModel;
 		proxyFactories = new HashMap<>();
-		stringEncoder = new StringEncoder(this);
+		stringEncoder = new StringEncoder(this); //TODO idf why this thing about StringEncoder?
+	}
+
+	public PamelaMetaModel getPamelaMetaModel() {
+		return getModelContext();
 	}
 
 	public PamelaMetaModel getModelContext() {
 		return pamelaMetaModel;
+		//TODO this is initialized at instantiation of a PamelaModelFactory with a given baseClass, for instance the interface FlexoProcess
 	}
 
 	public PamelaMetaModel getExtendedContext() {
@@ -436,9 +464,12 @@ public class PamelaModelFactory {
 
 	public <I> I newInstance(ModelEntity<I> modelEntity, Object... args) {
 		return newInstance(modelEntity.getImplementedInterface(), args);
+		//TODO ici j'ai un modelEntity et nons pas l'implémentation d'une Interface comme ci-dessous
 	}
 
 	public <I> I newInstance(Class<I> implementedInterface) {
+		//TODO ok je demande une nouvelle instance de l'interface de FPI
+		// la routine c'est que je n'ai pas d'argument dans le cas de test SerizalizationTest RestrictiveFails
 		return newInstance(implementedInterface, (Object[]) null);
 	}
 
@@ -446,14 +477,16 @@ public class PamelaModelFactory {
 		try {
 			// this.getModelContext().getPatternContext().enteringConstructor();
 			PAMELAProxyFactory<I> proxyFactory = getProxyFactory(implementedInterface, true);
-			I returned = proxyFactory.newInstance(args);
+				//TODO idf, is this how to get a ProxyObject at runtime ?
+			I returned = proxyFactory.newInstanceOfModelEntity(args);
+			//TODO idf, this is calling the "base" definition ?
 			if (getEditingContext() != null) {
 				if (getEditingContext().getUndoManager() != null) {
 					getEditingContext().getUndoManager().addEdit(new CreateCommand<>(returned, proxyFactory.getModelEntity(), this));
 				}
 			}
 			// this.getModelContext().getPatternContext().leavingConstructor();
-			getModelContext().notifiedNewInstance(returned, getModelEntityForInstance(returned));
+			getPamelaMetaModel().notifiedNewInstance(returned, getModelEntityForInstance(returned));
 			return returned;
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
@@ -486,7 +519,7 @@ public class PamelaModelFactory {
 	public <I> I _newInstance(Class<I> implementedInterface, boolean useExtended, Object... args) {
 		try {
 			PAMELAProxyFactory<I> proxyFactory = getProxyFactory(implementedInterface, true, useExtended);
-			I returned = proxyFactory.newInstance(args);
+			I returned = proxyFactory.newInstanceOfModelEntity(args);
 			if (getEditingContext() != null) {
 				if (getEditingContext().getUndoManager() != null) {
 					getEditingContext().getUndoManager().addEdit(new CreateCommand<>(returned, proxyFactory.getModelEntity(), this));
@@ -525,28 +558,45 @@ public class PamelaModelFactory {
 
 	private <I> PAMELAProxyFactory<I> getProxyFactory(Class<I> implementedInterface, boolean create, boolean useExtended)
 			throws ModelDefinitionException {
+		// TODO idf why this methods exists, the enclosing class already return the "proxyFactories" attribute ?
 		PAMELAProxyFactory<I> proxyFactory = proxyFactories.get(implementedInterface);
+		//TODO idf why proxyFactory could be null ?
 		if (proxyFactory == null) {
+			//TODO in case it's null, then what happens ? in my case it's not extended, then what ?
 			ModelEntity<I> entity;
 			if (useExtended) {
 				entity = getExtendedContext().getModelEntity(implementedInterface);
 			}
 			else {
-				entity = getModelContext().getModelEntity(implementedInterface);
+				//TODO then idf "getModelContext()" or it's subsequent call to "ModelEntity()" given the "implementedInterface"
+				entity =
+					getPamelaMetaModel(). //TODO this return a "PamelaMetaModel" type, where did I saw this ? I suppose it contains the implementing interface of FlexoProcess given when creating a "PamelaModelFactory"
+					getModelEntity(implementedInterface);
+				//TODO perhaps I have to look at how "entity" is derived to help understand how it's used in the instantiation of PAMELAProxyFactory
 			}
+			//TODO then if the entity is null what happens ?
 			if (entity == null) {
-				System.out.println("Debug model context");
+				StringBuilder sb = new StringBuilder();
+				sb.append("Debug model context\n");
 				Iterator<ModelEntity> it = pamelaMetaModel.getEntities();
 				while (it.hasNext()) {
 					ModelEntity<?> next = it.next();
-					System.out.println("> " + next);
+					sb.append("> ").append(next).append('\n');
 				}
+				System.out.println(sb.toString());
 				throw new ModelExecutionException("Unknown entity '" + implementedInterface.getName()
 						+ "'! Did you forget to import it or to annotated it with @ModelEntity?");
+						//TODO idf is this exception different from the one I encountered before ?
 			}
+			//TODO if it's not null and since I am in the case "create=true" then perhaps I don't get in the above conditional ?
 			else {
 				if (create) {
-					proxyFactories.put(implementedInterface, proxyFactory = new PAMELAProxyFactory<>(entity, this.getModelContext()));
+					//TODO here "entity" is not null
+					proxyFactory = new PAMELAProxyFactory<>(entity, this.getPamelaMetaModel());
+					//TODO idf why instantiate PAMELAProxyFactory, given the entity  ?
+					//TODO idf what's the entity type ? what's the value ? since it's derived from the implemented Interface of a FlexoProcess,
+					proxyFactories.put(implementedInterface, proxyFactory);
+					//TODO idf why I need to save this in the proxyFactory map,
 				}
 			}
 		}
@@ -635,6 +685,9 @@ public class PamelaModelFactory {
 			}*/
 			if (((ProxyObject) object).getHandler() instanceof ProxyMethodHandler) {
 				return (ProxyMethodHandler<I>) ((ProxyObject) object).getHandler();
+				/*
+					TODO why is this casting to ProxyObject ?
+				*/
 			}
 		}
 		return null;
@@ -642,6 +695,7 @@ public class PamelaModelFactory {
 
 	public <I> ModelEntity<I> importClass(Class<I> klass) throws ModelDefinitionException {
 		ModelEntity<I> modelEntity = pamelaMetaModel.getModelEntity(klass);
+		//TODO idf do I get here ?
 		if (modelEntity == null) {
 			extendedContext = new PamelaMetaModel(klass, getExtendedContext());
 			modelEntity = extendedContext.getModelEntity(klass);
@@ -668,9 +722,9 @@ public class PamelaModelFactory {
 	/**
 	 * Build and return a List of embedded objects, using meta informations contained in related class All property should be annotated with
 	 * a @Embedded annotation which determine the way of handling this property
-	 * 
+	 *
 	 * Supplied context is used to determine the closure of objects graph being constructed during this operation.
-	 * 
+	 *
 	 * @param root
 	 * @return
 	 */
@@ -681,9 +735,9 @@ public class PamelaModelFactory {
 	/**
 	 * Build and return a List of embedded objects, using meta informations contained in related class All property should be annotated with
 	 * a @Embedded annotation which determine the way of handling this property
-	 * 
+	 *
 	 * Supplied context is used to determine the closure of objects graph being constructed during this operation.
-	 * 
+	 *
 	 * @param root
 	 * @param context
 	 * @return
@@ -860,7 +914,7 @@ public class PamelaModelFactory {
 
 	/**
 	 * Return boolean indicating if supplied clipboard is valid for pasting in object monitored by this method handler<br>
-	 * 
+	 *
 	 * @param clipboard
 	 * @param context
 	 * @return
@@ -877,7 +931,7 @@ public class PamelaModelFactory {
 	/**
 	 * Paste supplied clipboard in context object<br>
 	 * Return pasted objects (a single object for a single contents clipboard, and a list of objects for a multiple contents)
-	 * 
+	 *
 	 * @param clipboard
 	 * @param context
 	 * @return
@@ -897,7 +951,7 @@ public class PamelaModelFactory {
 	/**
 	 * Paste supplied clipboard in context object for supplied property <br>
 	 * Return pasted objects (a single object for a single contents clipboard, and a list of objects for a multiple contents)
-	 * 
+	 *
 	 * @param clipboard
 	 * @param modelProperty
 	 * @param context
@@ -918,7 +972,7 @@ public class PamelaModelFactory {
 	/**
 	 * Paste supplied clipboard in context object for supplied property at specified pasting point<br>
 	 * Return pasted objects (a single object for a single contents clipboard, and a list of objects for a multiple contents)
-	 * 
+	 *
 	 * @param clipboard
 	 * @param modelProperty
 	 * @param pp
@@ -950,12 +1004,18 @@ public class PamelaModelFactory {
 
 	public void serialize(Object object, OutputStream os)
 			throws IOException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, ModelDefinitionException {
+				//TODO first
 		serialize(object, os, SerializationPolicy.PERMISSIVE, true);
 	}
 
 	public void serialize(Object object, OutputStream os, SerializationPolicy policy, boolean resetModifiedStatus)
 			throws IOException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, ModelDefinitionException {
+				//TODO second
 		XMLSerializer serializer = new XMLSerializer(this, policy);
+		/*
+			TODO why the policy doesn't seem to be checked at all when this is the point of testing ? in SerializationTests case RestrictiveFails
+		*/
+		//TODO idf I wan to serialize an instance of a FlexoProcess which is an instance of a PMF
 		serializer.serializeDocument(object, os, resetModifiedStatus);
 	}
 
@@ -979,7 +1039,7 @@ public class PamelaModelFactory {
 
 	/**
 	 * Hook to detect an object creation Default implementation silently returns
-	 * 
+	 *
 	 * @param newlyCreatedObject
 	 * @param implementedInterface
 	 */
@@ -989,7 +1049,7 @@ public class PamelaModelFactory {
 	/**
 	 * Hook to detect an object deserialization (called just after instance has been created)<br>
 	 * Default implementation silently returns
-	 * 
+	 *
 	 * @param newlyCreatedObject
 	 * @param implementedInterface
 	 */
@@ -999,7 +1059,7 @@ public class PamelaModelFactory {
 	/**
 	 * Hook to detect an object deserialization (called at the end of whole object graph deserialization)<br>
 	 * Default implementation silently returns
-	 * 
+	 *
 	 * @param newlyCreatedObject
 	 * @param implementedInterface
 	 */
@@ -1008,7 +1068,7 @@ public class PamelaModelFactory {
 
 	/**
 	 * Return {@link EditingContext} associated with this factory.
-	 * 
+	 *
 	 * @return
 	 */
 	public EditingContext getEditingContext() {
@@ -1018,7 +1078,7 @@ public class PamelaModelFactory {
 	/**
 	 * Sets {@link EditingContext} associated with this factory.<br>
 	 * When not null, new instances created with this factory are automatically registered in this EditingContext
-	 * 
+	 *
 	 * @param editingContext
 	 */
 	public void setEditingContext(EditingContext editingContext) {
@@ -1027,12 +1087,12 @@ public class PamelaModelFactory {
 
 	/**
 	 * Check that this factory contains all required implementation for all non-abstract entities
-	 * 
+	 *
 	 * @throws MissingImplementationException
 	 *             when an implementation was not found
 	 */
 	public void checkMethodImplementations() throws ModelDefinitionException, MissingImplementationException {
-		PamelaMetaModel pamelaMetaModel = getModelContext();
+		PamelaMetaModel pamelaMetaModel = getPamelaMetaModel();
 		MissingImplementationException thrown = null;
 		for (Iterator<ModelEntity> it = pamelaMetaModel.getEntities(); it.hasNext();) {
 			ModelEntity<?> e = it.next();

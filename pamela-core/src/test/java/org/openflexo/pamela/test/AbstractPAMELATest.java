@@ -41,6 +41,7 @@ package org.openflexo.pamela.test;
 
 import junit.framework.TestCase;
 
+import org.openflexo.pamela.PamelaMetaModelLibrary;
 import org.openflexo.pamela.PamelaMetaModel;
 import org.openflexo.pamela.exceptions.ModelDefinitionException;
 import org.openflexo.pamela.model.ModelEntity;
@@ -51,7 +52,7 @@ import org.openflexo.pamela.test.tests1.FlexoProcess;
 import org.openflexo.pamela.test.tests1.StartNode;
 import org.openflexo.pamela.test.tests1.TestModelObject;
 import org.openflexo.pamela.test.tests1.TokenEdge;
-import org.openflexo.pamela.test.tests1.WKFObject;
+import org.openflexo.pamela.test.tests1.WorkFlowObject;
 
 public abstract class AbstractPAMELATest extends TestCase {
 
@@ -59,6 +60,7 @@ public abstract class AbstractPAMELATest extends TestCase {
 	 * Little hack to access the library clear() method. This is only for testing purposes.
 	 */
 	protected void clearModelEntityLibrary() {
+		PamelaMetaModelLibrary.clearCache();//TODO watchout this has been added by copilot while debugging an exception raised by SerializationTests.
 		ModelEntityLibrary.clear();
 	}
 
@@ -68,13 +70,13 @@ public abstract class AbstractPAMELATest extends TestCase {
 		ModelEntity<AbstractNode> abstractNodeEntity = pamelaMetaModel.getModelEntity(AbstractNode.class);
 		ModelEntity<StartNode> startNodeEntity = pamelaMetaModel.getModelEntity(StartNode.class);
 		ModelEntity<TokenEdge> tokenEdgeEntity = pamelaMetaModel.getModelEntity(TokenEdge.class);
-		ModelEntity<WKFObject> wkfObjectEntity = pamelaMetaModel.getModelEntity(WKFObject.class);
+		ModelEntity<WorkFlowObject> workFlowObjectEntity = pamelaMetaModel.getModelEntity(WorkFlowObject.class);
 
 		assertNotNull(processEntity);
 		assertNotNull(abstractNodeEntity);
 		assertNotNull(startNodeEntity);
 		assertNotNull(tokenEdgeEntity);
-		assertNotNull(wkfObjectEntity);
+		assertNotNull(workFlowObjectEntity);
 
 		ModelProperty<? super FlexoProcess> nodesProperty = processEntity.getModelProperty(FlexoProcess.NODES);
 		assertNotNull(nodesProperty);
@@ -82,14 +84,14 @@ public abstract class AbstractPAMELATest extends TestCase {
 		assertNotNull(fooProperty);
 		assertNotNull(modelObjectEntity.getModelProperty(TestModelObject.FLEXO_ID));
 		assertNotNull(processEntity.getModelProperty(TestModelObject.FLEXO_ID));
-		assertNotNull(wkfObjectEntity.getModelProperty(TestModelObject.FLEXO_ID));
-		assertNotNull(wkfObjectEntity.getModelProperty(TestModelObject.FLEXO_ID).getSetter());
+		assertNotNull(workFlowObjectEntity.getModelProperty(TestModelObject.FLEXO_ID));
+		assertNotNull(workFlowObjectEntity.getModelProperty(TestModelObject.FLEXO_ID).getSetter());
 
-		ModelProperty<? super WKFObject> wkfObjectProcessProperty = wkfObjectEntity.getModelProperty(WKFObject.PROCESS);
+		ModelProperty<? super WorkFlowObject> wkfObjectProcessProperty = workFlowObjectEntity.getModelProperty(WorkFlowObject.PROCESS);
 		assertNotNull(wkfObjectProcessProperty);
 		assertNull(wkfObjectProcessProperty.getInverseProperty(processEntity));
 		assertNotNull(wkfObjectProcessProperty.getSetter());
-		ModelProperty<? super AbstractNode> abstractNodeProcessProperty = abstractNodeEntity.getModelProperty(WKFObject.PROCESS);
+		ModelProperty<? super AbstractNode> abstractNodeProcessProperty = abstractNodeEntity.getModelProperty(WorkFlowObject.PROCESS);
 		assertNotNull(abstractNodeProcessProperty);
 		assertNotNull(abstractNodeProcessProperty.getInverseProperty(processEntity));
 		assertNotNull(abstractNodeProcessProperty.getSetter());

@@ -8,8 +8,16 @@ import org.openflexo.pamela.annotations.Modify;
 import org.openflexo.pamela.annotations.Setter;
 
 @ModelEntity(isAbstract = true)
-@Modify(forward = WKFObject.PROCESS, synchWithForward = true)
-public interface WKFObject extends TestModelObject {
+@Modify(forward = WorkFlowObject.PROCESS, synchWithForward = true)
+public interface WorkFlowObject extends TestModelObject {
+	/*
+	Most likely: "WKF" = "Workflow" (common shorthand — fits `WKFObject` having a `getProcess()`).
+
+	Other possibilities (less likely):
+	- "Workforce"
+	- "Workflow Kernel/Framework" (project-specific)
+	- An initialism from a domain-specific name (check project docs?)
+	 */
 
 	public static final String PROCESS = "process";
 

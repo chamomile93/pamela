@@ -128,21 +128,29 @@ public class StringEncoder {
 	}
 
 	public <T> Converter<T> converterForClass(Class<T> objectType) {
+		//TODO objectType is, the class of , an instance of a FlexoProcess which is , an instance of a PMF
 		// 1. We try with custom converters
 		Converter<T> converterForClass = converterForClass(objectType, converters);
+		//TODO this converters are not defined so we jump
 		if (converterForClass == null) {
 			// 2. We try with model-defined converters
 			converterForClass = converterForClass(objectType, StringConverterLibrary.getInstance().getConverters());
+			//TODO idf what's the value of the StringConverterLibrary.getInstance().getConverters() map?
 		}
 		return converterForClass;
 	}
 
 	public static <T> Converter<T> converterForClass(Class<T> objectType, Map<Class<?>, Converter<?>> convertersMap) {
+		//TODO objectType is, the class of , an instance of a FlexoProcess which is , an instance of a PMF
 		Converter<?> returned;
 		Class<?> candidate = objectType;
 		// do {
 		// returned = convertersMap.get(candidate);
+		
+		//TODO idf why use TypeUtils from connie project ?
+		//TODO candidate is, the class of , an instance of a FlexoProcess which is , an instance of a PMF
 		returned = TypeUtils.objectForClass(candidate, convertersMap, false);
+		
 		/*if (candidate.equals(Object.class)) {
 			candidate = null;
 		} else {
@@ -153,6 +161,7 @@ public class StringEncoder {
 	}
 
 	public boolean isConvertable(Class<?> type) {
+		//TODO type is, the class of , an instance of a FlexoProcess which is , an instance of a PMF
 		return converterForClass(type) != null || type.isEnum();
 	}
 

@@ -59,6 +59,39 @@ import org.openflexo.toolbox.HasPropertyChangeSupport;
  * 
  */
 public interface AccessibleProxyObject extends HasPropertyChangeSupport, KeyValueCoding {
+	/**
+	 * Registers a runtime callable method on this proxy.
+	 *
+	 * @param methodName
+	 *            the dynamic method name
+	 * @param runtimeMethod
+	 *            implementation to invoke when the method is called
+	 */
+	public void registerRuntimeMethod(String methodName, RuntimeMethod runtimeMethod);
+
+	/**
+	 * Returns true when a runtime method has been registered for the supplied name.
+	 *
+	 * @param methodName
+	 *            the dynamic method name
+	 * @return true if a runtime method is available
+	 */
+	public boolean hasRuntimeMethod(String methodName);
+
+	/**
+	 * Invokes a runtime-registered method.
+	 *
+	 * @param methodName
+	 *            the dynamic method name
+	 * @param args
+	 *            method arguments
+	 * @return the method result
+	 */
+	public Object invokeRuntimeMethod(String methodName, Object... args);
+
+	/*
+	TODO I've added the above method definition to handle adding method definition in Pamela/AutenticatorPatternDefinition at runtime for my usecase, i don't know if it's really relevant here or elsewhere
+	*/
 
 	/**
 	 * Invokes the getter for the property with the given <code>propertyIdentifier</code>.

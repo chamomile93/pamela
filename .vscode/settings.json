@@ -1,0 +1,12 @@
+{
+  "java.project.referencedLibraries": {
+    "include": [
+      "lib/**/*.jar"
+    ],
+    "exclude": [
+      "**/*-sources.jar",
+      "**/build/**",
+      "**/bin/**"
+    ]
+  }
+}

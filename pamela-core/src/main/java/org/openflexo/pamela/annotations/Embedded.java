@@ -45,8 +45,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation is associated with a model property. It defines whether a model property should be considered as embedded or not. It also
+ * This annotation is associated with a model property. It defines whether a model property should be considered as embedded or not. 
+ * // TODO idf why I need this, how to use it
+ * It also
  * allows to define a set of properties that must be present in the context, in order to consider this model property value as 'embedded'.
+ * //TODO why ?
  * 
  * @author Guillaume
  *
@@ -76,6 +79,7 @@ public @interface Embedded {
 	 * @return the list of model properties of the corresponding model property value that must be embedded in order to consider this model
 	 *         property to be embedded.
 	 */
+	// TODO this seems cumbersome compared to bare serialization which already has the notion of closure condition, maybe this has not to do with serialization but more generally in the context of "cloning" object between "spaces" ?
 	String[] closureConditions() default {};
 
 	/**

@@ -1,40 +1,40 @@
 /**
- * 
+ *
  * Copyright (c) 2013-2015, Openflexo
  * Copyright (c) 2011-2012, AgileBirds
- * 
- * This file is part of Pamela-core, a component of the software infrastructure 
+ *
+ * This file is part of Pamela-core, a component of the software infrastructure
  * developed at Openflexo.
- * 
- * 
- * Openflexo is dual-licensed under the European Union Public License (EUPL, either 
- * version 1.1 of the License, or any later version ), which is available at 
+ *
+ *
+ * Openflexo is dual-licensed under the European Union Public License (EUPL, either
+ * version 1.1 of the License, or any later version ), which is available at
  * https://joinup.ec.europa.eu/software/page/eupl/licence-eupl
- * and the GNU General Public License (GPL, either version 3 of the License, or any 
+ * and the GNU General Public License (GPL, either version 3 of the License, or any
  * later version), which is available at http://www.gnu.org/licenses/gpl.html .
- * 
+ *
  * You can redistribute it and/or modify under the terms of either of these licenses
- * 
+ *
  * If you choose to redistribute it and/or modify under the terms of the GNU GPL, you
  * must include the following additional permission.
  *
  *          Additional permission under GNU GPL version 3 section 7
  *
- *          If you modify this Program, or any covered work, by linking or 
- *          combining it with software containing parts covered by the terms 
+ *          If you modify this Program, or any covered work, by linking or
+ *          combining it with software containing parts covered by the terms
  *          of EPL 1.0, the licensors of this Program grant you additional permission
- *          to convey the resulting work. * 
- * 
- * This software is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. 
+ *          to convey the resulting work. *
+ *
+ * This software is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE.
  *
  * See http://www.openflexo.org/license.html for details.
- * 
- * 
+ *
+ *
  * Please contact Openflexo (openflexo-contacts@openflexo.org)
  * or visit www.openflexo.org if you need additional information.
- * 
+ *
  */
 
 package org.openflexo.pamela.model;
@@ -94,12 +94,16 @@ import org.openflexo.toolbox.HasPropertyChangeSupport;
 
 /**
  * A {@link ModelEntity} represents a concept in a PAMELA meta-model<br>
- * 
- * A {@link ModelEntity} is reified in Java using an interface or class, annotated with a
+ *
+ * A {@link ModelEntity} is reified in Java using an interface or class,
+ * annotated with a
  * {@link org.openflexo.pamela.annotations.ModelEntity} annotation
- * 
+ *
+ * //TODO idf why use the term "reified" here, to me to reify is a synonym of
+ * "hypotheses" , it's also a way to "link" things between concept
+ *
  * @author guillaume, sylvain
- * 
+ *
  * @param <I>
  *            java type addressed by this entity
  */
@@ -136,7 +140,8 @@ public class ModelEntity<I> {
 	private final Map<ModelMethod, ModelProperty<? super I>> propertyMethods;
 
 	/**
-	 * The properties of this entity. The key is the xml attribute name of the property
+	 * The properties of this entity. The key is the xml attribute name of the
+	 * property
 	 */
 	private Map<String, ModelProperty<? super I>> modelPropertiesByXMLAttributeName;
 
@@ -151,12 +156,14 @@ public class ModelEntity<I> {
 	private Modify modify;
 
 	/**
-	 * Whether this entity is an abstract entity. Abstract entities cannot be instantiated.
+	 * Whether this entity is an abstract entity. Abstract entities cannot be
+	 * instantiated.
 	 */
 	private final boolean isAbstract;
 
 	/**
-	 * The default implementing class of this entity. The class can be abstract. This value may be null.
+	 * The default implementing class of this entity. The class can be abstract.
+	 * This value may be null.
 	 */
 	private Class<?> implementingClass;
 
@@ -171,7 +178,8 @@ public class ModelEntity<I> {
 	private List<ModelEntity<? super I>> allSuperEntities;
 
 	/**
-	 * The list of super entities (matching the list of super interfaces). This may be null
+	 * The list of super entities (matching the list of super interfaces). This may
+	 * be null
 	 */
 	private List<ModelEntity<? super I>> directSuperEntities;
 
@@ -191,9 +199,17 @@ public class ModelEntity<I> {
 
 	private final Map<Class<I>, Set<Method>> delegateImplementations;
 
-	ModelEntity(@Nonnull Class<I> implementedInterface) throws ModelDefinitionException {
+	// TODO I pulled-up these fields which were declared close to usage
+	private boolean xmlElementHasBeenRetrieved = false;
+	private Boolean hasInitializers;
+	private Map<String, JMLMethodDefinition> jmlMethods = new HashMap<>();
+	private JMLInvariant<I> invariant;
 
-		super(/*implementedInterface.getName()*/);
+	ModelEntity(@Nonnull Class<I> implementedInterface) throws ModelDefinitionException {
+		// TODO idf the instanticiation of this class yet
+		// TODO refactor into small pieces
+
+		super(/* implementedInterface.getName() */);
 
 		this.implementedInterface = implementedInterface;
 		declaredModelProperties = new HashMap<>();
@@ -211,6 +227,7 @@ public class ModelEntity<I> {
 		for (Class<?> i : implementedInterface.getInterfaces()) {
 			if (i.isAnnotationPresent(org.openflexo.pamela.annotations.ModelEntity.class)) {
 				if (superImplementedInterfaces == null) {
+					//TODO idf c'est l'initialization how could it be otherwise than null ? is this class created another way ?
 					superImplementedInterfaces = new ArrayList<>();
 				}
 				superImplementedInterfaces.add((Class<? super I>) i);
@@ -218,29 +235,37 @@ public class ModelEntity<I> {
 		}
 		for (Field field : getImplementedInterface().getDeclaredFields()) {
 			StringConverter converter = field.getAnnotation(StringConverter.class);
+			//TODO idf why use a converter here
 			if (converter != null) {
 				try {
 					StringConverterLibrary.getInstance().addConverter((Converter<?>) field.get(null));
 				} catch (IllegalArgumentException e) {
 					// This should not happen since interfaces can only have static fields
 					// and we pass 'null'
-					throw new ModelDefinitionException("Field " + field + " is not static! Cannot use it as string converter.");
+					throw new ModelDefinitionException(
+							"Field " + field + " is not static! Cannot use it as string converter.");
 				} catch (IllegalAccessException e) {
 					throw new ModelDefinitionException("Illegal access to field " + field);
 				} catch (ClassCastException e) {
-					throw new ModelDefinitionException("Field " + field.getName() + " is annotated with " + StringConverter.class.getName()
-							+ " but the value of the field is not an instance of " + Converter.class.getName());
+					// TODO why this might raise an exception in case of testing Serialization ?
+					throw new ModelDefinitionException(
+							"Field " + field.getName() + " is annotated with " + StringConverter.class.getName()
+									+ " but the value of the field is not an instance of " + Converter.class.getName());
 				}
 			}
 		}
 
-		// We scan already all the declared properties but we do not resolve their type. We do not resolve inherited properties either.
+		// We scan already all the declared properties but we do not resolve their type.
+		// We do not resolve inherited properties either.
 		for (Method m : getImplementedInterface().getDeclaredMethods()) {
 			String propertyIdentifier = getPropertyIdentifier(m);
-			// Sylvain: i commented following condition, as if a Pamela method overrides an interface where parent method
-			// was not annotated, property was ignored. But i dont't understand the reason of this condition
+			//TODO idf the below legacy comment
+			// // Sylvain: i commented following condition, as if a Pamela method overrides an
+			// interface where parent method
+			// was not annotated, property was ignored. But i dont't understand the reason
+			// of this condition
 			// Guillaume, could you please check this ?
-			if (propertyIdentifier == null /*|| !declaredModelProperties.containsKey(propertyIdentifier)*/) {
+			if (propertyIdentifier == null /* || !declaredModelProperties.containsKey(propertyIdentifier) */) {
 				List<Method> overridenMethods = ReflectionUtils.getOverridenMethods(m);
 				for (Method override : overridenMethods) {
 					propertyIdentifier = getPropertyIdentifier(override);
@@ -255,36 +280,39 @@ public class ModelEntity<I> {
 				ModelProperty<I> property = ModelProperty.getModelProperty(propertyIdentifier, this);
 				declaredModelProperties.put(propertyIdentifier, property);
 			}
-			org.openflexo.pamela.annotations.Initializer initializer = m.getAnnotation(org.openflexo.pamela.annotations.Initializer.class);
+			//TODO idf if this might be of interest in my testing SerializationTest
+			org.openflexo.pamela.annotations.Initializer initializer = m
+					.getAnnotation(org.openflexo.pamela.annotations.Initializer.class);
 			if (initializer != null) {
 				initializers.put(m, new ModelInitializer(initializer, m));
 			}
 
+			//TODO idf if this might be of interest in my testing SerializationTest
 			org.openflexo.pamela.annotations.DeserializationFinalizer deserializationFinalizer = m
 					.getAnnotation(org.openflexo.pamela.annotations.DeserializationFinalizer.class);
 			if (deserializationFinalizer != null) {
 				if (this.deserializationFinalizer == null) {
 					this.deserializationFinalizer = new DeserializationFinalizer(deserializationFinalizer, m);
-				}
-				else {
+				} else {
 					throw new ModelDefinitionException(
 							"Duplicated deserialization finalizer found for entity " + getImplementedInterface());
 				}
 			}
 
+			//TODO idf if this might be of interest in my testing SerializationTest
 			org.openflexo.pamela.annotations.DeserializationInitializer deserializationInitializer = m
 					.getAnnotation(org.openflexo.pamela.annotations.DeserializationInitializer.class);
 			if (deserializationInitializer != null) {
 				if (this.deserializationInitializer == null) {
 					this.deserializationInitializer = new DeserializationInitializer(deserializationInitializer, m);
-				}
-				else {
+				} else {
 					throw new ModelDefinitionException(
 							"Duplicated deserialization initializer found for entity " + getImplementedInterface());
 				}
 			}
 
-			// Register JML annotations if class is implementing SpecifiableProxyObject
+			//TODO idf if this might be of interest in my testing SerializationTest and later
+			// // Register JML annotations if class is implementing SpecifiableProxyObject
 			if (SpecifiableProxyObject.class.isAssignableFrom(getImplementedInterface())) {
 				registerJMLAnnotations(m);
 			}
@@ -296,25 +324,31 @@ public class ModelEntity<I> {
 		}
 
 		// Init delegate implementations
+		//TODO idf if this might be of interest in my testing SerializationTest
 		delegateImplementations = new HashMap<>();
+
 		for (Class<?> c : getImplementedInterface().getDeclaredClasses()) {
 			if (c.getAnnotation(Implementation.class) != null) {
 				if (getImplementedInterface().isAssignableFrom(c)) {
 					Class<I> candidateImplementation = (Class<I>) c;
-					// System.out.println("Found implementation " + candidateImplementation + " for " + getImplementedInterface());
+					// System.out.println("Found implementation " + candidateImplementation + " for
+					// " + getImplementedInterface());
 					Set<Method> implementedMethods = new HashSet<Method>() {
-						// We override here the add method to avoid to have duplicated method declaration with different return types
+						// We override here the add method to avoid to have duplicated method
+						// declaration with different return types
 						@Override
 						public boolean add(Method m) {
 							for (Method m2 : this) {
 								if (PamelaUtils.methodIsEquivalentTo(m, m2)) {
-									if (TypeUtils.isTypeAssignableFrom(m.getGenericReturnType(), m2.getGenericReturnType())) {
+									if (TypeUtils.isTypeAssignableFrom(m.getGenericReturnType(),
+											m2.getGenericReturnType())) {
 										// m2 is the most specialized method, we can skip the adding of m
 										return false;
-									}
-									else if (TypeUtils.isTypeAssignableFrom(m2.getGenericReturnType(), m.getGenericReturnType())) {
+									} else if (TypeUtils.isTypeAssignableFrom(m2.getGenericReturnType(),
+											m.getGenericReturnType())) {
 										// m is the most specialized method
-										// We remove the previously defined (but less generic) m2, and add more generic m method
+										// We remove the previously defined (but less generic) m2, and add more generic
+										// m method
 										remove(m2);
 										return super.add(m);
 									}
@@ -327,16 +361,17 @@ public class ModelEntity<I> {
 						implementedMethods.add(m);
 					}
 					delegateImplementations.put(candidateImplementation, implementedMethods);
-				}
-				else {
-					throw new ModelDefinitionException("Found candidate implementation " + c + " for entity " + getImplementedInterface()
-							+ " which does not implement " + getImplementedInterface());
+				} else {
+					throw new ModelDefinitionException(
+							"Found candidate implementation " + c + " for entity " + getImplementedInterface()
+									+ " which does not implement " + getImplementedInterface());
 				}
 			}
 		}
 
 	}
-
+	
+	//TODO idf why, is this related to my testing case
 	public void finalizeImport() throws ModelDefinitionException {
 		for (ModelProperty<? super I> property : properties.values()) {
 			property.finalizeImport();
@@ -348,18 +383,15 @@ public class ModelEntity<I> {
 		Getter aGetter = m.getAnnotation(Getter.class);
 		if (aGetter != null) {
 			propertyIdentifier = aGetter.value();
-		}
-		else {
+		} else {
 			Setter aSetter = m.getAnnotation(Setter.class);
 			if (aSetter != null) {
 				propertyIdentifier = aSetter.value();
-			}
-			else {
+			} else {
 				Adder anAdder = m.getAnnotation(Adder.class);
 				if (anAdder != null) {
 					propertyIdentifier = anAdder.value();
-				}
-				else {
+				} else {
 					Remover aRemover = m.getAnnotation(Remover.class);
 					if (aRemover != null) {
 						propertyIdentifier = aRemover.value();
@@ -371,8 +403,12 @@ public class ModelEntity<I> {
 	}
 
 	void init() throws ModelDefinitionException {
-
-		// System.out.println("Init " + getImplementedInterface() + " with direct super entities " + getDirectSuperEntities());
+		// TODO idf what's doing, does it relate to the testing case of
+		// SerializationTests and extensive or restrictive case? supposed yes since
+		// ModelEntity is the base annotation in this universe
+		// TODO idf probablly look into next time
+		// System.out.println("Init " + getImplementedInterface() + " with direct super
+		// entities " + getDirectSuperEntities());
 
 		// We now resolve our inherited entities and properties
 		if (getDirectSuperEntities() != null) {
@@ -382,9 +418,10 @@ public class ModelEntity<I> {
 			if (property.getType() != null && !StringConverterLibrary.getInstance().hasConverter(property.getType())
 					&& !property.getType().isEnum() && !property.isStringConvertable() && !property.ignoreType()) {
 				try {
-					embeddedEntities.add(ModelEntityLibrary.get(property.getType(), true));
+					embeddedEntities.add(ModelEntityLibrary.createOrGetModelEntityFromImplementingInterface(property.getType(), true));
 				} catch (ModelDefinitionException e) {
-					throw new ModelDefinitionException("Could not retrieve model entity for property " + property + " and entity " + this,
+					throw new ModelDefinitionException(
+							"Could not retrieve model entity for property " + property + " and entity " + this,
 							e);
 				}
 			}
@@ -394,7 +431,7 @@ public class ModelEntity<I> {
 		Imports imports = implementedInterface.getAnnotation(Imports.class);
 		if (imports != null) {
 			for (Import imp : imports.value()) {
-				embeddedEntities.add(ModelEntityLibrary.get(imp.value(), true));
+				embeddedEntities.add(ModelEntityLibrary.createOrGetModelEntityFromImplementingInterface(imp.value(), true));
 			}
 		}
 
@@ -402,7 +439,8 @@ public class ModelEntity<I> {
 
 		checkImplementationsClash();
 
-		// System.out.println("For " + getImplementedInterface() + " embeddedEntities=" + embeddedEntities);
+		// System.out.println("For " + getImplementedInterface() + " embeddedEntities="
+		// + embeddedEntities);
 	}
 
 	public Map<Class<I>, Set<Method>> getDelegateImplementations() {
@@ -411,17 +449,20 @@ public class ModelEntity<I> {
 
 	private void checkImplementationsClash() throws ModelDefinitionException {
 
-		// System.out.println("checkImplementationsClash() for " + getImplementedInterface());
+		// System.out.println("checkImplementationsClash() for " +
+		// getImplementedInterface());
 		// System.out.println("embeddedEntities=" + embeddedEntities);
 		// System.out.println("getDirectSuperEntities()=" + getDirectSuperEntities());
 
 		if (getDirectSuperEntities() != null) {
+			// TODO idf why is this is too complex
 			Set<Method> implementedMethods = new HashSet<>();
 			for (ModelEntity<? super I> parentEntity : getDirectSuperEntities()) {
 				for (Class<? super I> implClass : parentEntity.delegateImplementations.keySet()) {
 					for (Method m : parentEntity.delegateImplementations.get(implClass)) {
 						for (Method m2 : implementedMethods) {
-							if (PamelaUtils.methodIsEquivalentTo(m, m2) && !isToBeExcludedFromImplementationClashChecking(m)) {
+							if (PamelaUtils.methodIsEquivalentTo(m, m2)
+									&& !isToBeExcludedFromImplementationClashChecking(m)) {
 								// We are in the case of implementation clash
 								// We must now check if this clash was property handled
 								boolean localImplementationWasFound = false;
@@ -439,13 +480,16 @@ public class ModelEntity<I> {
 								}
 								if (!localImplementationWasFound) {
 									throw new ModelDefinitionException(
-											"Multiple inheritance implementation clash with method " + m + " defined in " + implClass
-													+ " and " + m2.getDeclaringClass() + ". Please disambiguate method.");
+											"Multiple inheritance implementation clash with method " + m
+													+ " defined in " + implClass
+													+ " and " + m2.getDeclaringClass()
+													+ ". Please disambiguate method.");
 								}
 							}
 						}
 						implementedMethods.add(m);
-						// System.out.println("Consider implementation method " + m + " in " + getImplementedInterface());
+						// System.out.println("Consider implementation method " + m + " in " +
+						// getImplementedInterface());
 					}
 				}
 			}
@@ -454,7 +498,7 @@ public class ModelEntity<I> {
 
 	/**
 	 * Hook used to prevent multiple inheritance clash in JACOCO context
-	 * 
+	 *
 	 * @param m
 	 * @return
 	 */
@@ -468,7 +512,8 @@ public class ModelEntity<I> {
 		}
 		properties.putAll(declaredModelProperties);
 
-		// Resolve inherited properties (we only scan direct parent properties, since themselves will scan for their inherited parents)
+		// Resolve inherited properties (we only scan direct parent properties, since
+		// themselves will scan for their inherited parents)
 		if (getDirectSuperEntities() != null) {
 			for (ModelEntity<? super I> parentEntity : getDirectSuperEntities()) {
 				parentEntity.mergeProperties();
@@ -478,7 +523,8 @@ public class ModelEntity<I> {
 			}
 		}
 
-		// Validate properties now (they should all have a getter and a return type, etc...
+		// Validate properties now (they should all have a getter and a return type,
+		// etc...
 		for (ModelProperty<? super I> p : properties.values()) {
 			p.validate();
 		}
@@ -496,10 +542,14 @@ public class ModelEntity<I> {
 			}
 		}
 
-		// TODO: maybe it would be better to be closer to what constructors do, ie, if there are super-initializer,
-		// And none of them are without arguments, then this entity should define an initializer with the same
-		// method signature (this is to enforce the developer to be aware of what the parameters do):
-		// FlexoModelObject.init(String flexoID) vs AbstractNode.init(String nodeName)-->same signature but the semantics of the parameter
+		// TODO: maybe it would be better to be closer to what constructors do, ie, if
+		// there are super-initializer,
+		// And none of them are without arguments, then this entity should define an
+		// initializer with the same
+		// method signature (this is to enforce the developer to be aware of what the
+		// parameters do):
+		// FlexoModelObject.init(String flexoID) vs AbstractNode.init(String
+		// nodeName)-->same signature but the semantics of the parameter
 		// is different
 		// Validate initializers
 
@@ -528,26 +578,30 @@ public class ModelEntity<I> {
 		if (implementationClass != null) {
 			return implementingClass = implementationClass.value();
 			// This may be not required under some circumstances
-			/*if (implementedInterface.isAssignableFrom(implementationClass.value())) {
-				return implementingClass = implementationClass.value();
-			}
-			else {
-				throw new ModelDefinitionException("Class " + implementationClass.value().getName()
-						+ " is declared as an implementation class of " + this + " but does not extend " + implementedInterface.getName());
-			}*/
-		}
-		else {
+			/*
+			 * if (implementedInterface.isAssignableFrom(implementationClass.value())) {
+			 * return implementingClass = implementationClass.value();
+			 * }
+			 * else {
+			 * throw new ModelDefinitionException("Class " +
+			 * implementationClass.value().getName()
+			 * + " is declared as an implementation class of " + this +
+			 * " but does not extend " + implementedInterface.getName());
+			 * }
+			 */
+		} else {
 			if (getDirectSuperEntities() != null) {
 				for (ModelEntity<? super I> e : getDirectSuperEntities()) {
 					Class<?> klass = e.getImplementingClass();
 					if (klass != null) {
 						if (implementingClass == null) {
 							implementingClass = klass;
-							// System.out.println("Found " + implementingClass + " for " + e.getImplementedInterface());
-						}
-						else if (implementingClass != klass) {
+							// System.out.println("Found " + implementingClass + " for " +
+							// e.getImplementedInterface());
+						} else if (implementingClass != klass) {
 							throw new ModelDefinitionException(
-									"Ambiguous implementing klass for entity '" + this + "'. Found more than one valid super klass: "
+									"Ambiguous implementing klass for entity '" + this
+											+ "'. Found more than one valid super klass: "
 											+ implementingClass.getName() + " and " + klass.getName());
 						}
 					}
@@ -569,7 +623,7 @@ public class ModelEntity<I> {
 		if (directSuperEntities == null && superImplementedInterfaces != null) {
 			directSuperEntities = new ArrayList<>(superImplementedInterfaces.size());
 			for (Class<? super I> superInterface : superImplementedInterfaces) {
-				ModelEntity<? super I> superEntity = ModelEntityLibrary.get(superInterface, true);
+				ModelEntity<? super I> superEntity = ModelEntityLibrary.createOrGetModelEntityFromImplementingInterface(superInterface, true);
 				directSuperEntities.add(superEntity);
 			}
 		}
@@ -578,7 +632,7 @@ public class ModelEntity<I> {
 
 	/**
 	 * Returns a list of all the (direct & indirect) super entities of this entity.
-	 * 
+	 *
 	 * @return all the (direct & indirect) super entities of this entity.
 	 * @throws ModelDefinitionException
 	 */
@@ -587,7 +641,8 @@ public class ModelEntity<I> {
 			allSuperEntities = new ArrayList<>();
 			// 1. We add the direct ancestors of this entity
 			allSuperEntities.addAll(getDirectSuperEntities());
-			// 2. We add the indirect ancestors of this entity to have a topologically sorted array.
+			// 2. We add the indirect ancestors of this entity to have a topologically
+			// sorted array.
 			for (ModelEntity<? super I> superEntity : new ArrayList<>(allSuperEntities)) {
 				allSuperEntities.addAll(superEntity.getAllSuperEntities());
 			}
@@ -625,9 +680,10 @@ public class ModelEntity<I> {
 	}
 
 	/**
-	 * Returns whether the implemented interface associated with <code>this</code> model entity has a method annotated with a {@link Getter}
+	 * Returns whether the implemented interface associated with <code>this</code>
+	 * model entity has a method annotated with a {@link Getter}
 	 * with its value set to the provided <code>propertyIdentifier</code>.
-	 * 
+	 *
 	 * @param propertyIdentifier
 	 * @return
 	 */
@@ -636,10 +692,11 @@ public class ModelEntity<I> {
 	}
 
 	/**
-	 * Returns the {@link ModelProperty} with the identifier <code>propertyIdentifier</code>.
-	 * 
+	 * Returns the {@link ModelProperty} with the identifier
+	 * <code>propertyIdentifier</code>.
+	 *
 	 * @param propertyIdentifier
-	 *            the identifier of the property
+	 *                           the identifier of the property
 	 * @return the property with the identifier <code>propertyIdentifier</code>.
 	 * @throws ModelDefinitionException
 	 */
@@ -648,12 +705,14 @@ public class ModelEntity<I> {
 	}
 
 	/**
-	 * Creates the {@link ModelProperty} with the identifier <code>propertyIdentifier</code>.
-	 * 
+	 * Creates the {@link ModelProperty} with the identifier
+	 * <code>propertyIdentifier</code>.
+	 *
 	 * @param propertyIdentifier
-	 *            the identifier of the property
+	 *                           the identifier of the property
 	 * @param create
-	 *            whether the property should be create or not, if not found
+	 *                           whether the property should be create or not, if
+	 *                           not found
 	 * @return the property with the identifier <code>propertyIdentifier</code>.
 	 * @throws ModelDefinitionException
 	 */
@@ -663,39 +722,53 @@ public class ModelEntity<I> {
 	}
 
 	/**
-	 * Builds the {@link ModelProperty} with identifier <code>propertyIdentifier</code>, if it is declared at least once in the hierarchy
-	 * (i.e., at least one method is annotated with the {@link Getter} annotation and the given identifier, <code>propertyIdentifier</code>
-	 * ). In case of inheritance, the property is combined with all its ancestors. In case of multiple inheritance of the same property,
-	 * conflicts are resolved to the possible extent. In case of contradiction, a {@link PropertyClashException} is thrown.
-	 * 
+	 * Builds the {@link ModelProperty} with identifier
+	 * <code>propertyIdentifier</code>, if it is declared at least once in the
+	 * hierarchy
+	 * (i.e., at least one method is annotated with the {@link Getter} annotation
+	 * and the given identifier, <code>propertyIdentifier</code>
+	 * //TODO I do use the annotation Getter in the Serialization test with a Node
+	 * class
+	 * ). In case of inheritance, the property is combined with all its ancestors.
+	 * In case of multiple inheritance of the same property,
+	 * conflicts are resolved to the possible extent. In case of contradiction, a
+	 * {@link PropertyClashException} is thrown.
+	 *
 	 * @param propertyIdentifier
-	 *            the identifier of the property
+	 *                           the identifier of the property
 	 * @return the new, possibly combined, property.
 	 * @throws ModelDefinitionException
-	 *             in case of an inconsistency in the model of a clash of property inheritance.
+	 *                                  in case of an inconsistency in the model of
+	 *                                  a clash of property inheritance.
 	 */
 	private ModelProperty<? super I> buildModelProperty(String propertyIdentifier) throws ModelDefinitionException {
 		ModelProperty<I> property = ModelProperty.getModelProperty(propertyIdentifier, this);
 		if (singleInheritance() || multipleInheritance()) {
-			ModelProperty<? super I> parentProperty = buildModelPropertyUsingParentProperties(propertyIdentifier, property);
+			ModelProperty<? super I> parentProperty = buildModelPropertyUsingParentProperties(propertyIdentifier,
+					property);
 			return combine(property, parentProperty);
 		}
 		return property;
 	}
 
 	/**
-	 * Returns a model property with the identifier <code>propertyIdentifier</code> which is a combination of all the model properties with
-	 * the identifier <code>propertyIdentifier</code> of the parent entities. This method may return <code>null</code> in case amongst all
-	 * parents, non of them declare a property with identifier <code>propertyIdentifier</code>.
-	 * 
+	 * Returns a model property with the identifier <code>propertyIdentifier</code>
+	 * which is a combination of all the model properties with
+	 * the identifier <code>propertyIdentifier</code> of the parent entities. This
+	 * method may return <code>null</code> in case amongst all
+	 * parents, non of them declare a property with identifier
+	 * <code>propertyIdentifier</code>.
+	 *
 	 * @param propertyIdentifier
-	 *            the identifier of the property
+	 *                           the identifier of the property
 	 * @param property
-	 *            the model property with the identifier defined for <code>this</code> {@link ModelEntity}.
+	 *                           the model property with the identifier defined for
+	 *                           <code>this</code> {@link ModelEntity}.
 	 * @return
 	 * @throws ModelDefinitionException
 	 */
-	private ModelProperty<? super I> buildModelPropertyUsingParentProperties(String propertyIdentifier, ModelProperty<I> property)
+	private ModelProperty<? super I> buildModelPropertyUsingParentProperties(String propertyIdentifier,
+			ModelProperty<I> property)
 			throws ModelDefinitionException {
 		ModelProperty<? super I> returned = null;
 		for (ModelEntity<? super I> parent : getDirectSuperEntities()) {
@@ -704,8 +777,7 @@ public class ModelEntity<I> {
 			}
 			if (returned == null) {
 				returned = parent.getModelProperty(propertyIdentifier);
-			}
-			else {
+			} else {
 				returned = combineAsAncestors(parent.getModelProperty(propertyIdentifier), returned, property);
 			}
 		}
@@ -713,23 +785,27 @@ public class ModelEntity<I> {
 	}
 
 	/**
-	 * Returns a combined property which is the merge of the property <code>property</code> and its parent property
-	 * <code>parentProperty</code>. In case of conflicts, the behaviour defined by <code>property</code> superseeds the one defined by
+	 * Returns a combined property which is the merge of the property
+	 * <code>property</code> and its parent property
+	 * <code>parentProperty</code>. In case of conflicts, the behaviour defined by
+	 * <code>property</code> superseeds the one defined by
 	 * <code>parentProperty</code>
-	 * 
+	 *
 	 * @param property
-	 *            the property to merge
+	 *                       the property to merge
 	 * @param parentProperty
-	 *            the parent property to merge
+	 *                       the parent property to merge
 	 * @return a combined/merged property
 	 * @throws ModelDefinitionException
 	 */
 	private ModelProperty<? super I> combine(ModelProperty<I> property, ModelProperty<? super I> parentProperty)
 			throws ModelDefinitionException {
+		// TODO why is this needed ?
 		return property.combineWith(parentProperty, property);
 	}
 
-	private ModelProperty<? super I> combineAsAncestors(ModelProperty<? super I> property1, ModelProperty<? super I> property2,
+	private ModelProperty<? super I> combineAsAncestors(ModelProperty<? super I> property1,
+			ModelProperty<? super I> property2,
 			ModelProperty<I> declaredProperty) throws ModelDefinitionException {
 		if (property1 == null) {
 			return property2;
@@ -745,8 +821,10 @@ public class ModelEntity<I> {
 			ModelProperty<I> declaredProperty) throws PropertyClashException {
 		String contradiction = property1.contradicts(property2, declaredProperty);
 		if (contradiction != null) {
-			throw new PropertyClashException("Property '" + property1.getPropertyIdentifier() + "' contradiction between entity '"
-					+ property1.getModelEntity() + "' and entity '" + property2.getModelEntity() + "'.\nReason:" + contradiction);
+			throw new PropertyClashException(
+					"Property '" + property1.getPropertyIdentifier() + "' contradiction between entity '"
+							+ property1.getModelEntity() + "' and entity '" + property2.getModelEntity() + "'.\nReason:"
+							+ contradiction);
 		}
 	}
 
@@ -792,18 +870,16 @@ public class ModelEntity<I> {
 		return implementationClass;
 	}
 
-	private boolean xmlElementHasBeenRetrieved = false;
-
 	/**
 	 * Return {@link XMLElement} by combining all super entities declarations
-	 * 
+	 *
 	 * @return
 	 */
 	public XMLElement getXMLElement() {
 
 		if (!xmlElementHasBeenRetrieved) {
 
-			xmlElementHasBeenRetrieved = true;
+			xmlElementHasBeenRetrieved = true; // TODO idf not thread safe ? I forgot where we are
 
 			xmlElement = implementedInterface.getAnnotation(XMLElement.class);
 
@@ -817,6 +893,7 @@ public class ModelEntity<I> {
 				xmlTag = xmlElement.xmlTag();
 				if (xmlTag == null || xmlTag.equals(XMLElement.DEFAULT_XML_TAG)) {
 					xmlTag = getImplementedInterface().getSimpleName();
+					//TODO this set the default name for the tag as the class in case not tag was given
 				}
 			}
 
@@ -827,29 +904,27 @@ public class ModelEntity<I> {
 							if (superEntity.getXMLElement() != null) {
 								if (xmlElement == null) {
 									xmlElement = superEntity.getXMLElement();
-								}
-								else {
+								} else {
 									if (!superEntity.getXMLElement().context().equals(XMLElement.NO_CONTEXT)) {
 										context = superEntity.getXMLElement().context();
-									}
-									else {
+									} else {
 										context = xmlElement.context();
 									}
 									if (!superEntity.getXMLElement().namespace().equals(XMLElement.NO_NAME_SPACE)) {
 										namespace = superEntity.getXMLElement().namespace();
-									}
-									else {
+									} else {
 										namespace = xmlElement.namespace();
 									}
 									if (!superEntity.getXMLElement().idFactory().equals(XMLElement.NO_ID_FACTORY)) {
 										idFactory = superEntity.getXMLElement().idFactory();
-									}
-									else {
+									} else {
 										idFactory = xmlElement.idFactory();
 									}
 									primary |= superEntity.getXMLElement().primary();
+									//TODO this is a short syntax fo primary = primary OR xyz (not lazy)
 									primary |= xmlElement.primary();
-									xmlElement = new XMLElement.XMLElementImpl(xmlTag, context, namespace, primary, idFactory);
+									xmlElement = new XMLElement.XMLElementImpl(xmlTag, context, namespace, primary,
+											idFactory);
 								}
 							}
 						}
@@ -871,6 +946,7 @@ public class ModelEntity<I> {
 			}
 			if (xmlTag == null || xmlTag.equals(XMLElement.DEFAULT_XML_TAG)) {
 				xmlTag = getImplementedInterface().getSimpleName();
+				//TODO why is this duplicated from the getXMLElement() method ? this suppose that getXMLElement might not be defined ? maybe I reading this incorrectly...
 			}
 		}
 		return xmlTag;
@@ -879,7 +955,7 @@ public class ModelEntity<I> {
 	/**
 	 * Return an iterator for {@link ModelProperty} objects<br>
 	 * Note that order is absolutely not guaranteed
-	 * 
+	 *
 	 * @return
 	 * @throws ModelDefinitionException
 	 */
@@ -898,7 +974,7 @@ public class ModelEntity<I> {
 	/**
 	 * Return an iterator for {@link ModelProperty} objects<br>
 	 * Order respect {@link CloningStrategy#cloneAfterProperty()} annotation
-	 * 
+	 *
 	 * @return
 	 * @throws ModelDefinitionException
 	 */
@@ -910,14 +986,14 @@ public class ModelEntity<I> {
 		return returned.iterator();
 	}
 
-	private void appendProperty(ModelProperty<? super I> p, List<ModelProperty<? super I>> list) throws ModelDefinitionException {
+	private void appendProperty(ModelProperty<? super I> p, List<ModelProperty<? super I>> list)
+			throws ModelDefinitionException {
 		if (p.getCloneAfterProperty() != null) {
 			appendProperty((ModelProperty<? super I>) p.getCloneAfterProperty(), list);
 			if (!list.contains(p)) {
 				list.add(p);
 			}
-		}
-		else {
+		} else {
 			if (!list.contains(p)) {
 				list.add(0, p);
 			}
@@ -959,8 +1035,7 @@ public class ModelEntity<I> {
 			for (ModelEntity<?> e : entity.getDirectSuperEntities()) {
 				if (e == this) {
 					return true;
-				}
-				else if (isAncestorOf(e)) {
+				} else if (isAncestorOf(e)) {
 					return true;
 				}
 			}
@@ -968,14 +1043,13 @@ public class ModelEntity<I> {
 		return false;
 	}
 
-	private Boolean hasInitializers;
+
 
 	public boolean hasInitializers() throws ModelDefinitionException {
 		if (hasInitializers == null) {
 			if (initializers.size() > 0) {
 				return hasInitializers = true;
-			}
-			else if (getDirectSuperEntities() != null) {
+			} else if (getDirectSuperEntities() != null) {
 				for (ModelEntity<?> e : getDirectSuperEntities()) {
 					if (e.hasInitializers()) {
 						return hasInitializers = true;
@@ -989,12 +1063,24 @@ public class ModelEntity<I> {
 
 	public ModelInitializer getInitializers(Method m) throws ModelDefinitionException {
 		if (m.getDeclaringClass() != implementedInterface) {
-			ModelEntity<?> e = ModelEntityLibrary.get(m.getDeclaringClass());
-			if (e == null) {
-				throw new ModelExecutionException("Could not find initializer for method " + m.toGenericString() + ". Make sure that "
+			ModelEntity<?> aModelEntityFromMethod = ModelEntityLibrary.getModelEntityFromImplementingInterface(m.getDeclaringClass());
+			// TODO idf have I seen this before ?
+			if (aModelEntityFromMethod == null) {
+				// TODO idf why this might raise an exception in case of testing
+				// SerializationTests ?
+				throw new ModelExecutionException("Could not find initializer for method " + m.toGenericString()
+						+ ". Make sure that "
 						+ m.getDeclaringClass().getName() + " is annotated with ModelEntity and has been imported.");
+				/*
+				 * TODO from ProxyMethodHandler._invoke this raises an exception because the
+				 * modelEntity variable is null
+				 *
+				 * Why is this null ?
+				 *
+				 */
+
 			}
-			return e.getInitializers(m);
+			return aModelEntityFromMethod.getInitializers(m);
 		}
 		return initializers.get(m);
 	}
@@ -1019,11 +1105,12 @@ public class ModelEntity<I> {
 					ModelInitializer initializer = e.getInitializerForArgs(types);
 					if (found == null) {
 						found = initializer;
-					}
-					else {
-						throw new ModelDefinitionException("Initializer clash: " + found.getInitializingMethod().toGenericString()
-								+ " cannot be distinguished with " + initializer.getInitializingMethod().toGenericString()
-								+ ". Please override initializer in " + getImplementedInterface());
+					} else {
+						throw new ModelDefinitionException(
+								"Initializer clash: " + found.getInitializingMethod().toGenericString()
+										+ " cannot be distinguished with "
+										+ initializer.getInitializingMethod().toGenericString()
+										+ ". Please override initializer in " + getImplementedInterface());
 					}
 
 				}
@@ -1058,7 +1145,7 @@ public class ModelEntity<I> {
 	/**
 	 * Return the first found deserialization initializer in the class hierarchy<br>
 	 * TODO: manage multiple inheritance issues
-	 * 
+	 *
 	 * @return
 	 * @throws ModelDefinitionException
 	 */
@@ -1079,7 +1166,7 @@ public class ModelEntity<I> {
 	/**
 	 * Return the first found deserialization finalizer in the class hierarchy<br>
 	 * TODO: manage multiple inheritance issues
-	 * 
+	 *
 	 * @return
 	 * @throws ModelDefinitionException
 	 */
@@ -1098,12 +1185,14 @@ public class ModelEntity<I> {
 	}
 
 	/**
-	 * Returns the list of model properties of this model entity which are of the type provided by <code>type</code> or any of its
+	 * Returns the list of model properties of this model entity which are of the
+	 * type provided by <code>type</code> or any of its
 	 * compatible type (ie, a super-type of <code>type</code>).
-	 * 
+	 *
 	 * @param type
-	 *            the type used for model properties lookup
-	 * @return a list of model properties to which an instance of <code>type</code> can be assigned or added
+	 *             the type used for model properties lookup
+	 * @return a list of model properties to which an instance of <code>type</code>
+	 *         can be assigned or added
 	 */
 	public Collection<ModelProperty<? super I>> getPropertiesAssignableFrom(Class<?> type) {
 		Collection<ModelProperty<? super I>> ppProperties = new ArrayList<>();
@@ -1118,15 +1207,13 @@ public class ModelEntity<I> {
 	public Modify getModify() throws ModelDefinitionException {
 		if (modify != null) {
 			return modify;
-		}
-		else {
+		} else {
 			if (getDirectSuperEntities() != null) {
 				for (ModelEntity<? super I> e : getDirectSuperEntities()) {
 					if (e.getModify() != null) {
 						if (modify == null) {
 							modify = e.getModify();
-						}
-						else {
+						} else {
 							throw new ModelDefinitionException("Duplicated modify annotation on " + this
 									+ ". Please add modify annotation on " + implementedInterface.getName());
 						}
@@ -1142,13 +1229,15 @@ public class ModelEntity<I> {
 	}
 
 	/**
-	 * Check that this entity with supplied factory contains all required implementation<br>
+	 * Check that this entity with supplied factory contains all required
+	 * implementation<br>
 	 * If entity is abstract simply return
-	 * 
+	 *
 	 * @throws MissingImplementationException
-	 *             when an implementation was not found
+	 *                                        when an implementation was not found
 	 */
-	public void checkMethodImplementations(PamelaModelFactory factory) throws ModelDefinitionException, MissingImplementationException {
+	public void checkMethodImplementations(PamelaModelFactory factory)
+			throws ModelDefinitionException, MissingImplementationException {
 		// Abstract entities are allowed not to provide all implementations
 		if (isAbstract()) {
 			return;
@@ -1169,9 +1258,10 @@ public class ModelEntity<I> {
 	}
 
 	/**
-	 * Return the list of all methods beeing implemented by entity addressed by implemented interface<br>
+	 * Return the list of all methods beeing implemented by entity addressed by
+	 * implemented interface<br>
 	 * Methods beeing shadowed by overriden methods are excluded from results
-	 * 
+	 *
 	 * @return
 	 */
 	public List<Method> getNotOverridenMethods() {
@@ -1189,28 +1279,32 @@ public class ModelEntity<I> {
 				}
 				if (!isOverriden) {
 					returned.add(m1);
-				} /*else {
-					System.out.println("Dismiss " + m1 + " because overriden by " + overridingMethod);
-					}*/
+				} /*
+					 * else {
+					 * System.out.println("Dismiss " + m1 + " because overriden by " +
+					 * overridingMethod);
+					 * }
+					 */
 			}
 		}
 		return returned;
 	}
 
 	/**
-	 * Check that this entity provides an implementation for supplied method, given a {@link PamelaModelFactory}
-	 * 
+	 * Check that this entity provides an implementation for supplied method, given
+	 * a {@link PamelaModelFactory}
+	 *
 	 * @return true if an implementation was found
 	 * @throws ModelDefinitionException
 	 */
-	private boolean checkMethodImplementation(Method method, PamelaModelFactory factory) throws ModelDefinitionException {
+	private boolean checkMethodImplementation(Method method, PamelaModelFactory factory)
+			throws ModelDefinitionException {
 
 		// Abstract entities are allowed not to provide all implementations
 		ModelProperty<?> property = getPropertyForMethod(method);
 		if (property != null) {
 			return true;
-		}
-		else {
+		} else {
 			if (method.isDefault()) {
 				return true;
 			}
@@ -1315,7 +1409,8 @@ public class ModelEntity<I> {
 			}
 
 			// Look up in base implementation class
-			Class<?> implementingClassForInterface = factory.getImplementingClassForInterface(getImplementedInterface());
+			Class<?> implementingClassForInterface = factory
+					.getImplementingClassForInterface(getImplementedInterface());
 			if (implementingClassForInterface != null) {
 				try {
 					Method m = implementingClassForInterface.getMethod(method.getName(), method.getParameterTypes());
@@ -1334,8 +1429,9 @@ public class ModelEntity<I> {
 	}
 
 	/**
-	 * Check that this entity provides an implementation for supplied method, given a {@link PamelaModelFactory}
-	 * 
+	 * Check that this entity provides an implementation for supplied method, given
+	 * a {@link PamelaModelFactory}
+	 *
 	 * @return true if an implementation was found
 	 * @throws ModelDefinitionException
 	 */
@@ -1368,9 +1464,6 @@ public class ModelEntity<I> {
 
 	}
 
-	private Map<String, JMLMethodDefinition> jmlMethods = new HashMap<>();
-	private JMLInvariant<I> invariant;
-
 	private void registerJMLAnnotations() {
 		if (SpecifiableProxyObject.class.isAssignableFrom(getImplementedInterface())) {
 			if (getImplementedInterface().isAnnotationPresent(Invariant.class)) {
@@ -1389,7 +1482,8 @@ public class ModelEntity<I> {
 	}
 
 	public JMLMethodDefinition<? super I> getJMLMethodDefinition(Method method) {
-		JMLMethodDefinition<? super I> returned = jmlMethods.get(PamelaUtils.getSignature(method, getImplementedInterface(), true));
+		JMLMethodDefinition<? super I> returned = jmlMethods
+				.get(PamelaUtils.getSignature(method, getImplementedInterface(), true));
 		if (returned == null) {
 			try {
 				if (getDirectSuperEntities() != null) {

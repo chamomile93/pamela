@@ -23,12 +23,13 @@ public class PamelaCoreTests4 {
 	 */
 	@Test
 	public void testFactory() {
-
+		//TODO what other test could be done on the factory ?
+		// testing nonnull reference is kind of lowentry
 		try {
 			PamelaModelFactory factory = new PamelaModelFactory(PamelaMetaModelLibrary.retrieveMetaModel(MyContainer.class, MyContents.class));
 
-			ModelEntity<MyContainer> myContainerEntity = factory.getModelContext().getModelEntity(MyContainer.class);
-			ModelEntity<MyContents> myContentsEntity = factory.getModelContext().getModelEntity(MyContents.class);
+			ModelEntity<MyContainer> myContainerEntity = factory.getPamelaMetaModel().getModelEntity(MyContainer.class);
+			ModelEntity<MyContents> myContentsEntity = factory.getPamelaMetaModel().getModelEntity(MyContents.class);
 
 			assertNotNull(myContainerEntity);
 			assertNotNull(myContentsEntity);

@@ -1,39 +1,39 @@
 /**
- * 
+ *
  * Copyright (c) 2014, Openflexo
- * 
- * This file is part of Pamela-core, a component of the software infrastructure 
+ *
+ * This file is part of Pamela-core, a component of the software infrastructure
  * developed at Openflexo.
- * 
- * 
- * Openflexo is dual-licensed under the European Union Public License (EUPL, either 
- * version 1.1 of the License, or any later version ), which is available at 
+ *
+ *
+ * Openflexo is dual-licensed under the European Union Public License (EUPL, either
+ * version 1.1 of the License, or any later version ), which is available at
  * https://joinup.ec.europa.eu/software/page/eupl/licence-eupl
- * and the GNU General Public License (GPL, either version 3 of the License, or any 
+ * and the GNU General Public License (GPL, either version 3 of the License, or any
  * later version), which is available at http://www.gnu.org/licenses/gpl.html .
- * 
+ *
  * You can redistribute it and/or modify under the terms of either of these licenses
- * 
+ *
  * If you choose to redistribute it and/or modify under the terms of the GNU GPL, you
  * must include the following additional permission.
  *
  *          Additional permission under GNU GPL version 3 section 7
  *
- *          If you modify this Program, or any covered work, by linking or 
- *          combining it with software containing parts covered by the terms 
+ *          If you modify this Program, or any covered work, by linking or
+ *          combining it with software containing parts covered by the terms
  *          of EPL 1.0, the licensors of this Program grant you additional permission
- *          to convey the resulting work. * 
- * 
- * This software is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. 
+ *          to convey the resulting work. *
+ *
+ * This software is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE.
  *
  * See http://www.openflexo.org/license.html for details.
- * 
- * 
+ *
+ *
  * Please contact Openflexo (openflexo-contacts@openflexo.org)
  * or visit www.openflexo.org if you need additional information.
- * 
+ *
  */
 
 package org.openflexo.pamela.xml;
@@ -50,21 +50,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.jdom2.Document;
+import org.jdom2.Document; //TODO  is there an alternative to this library ?
 import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.LineSeparator;
 import org.jdom2.output.XMLOutputter;
 import org.openflexo.connie.java.JavaBindingFactory;
 import org.openflexo.connie.java.util.JavaBindingEvaluator;
+import org.openflexo.pamela.PamelaMetaModel;
 import org.openflexo.pamela.PamelaMetaModelLibrary;
 import org.openflexo.pamela.annotations.XMLElement;
 import org.openflexo.pamela.exceptions.InvalidDataException;
 import org.openflexo.pamela.exceptions.ModelDefinitionException;
 import org.openflexo.pamela.exceptions.ModelExecutionException;
 import org.openflexo.pamela.exceptions.RestrictiveSerializationException;
-import org.openflexo.pamela.factory.PamelaModelFactory;
 import org.openflexo.pamela.factory.PamelaConstants;
+import org.openflexo.pamela.factory.PamelaModelFactory;
 import org.openflexo.pamela.factory.ProxyMethodHandler;
 import org.openflexo.pamela.factory.SerializationPolicy;
 import org.openflexo.pamela.factory.StringEncoder;
@@ -76,7 +77,7 @@ import javassist.util.proxy.ProxyObject;
 
 /**
  * XML serializer implementation
- * 
+ *
  * @author christophe
  *
  */
@@ -90,16 +91,17 @@ public class XMLSerializer {
 
 	/**
 	 * Stores already serialized objects where key is the serialized object and value is a
-	 * 
+	 *
 	 * <pre>
 	 * Object
 	 * </pre>
-	 * 
+	 * // TODO idf why "pre" tag is enclosing the word "Object" in the above line ? why is there a tag ? on a second read, I understand that the key is a String "serialization" of the object as the value
+	 * // TODO why choose "Object" as a key ? Why choose what seems to look like a "String" as a value ?
 	 * instance coding the unique identifier of the object
 	 */
 	private Map<Object, Object> alreadySerialized;
 
-	private int id = 0;
+	private int id = 0;//TODO probably this is what is incrementing the id in for each xml attribute "id" in the generated XML file? this happens when an xmlElement reference is null and something else, then we couldn't gete a binding evaluator to generate a "reference", and continued to the instruction that returned id and incremented it's value by one
 	private final PamelaModelFactory pamelaModelFactory;
 	private final SerializationPolicy policy;
 
@@ -108,6 +110,7 @@ public class XMLSerializer {
 	}
 
 	public XMLSerializer(PamelaModelFactory pamelaModelFactory, SerializationPolicy policy) {
+		//TODO third
 		this.pamelaModelFactory = pamelaModelFactory;
 		this.policy = policy;
 	}
@@ -118,12 +121,15 @@ public class XMLSerializer {
 
 	public Document serializeDocument(Object object, OutputStream out, boolean resetModifiedStatus)
 			throws IOException, IllegalArgumentException, IllegalAccessException, InvocationTargetException, ModelDefinitionException {
+				//TODO fourth
 		Document builtDocument = new Document();
 		id = 0;
 		objectReferences = new HashMap<>();
 		alreadySerialized = new HashMap<>();
+		//TODO object is an instance of a FlexoProcess which is an instance of a PMF
 		Element rootElement = serializeElement(object, null, resetModifiedStatus);
 		postProcess(rootElement);
+		//TODO what is postProcess
 		builtDocument.setRootElement(rootElement);
 		Format prettyFormat = Format.getPrettyFormat();
 		prettyFormat.setLineSeparator(LineSeparator.SYSTEM);
@@ -170,18 +176,31 @@ public class XMLSerializer {
 	private <I> Element serializeElement(Object object, XMLElement context, boolean resetModifiedStatus)
 			throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, ModelDefinitionException {
 		Element returned;
+		//TODO object is an instance of a FlexoProcess which is an instance of a PMF
 		if (object instanceof ProxyObject) {
+			/*
+				* TODO idf, at this point the object is of type FlexoProcess how could it be a subtype of ProxyObject?
+				* in case RESTRICTIVE i go through this branch and I don't understand why
+				* this means that object is an instance of ProxyObject
+			*/
 			ProxyMethodHandler<I> handler = (ProxyMethodHandler<I>) ((ProxyObject) object).getHandler();
-			ModelEntity<I> modelEntity = handler.getModelEntity();
+			ModelEntity<I> modelEntity = handler.getModelEntity(); //TODO j'ai oublié comment le proxy handler connait la méthode 'getModelEntity()' ? //TODO dans le cas du "Node" imbriqué dans le "Process" , pourquoi le modelEntity retourné c'est un FlexoProcess puis plus bas
 			Class<I> implementedInterface = modelEntity.getImplementedInterface();
 			boolean serializeModelEntityName = false;
 			XMLElement xmlElement = modelEntity.getXMLElement();
 			String xmlTag = modelEntity.getXMLTag();
-			if (pamelaModelFactory.getModelContext().getModelEntity(implementedInterface) == null) {
+			PamelaMetaModel aPamelaMetaModel = pamelaModelFactory.getPamelaMetaModel();
+			ModelEntity<?> aModelEntity = aPamelaMetaModel.getModelEntity(implementedInterface); //TODO idf dans le cas du Node ajouté a un FlexoProcess, j'ai oublié pourquoi ici on autre chose qu'un FlexoProcess
+			if (aModelEntity == null) {
+				/*
+					* TODO idf how the class given implementedInterface could be null when fetched from the modelEntity
+					* maybe it looks for "FlexoProcessImpl" instead of interface "FlexoProcess"?
+					* indeed it's not null....
+				*/
 				serializeModelEntityName = true;
 				switch (policy) {
 					case EXTENSIVE:
-						List<ModelEntity<?>> upperEntities = pamelaModelFactory.getModelContext().getUpperEntities(object);
+						List<ModelEntity<?>> upperEntities = pamelaModelFactory.getPamelaMetaModel().getUpperEntities(object);
 						if (upperEntities.size() == 0) {
 							throw new ModelDefinitionException("Cannot serialize object of type: " + object.getClass().getName()
 									+ " in context " + context.xmlTag() + ". No model entity could be found in the model mapping");
@@ -193,9 +212,10 @@ public class XMLSerializer {
 						ModelEntity<?> e = upperEntities.get(0);
 						xmlTag = e.getXMLTag();
 						modelEntity = PamelaMetaModelLibrary.retrieveMetaModel(implementedInterface).getModelEntity(implementedInterface);
+						//TODO idf this uses the ModelEntity class "importEntity" at some point
 						break;
 					case PERMISSIVE:
-						upperEntities = pamelaModelFactory.getModelContext().getUpperEntities(object);
+						upperEntities = pamelaModelFactory.getPamelaMetaModel().getUpperEntities(object);
 						if (upperEntities.size() == 0) {
 							throw new ModelDefinitionException("Cannot serialize object of type: " + object.getClass().getName()
 									+ " in context " + context.xmlTag() + ". No model entity could be found in the model mapping");
@@ -243,6 +263,7 @@ public class XMLSerializer {
 						Iterator<ModelProperty<? super I>> properties = modelEntity.getProperties();
 						while (properties.hasNext()) {
 							ModelProperty<? super I> p = properties.next();
+							//TODO idf why do we have to iterate over every "ModelProperty" of a modelEntity in this case ?
 							if (p.getXMLAttribute() != null) {
 								Object oValue = handler.invokeGetter(p);
 								boolean ignoreProperty = false;
@@ -282,6 +303,7 @@ public class XMLSerializer {
 									case LIST:
 										List<?> values = (List<?>) handler.invokeGetter(p);
 										// NPE if list not initialized
+										//TODO idf in case I have one Node in my list, why it's of type FlexoModelObjectImpl ?
 										if (values != null) {
 											for (Object o : new ArrayList<>(values)) {
 												if (o != null) {
@@ -329,12 +351,14 @@ public class XMLSerializer {
 				// somewhere "+anObject);
 
 				returned = new Element(elementName, namespace);
+				//TODO this come from jdom2 package
 				returned.setAttribute(ID_REF, reference.toString());
 			}
 
 			// OK, Element is now built
 			ObjectReference ref = objectReferences.get(object);
 			if (ref != null) {
+				//TODO the comment says that the element is built, how could it be that "ref" = null ?
 				ref.notifyNewElementReference(xmlElement, context, returned);
 			}
 			else {
@@ -344,6 +368,7 @@ public class XMLSerializer {
 			return returned;
 		}
 		else if (getStringEncoder().isConvertable(object.getClass())) {
+			//TODO probably I get here
 			try {
 				if (StringUtils.isNotEmpty(context.xmlTag())) {
 					returned = new Element(context.xmlTag(), context.namespace());
@@ -366,12 +391,14 @@ public class XMLSerializer {
 	}
 
 	private void postProcess(Element rootElement) {
+		//TODO what is this ?
 		int requiredSwaps = objectReferences.size();
 		while (requiredSwaps > 0) {
 			int newRequiredSwaps = 0;
 			for (ObjectReference ref : objectReferences.values()) {
 				if (!ref.postProcess()) {
 					newRequiredSwaps++;
+					//TODO what does it mean to count this ?
 				}
 			}
 			if (newRequiredSwaps == requiredSwaps) {
@@ -414,7 +441,7 @@ public class XMLSerializer {
 
 		/*
 		 * protected int getId() { return id; }
-		 * 
+		 *
 		 * protected void changeId(int newId) { //
 		 * System.out.println("changeId() to "
 		 * +newId+" for "+primaryElement.element); if ((primaryElement != null)
@@ -423,7 +450,7 @@ public class XMLSerializer {
 		 * en=referenceElements.elements(); en.hasMoreElements();) {
 		 * ElementReference next = (ElementReference)en.nextElement(); if
 		 * (next.element != null) changeIdForElement(newId,next.element); } }
-		 * 
+		 *
 		 * protected void changeIdForElement(int newId, Element element) { if
 		 * (element.getAttribute(ID) != null) {
 		 * element.setAttribute(ID,encodeInteger(newId)); } else if
@@ -451,6 +478,7 @@ public class XMLSerializer {
 		private boolean done = false;
 
 		protected boolean postProcess() {
+			//TODO what is this ?
 			// System.out.println("***** postProcess("+this+")");
 			// System.out.println("PRIMARY= (primary="+primaryElement.isPrimary()+") "+primaryElement.element);
 			/*
@@ -478,8 +506,10 @@ public class XMLSerializer {
 		}
 
 		private boolean setAsNewPrimaryElement(ElementReference newElementReference) {
+			//TODO  why this after postProcess?
 			// System.out.println("Need to exchange "+primaryElement.element+" and "+newElementReference.element);
 			if (exchange(primaryElement, newElementReference)) {
+				//TODO what is being swaped ?
 				referenceElements.remove(newElementReference);
 				referenceElements.add(primaryElement);
 				primaryElement = newElementReference;

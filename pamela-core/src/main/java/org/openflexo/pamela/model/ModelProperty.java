@@ -130,6 +130,7 @@ public class ModelProperty<I> {
 
 	protected static <I> ModelProperty<I> getModelProperty(String propertyIdentifier, ModelEntity<I> modelEntity)
 			throws ModelDefinitionException {
+			//TODO idf what's going on
 		PropertyImplementation propertyImplementation = null;
 		Getter getter = null;
 		Setter setter = null;
@@ -941,6 +942,7 @@ public class ModelProperty<I> {
 			xmlElement = rulingProperty.getXMLElement();
 		}
 		else if (getXMLAttribute() != null || property.getXMLAttribute() != null) {
+			//TODO idf and this might concerns my current work on serialization
 			if (getXMLAttribute() != null && !getXMLAttribute().xmlTag().equals(XMLAttribute.DEFAULT_XML_TAG)) {
 				xmlAttribute = getXMLAttribute();
 			}
@@ -949,6 +951,7 @@ public class ModelProperty<I> {
 			}
 		}
 		else if (getXMLElement() != null || property.getXMLElement() != null) {
+			//TODO idf idem
 			String xmlTag = XMLElement.DEFAULT_XML_TAG;
 			String context = XMLElement.NO_CONTEXT;
 			String namespace = XMLElement.NO_NAME_SPACE;
@@ -1049,6 +1052,7 @@ public class ModelProperty<I> {
 	}
 
 	public XMLAttribute getXMLAttribute() {
+		//TODO this is fetch from the XMLSerializer class at some point
 		return xmlAttribute;
 	}
 
@@ -1180,7 +1184,8 @@ public class ModelProperty<I> {
 	}
 
 	public ModelEntity<?> getAccessedEntity() {
-		return ModelEntityLibrary.get(getType());
+		return ModelEntityLibrary.getModelEntityFromImplementingInterface(getType());
+		//TODO idf first time I see this, does it concerns my current work on the test case serialization tests ?
 	}
 
 	public ReturnedValue getReturnedValue() {

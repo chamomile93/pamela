@@ -65,6 +65,7 @@
 
 buildscript {
     repositories {
+        mavenLocal()
         maven { url uri('https://maven.openflexo.org/artifactory/openflexo-deps/') }
     }
     
@@ -76,9 +77,10 @@ buildscript {
 
 subprojects {
 	repositories {
+    mavenLocal()
         maven { url "https://maven.openflexo.org/artifactory/openflexo-deps/" }
     }
 }
 
-version = "1.6.1"
+version = "1.6.1-alloy"
 apply plugin: 'org.openflexo.buildconfig'

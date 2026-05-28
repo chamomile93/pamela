@@ -14,6 +14,7 @@ import org.openflexo.toolbox.StringUtils;
  * @param <I>
  */
 public class ModelPropertyXMLTag<I> {
+	//TODO idf if i have to look into it as I am currently working on the SerializationTests case
 	private final String tag;
 	private final ModelProperty<? super I> property;
 	private final ModelEntity<?> accessedEntity;

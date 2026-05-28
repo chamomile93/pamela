@@ -44,6 +44,7 @@ public abstract class MyContainerImpl implements MyContainer {
 
 	private MyContents lecontenu = null;
 	private PamelaModelFactory factory = null;
+	//TODO idf what's the purpose of this field ?
 	private String contentURI = null;
 
 	public void setFactory(PamelaModelFactory fact) {

@@ -12,7 +12,7 @@ import org.openflexo.pamela.securitypatterns.authenticator.annotations.RequiresA
 @ModelEntity
 @AuthenticatorSubject(patternID = MySubject.PATTERN_ID)
 public class MySubject {
-	public static final String PATTERN_ID = "patternID";
+	public static final String PATTERN_ID = "patternIDValue";
 	public static final String AUTH_INFO = "auth_info1";
 	public static final String MANAGER = "manager";
 	public static final String ID_PROOF = "id_proof";

@@ -113,6 +113,7 @@ public @interface XMLElement {
 		private String idFactory;
 
 		public XMLElementImpl(String xmlTag, String context, String namespace, boolean primary, String idFactory) {
+			//TODO this is used while creating a ModelEntity from a class annotated with @XMLElement
 			this.xmlTag = xmlTag;
 			this.context = context;
 			this.namespace = namespace;

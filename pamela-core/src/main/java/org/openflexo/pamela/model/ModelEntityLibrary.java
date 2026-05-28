@@ -59,37 +59,56 @@ public class ModelEntityLibrary {
 	private static List<ModelEntity<?>> newEntities = new ArrayList<>();
 
 	public static synchronized <I> ModelEntity<I> importEntity(Class<I> implementedInterface) throws ModelDefinitionException {
+		//TODO given that the arg1 is my FlexoProcess interface class in my testing case SerializationTests
+		//TODO is it necessary to be synchronized ?
+		//TODO idf how far it's used in OpenFlexo
 		ModelEntity<I> modelEntity = (ModelEntity<I>) entities.get(implementedInterface);
+		//TODO entities the first is empty, then modelEntity is null
 		if (modelEntity == null) {
-			modelEntity = get(implementedInterface, true);
-			for (ModelEntity<?> e : newEntities) {
-				e.mergeProperties();
+			modelEntity = createOrGetModelEntityFromImplementingInterface(implementedInterface, true);
+			//TODO idf the previous method has modified "newEntities"
+			for (ModelEntity<?> aNewEntity : newEntities) {
+				aNewEntity.mergeProperties();
+				//TODO idf
 			}
 			newEntities.clear();
+			//TODO idf
 		}
 		return modelEntity;
 	}
 
-	static <I> ModelEntity<I> get(Class<I> implementedInterface, boolean create) throws ModelDefinitionException {
+	static <I> ModelEntity<I> createOrGetModelEntityFromImplementingInterface(Class<I> implementedInterface, boolean create) throws ModelDefinitionException {
 		ModelEntity<I> modelEntity = (ModelEntity<I>) entities.get(implementedInterface);
 		if (modelEntity == null && create) {
+			//TODO I suppose this is the case the first time I reach here with a FlexoProcess interface class as argument, given that "entities" is empty at the beginning, so we create a new ModelEntity for this class and put it in the "entities" map
 			if (!ModelEntity.isModelEntity(implementedInterface)) {
 				throw new ModelDefinitionException("Class " + implementedInterface + " is not a ModelEntity.");
+				//TODO perhaps I forgot to add the annotation "@ModelEntity" to my FlexoProcess interface class
 			}
 			synchronized (ModelEntityLibrary.class) {
-				entities.put(implementedInterface, modelEntity = new ModelEntity<>(implementedInterface));
+				//TODO idf why do we need to synchronize here ?
+				
+				modelEntity = new ModelEntity<>(implementedInterface);
+				
+				entities.put(implementedInterface, modelEntity);
+				
 				modelEntity.init();
+				//TODO idf why init?
+
 				newEntities.add(modelEntity);
+				//TODO idf why we need to retain this field, and ok this is why we can iterate on newEntities,
 			}
 		}
 		return modelEntity;
 	}
 
-	static <I> ModelEntity<I> get(Class<I> implementedInterface) {
+	static <I> ModelEntity<I> getModelEntityFromImplementingInterface(Class<I> implementedInterface) {
+		//TODO this seems to be an overloaded method of the previous one
 		try {
-			return get(implementedInterface, false);
+			return createOrGetModelEntityFromImplementingInterface(implementedInterface, false);
 		} catch (ModelDefinitionException e) {
 			// Never happens
+			//TODO idf the previous existing comment
 			return null;
 		}
 	}
@@ -103,5 +122,6 @@ public class ModelEntityLibrary {
 	 */
 	public static void clear() {
 		entities.clear();
+		newEntities.clear(); //TODO watchout this has been added by copilot while debugging an exception raised by SerializationTests.
 	}
 }

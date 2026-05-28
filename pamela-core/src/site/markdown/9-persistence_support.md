@@ -17,7 +17,11 @@ Serialization scheme relies on a String serializer/deserializer for common types
 
 The encoding of the object graph structure (and not only trees, as reflected by XML structure) relies on references (use of `idref` attributes). The serialization strategy is highly configurable, and allows a persistent-stable structure using a `primary` feature defined on some *ModelProperties* (referenced object will be preferably extensively serialized as this location).
 
+//TODO idf
+
 Serialization and deserialization processes are provided with extension points (serialization/deserialization initializers/deserializers), where the developer may inject some specific code.
+
+//TODO idf
 
 Excerpt of code showing XML serialization directives, and exposing deserialization extension points.
 
@@ -94,8 +98,3 @@ public interface Node extends AccessibleProxyObject {
 
 }
 ```java
-
- 
-
-    
-  

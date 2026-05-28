@@ -1,7 +1,6 @@
 package org.openflexo.pamela.test.serialization;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,6 +12,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openflexo.pamela.PamelaMetaModelLibrary;
 import org.openflexo.pamela.exceptions.ModelDefinitionException;
 import org.openflexo.pamela.factory.DeserializationPolicy;
 import org.openflexo.pamela.factory.PamelaModelFactory;
@@ -30,6 +30,7 @@ public class DeserializationTests {
 
 	@BeforeClass
 	public static void setUpClass() throws IOException, ModelDefinitionException {
+		PamelaMetaModelLibrary.clearCache(); //TODO watchout this has been added by copilot while debugging an exception raised by SerializationTests.
 		ModelEntityLibrary.clear();
 		file = File.createTempFile("PAMELA-TestDeserialization", ".xml");
 		factory = new PamelaModelFactory(Node.class);
@@ -44,7 +45,7 @@ public class DeserializationTests {
 	@TestOrder(1)
 	public void testInitializeAModel() {
 
-		Assert.assertNotNull(factory.getModelContext().getModelEntity(Node.class));
+		Assert.assertNotNull(factory.getPamelaMetaModel().getModelEntity(Node.class));
 
 		Node rootNode = factory.newInstance(Node.class);
 		rootNode.setName("Root");
