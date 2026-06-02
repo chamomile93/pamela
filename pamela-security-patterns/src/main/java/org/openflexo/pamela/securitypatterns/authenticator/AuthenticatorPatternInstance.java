@@ -59,9 +59,16 @@ import org.openflexo.toolbox.HasPropertyChangeSupport;
  * <ul>
  * <li>Maintaining state variables of the pattern instance</li>
  * <li>Enforcing invariants of the {@link Authenticator} annotated class.</li>
- * <li>Enforcing preconditions of the {@link Authenticator} annotated class.</li>
- * <li>Enforcing postconditions of the {@link Authenticator} annotated class.</li>
+ * <li>Enforcing preconditions of the {@link Authenticator} annotated
+ * class.</li>
+ * <li>Enforcing postconditions of the {@link Authenticator} annotated
+ * class.</li>
  * </ul>
+ *
+ * @param <S>  the type of the Subject
+ * @param <A>  the type of the Authenticator
+ * @param <AI> the type of the Authentication Information
+ * @param <PI> the type of the Proof of Identity
  *
  * @author Caine Silva, Sylvain Guerin
  */
@@ -92,10 +99,11 @@ public class AuthenticatorPatternInstance<A, S, AI, PI> extends PatternInstance<
 			((HasPropertyChangeSupport) subject).getPropertyChangeSupport().addPropertyChangeListener(this);
 		}
 		if (this instanceof org.openflexo.pamela.AccessibleProxyObject) {
-			((org.openflexo.pamela.AccessibleProxyObject) this).registerRuntimeMethod("checkAuthInfoIsFinal", (receiver, args) -> {
-				((AuthenticatorPatternInstance<?, ?, ?, ?>) receiver).checkAuthInfoIsFinal();
-				return null;
-			});
+			((org.openflexo.pamela.AccessibleProxyObject) this).registerRuntimeMethod("checkAuthInfoIsFinal",
+					(receiver, args) -> {
+						((AuthenticatorPatternInstance<?, ?, ?, ?>) receiver).checkAuthInfoIsFinal();
+						return null;
+					});
 		}
 		checkAuthenticator();
 	}
@@ -116,7 +124,8 @@ public class AuthenticatorPatternInstance<A, S, AI, PI> extends PatternInstance<
 		return authenticator;
 	}
 
-	private A retrieveAuthenticator() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private A retrieveAuthenticator()
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		return (A) getPatternDefinition().authenticatorGetterMethod.invoke(subject);
 	}
 
@@ -152,7 +161,7 @@ public class AuthenticatorPatternInstance<A, S, AI, PI> extends PatternInstance<
 	 * @throws IllegalAccessException
 	 * 
 	 */
-	 void performAuthentication() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	void performAuthentication() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
 		System.out.println("performAuthentication() !!!");
 
@@ -170,7 +179,7 @@ public class AuthenticatorPatternInstance<A, S, AI, PI> extends PatternInstance<
 			isAuthenticating = false;
 		}
 	}
-	 
+
 	public void authenticationSuceeded() {
 	}
 
@@ -178,38 +187,46 @@ public class AuthenticatorPatternInstance<A, S, AI, PI> extends PatternInstance<
 		return isAuthenticated;
 	}
 
-	public AI retrieveAuthentificationInformation() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public AI retrieveAuthentificationInformation()
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		return (AI) getPatternDefinition().authentificationInfoMethod.invoke(subject);
 	}
 
-	public PI retrieveProofOfIdentity() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public PI retrieveProofOfIdentity()
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		return (PI) getPatternDefinition().proofOfIdentityGetterMethod.invoke(getSubject());
 	}
 
-	public void setProofOfIdentity(PI proofOfIdentity) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public void setProofOfIdentity(PI proofOfIdentity)
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		getPatternDefinition().proofOfIdentitySetterMethod.invoke(subject, proofOfIdentity);
 	}
 
 	/**
-	 * Method called before every method of interest is about to be invoked. Performs the execution, if relevant.
+	 * Method called before every method of interest is about to be invoked.
+	 * Performs the execution, if relevant.
 	 * 
 	 * @param instance
-	 *            Object on which the method is called
+	 *                 Object on which the method is called
 	 * @param method
-	 *            Called method
+	 *                 Called method
 	 * @param args
-	 * @return a {@link ReturnWrapper} wrapping true if the execution of the invoke should go one after the call, false if not.
+	 * @return a {@link ReturnWrapper} wrapping true if the execution of the invoke
+	 *         should go one after the call, false if not.
 	 * @throws InvocationTargetException
-	 *             if an error occurred when internally invoking a method
+	 *                                   if an error occurred when internally
+	 *                                   invoking a method
 	 * @throws IllegalAccessException
-	 *             if an error occurred when internally invoking a method
+	 *                                   if an error occurred when internally
+	 *                                   invoking a method
 	 * @throws NoSuchMethodException
-	 *             if an error occurred when internally invoking a method
+	 *                                   if an error occurred when internally
+	 *                                   invoking a method
 	 */
 	@Override
 	public ReturnWrapper processMethodBeforeInvoke(Object instance, Method method, Object[] args)
 			throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-			
+
 		System.out.println("On utilise bien le processMethodBeforInvoke");
 		if (instance != getSubject()) {
 			// We are only interested to the method calls on the subject
@@ -231,10 +248,12 @@ public class AuthenticatorPatternInstance<A, S, AI, PI> extends PatternInstance<
 			}
 		}
 
-		Method apiMethod = getPatternDefinition().subjectModelEntity.getImplementedInterface().getMethod(method.getName(),
+		Method apiMethod = getPatternDefinition().subjectModelEntity.getImplementedInterface().getMethod(
+				method.getName(),
 				method.getParameterTypes());
 
-		if (method.getAnnotation(RequiresAuthentication.class) != null || (apiMethod.getAnnotation(RequiresAuthentication.class) != null)) {
+		if (method.getAnnotation(RequiresAuthentication.class) != null
+				|| (apiMethod.getAnnotation(RequiresAuthentication.class) != null)) {
 			if (isValid() && !isAuthenticated()) {
 				performAuthentication();
 			}
@@ -262,10 +281,11 @@ public class AuthenticatorPatternInstance<A, S, AI, PI> extends PatternInstance<
 	}
 
 	/**
-	 * Method called before all method invoke. It performs the invariant and precondition checks.
+	 * Method called before all method invoke. It performs the invariant and
+	 * precondition checks.
 	 * 
 	 * @param method
-	 *            Method which will be invoked
+	 *               Method which will be invoked
 	 * @throws InvocationTargetException
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
@@ -285,12 +305,13 @@ public class AuthenticatorPatternInstance<A, S, AI, PI> extends PatternInstance<
 	}
 
 	/**
-	 * Method called before after all method invoke. It performs the invariant and postcondition checks.
+	 * Method called before after all method invoke. It performs the invariant and
+	 * postcondition checks.
 	 * 
 	 * @param method
-	 *            Method which will be invoked
+	 *                    Method which will be invoked
 	 * @param returnValue
-	 *            returnValue of the method
+	 *                    returnValue of the method
 	 * @throws InvocationTargetException
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
@@ -322,17 +343,20 @@ public class AuthenticatorPatternInstance<A, S, AI, PI> extends PatternInstance<
 		this.checkAuthenticatorIsFinal();
 		this.checkIdProofIsValid();
 		// if (this instanceof org.openflexo.pamela.AccessibleProxyObject) {
-		// 	((org.openflexo.pamela.AccessibleProxyObject) this).invokeRuntimeMethod("checkAuthInfoIsFinal");
+		// ((org.openflexo.pamela.AccessibleProxyObject)
+		// this).invokeRuntimeMethod("checkAuthInfoIsFinal");
 		// }
 		// else {
-		// 	checkAuthInfoIsFinal();
+		// checkAuthInfoIsFinal();
 		// }
-		// TODO maybe here our purposes it better to not assume checkAuthInfoIsFinal then add it and conclude it holds at runtime.
+		// TODO maybe here our purposes it better to not assume checkAuthInfoIsFinal
+		// then add it and conclude it holds at runtime.
 
 	}
 
 	/**
-	 * Method checking the invariant preventing <code>Proof of Identity</code> forgery.
+	 * Method checking the invariant preventing <code>Proof of Identity</code>
+	 * forgery.
 	 */
 	private void checkIdProofIsValid() {
 		try {
@@ -341,7 +365,8 @@ public class AuthenticatorPatternInstance<A, S, AI, PI> extends PatternInstance<
 				if (!proofOfIdentity.equals(currentProof)) {
 					if ((proofOfIdentity == null && !currentProof.equals(defaultIdProof)) || (proofOfIdentity != null
 							&& !currentProof.equals(proofOfIdentity) && !currentProof.equals(this.defaultIdProof))) {
-						throw new ModelExecutionException("Subject Invariant Violation: Proof of identity has been forged");
+						throw new ModelExecutionException(
+								"Subject Invariant Violation: Proof of identity has been forged");
 					}
 				}
 			}
@@ -351,7 +376,8 @@ public class AuthenticatorPatternInstance<A, S, AI, PI> extends PatternInstance<
 	}
 
 	/**
-	 * Method checking the invariant ensuring all <code>Authentication Information</code> does not change throughout runtime.
+	 * Method checking the invariant ensuring all
+	 * <code>Authentication Information</code> does not change throughout runtime.
 	 */
 	void checkAuthInfoIsFinal() {
 		try {
@@ -368,32 +394,36 @@ public class AuthenticatorPatternInstance<A, S, AI, PI> extends PatternInstance<
 
 		// TODO: multiple AuthInfo
 		/*
-		int i = 0;
-		try {
-			for (Method getter : this.entity.getAuthInfoGetters().values()) {
-				Object currentAuthInfo = getter.invoke(this.instance);
-				if (!currentAuthInfo.equals(this.authInfos.get(i))) {
-					break;
-				}
-				i++;
-			}
-			if (i != this.authInfos.size()) {
-				throw new ModelExecutionException(
-						"Subject Invariant Violation: Authentication Information has changed since initialization");
-			}
-		} catch (IllegalAccessException | InvocationTargetException e) {
-			e.printStackTrace();
-		}
-		*/
+		 * int i = 0;
+		 * try {
+		 * for (Method getter : this.entity.getAuthInfoGetters().values()) {
+		 * Object currentAuthInfo = getter.invoke(this.instance);
+		 * if (!currentAuthInfo.equals(this.authInfos.get(i))) {
+		 * break;
+		 * }
+		 * i++;
+		 * }
+		 * if (i != this.authInfos.size()) {
+		 * throw new ModelExecutionException(
+		 * "Subject Invariant Violation: Authentication Information has changed since initialization"
+		 * );
+		 * }
+		 * } catch (IllegalAccessException | InvocationTargetException e) {
+		 * e.printStackTrace();
+		 * }
+		 */
 	}
+
 	/**
-	 * Method checking the invariant ensuring the <code>authenticator</code> does not change throughout runtime.
+	 * Method checking the invariant ensuring the <code>authenticator</code> does
+	 * not change throughout runtime.
 	 */
 	private void checkAuthenticatorIsFinal() {
 		try {
 			A currentAuthenticator = retrieveAuthenticator();
 			if (currentAuthenticator != authenticator) {
-				throw new ModelExecutionException("Subject Invariant Violation: Authenticator has changed since initialization");
+				throw new ModelExecutionException(
+						"Subject Invariant Violation: Authenticator has changed since initialization");
 			}
 		} catch (IllegalAccessException | InvocationTargetException e) {
 			e.printStackTrace();
@@ -402,17 +432,20 @@ public class AuthenticatorPatternInstance<A, S, AI, PI> extends PatternInstance<
 	}
 
 	/**
-	 * Method checking the invariant ensuring uniqueness of the set of <code>Authentication Information</code>.
+	 * Method checking the invariant ensuring uniqueness of the set of
+	 * <code>Authentication Information</code>.
 	 * 
 	 * @throws InvocationTargetException
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	private void checkAuthInfoUniqueness() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private void checkAuthInfoUniqueness()
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
 		AI currentAuthInfo = retrieveAuthentificationInformation();
 		if (currentAuthInfo != null) {
-			for (PatternInstance<AuthenticatorPatternDefinition> pi : getModelContext().getPatternInstances(getPatternDefinition())) {
+			for (PatternInstance<AuthenticatorPatternDefinition> pi : getModelContext()
+					.getPatternInstances(getPatternDefinition())) {
 				AuthenticatorPatternInstance otherInstance = (AuthenticatorPatternInstance) pi;
 				AI oppositeAuthInfo = (AI) otherInstance.retrieveAuthentificationInformation();
 				if (otherInstance != this) {
@@ -420,49 +453,59 @@ public class AuthenticatorPatternInstance<A, S, AI, PI> extends PatternInstance<
 						System.out.println("Tiens j'ai trouve des AuthInfo identiques");
 						System.out.println("currentAuthInfo=" + currentAuthInfo);
 						System.out.println("oppositeAuthInfo=" + oppositeAuthInfo);
-						throw new ModelExecutionException("Subject Invariant Violation: Authentication information are not unique");
+						throw new ModelExecutionException(
+								"Subject Invariant Violation: Authentication information are not unique");
 					}
 				}
 			}
 		}
 		// TODO: multiple AuthInfo
-		/*for (AuthenticatorSubjectInstance otherInstance : this.entity.getInstances().values()) {
-			int i;
-			for (i = 0; i < authInfos.size(); i++) {
-				if (authInfos.get(i) != otherInstance.getAuthInfos().get(i)) {
-					break;
-				}
-			}
-			if (i == authInfos.size() && !otherInstance.getInstance().equals(this.instance)) {
-				throw new ModelExecutionException("Subject Invariant Violation: Authentication information are not unique");
-			}
-		}*/
+		/*
+		 * for (AuthenticatorSubjectInstance otherInstance :
+		 * this.entity.getInstances().values()) {
+		 * int i;
+		 * for (i = 0; i < authInfos.size(); i++) {
+		 * if (authInfos.get(i) != otherInstance.getAuthInfos().get(i)) {
+		 * break;
+		 * }
+		 * }
+		 * if (i == authInfos.size() &&
+		 * !otherInstance.getInstance().equals(this.instance)) {
+		 * throw new
+		 * ModelExecutionException("Subject Invariant Violation: Authentication information are not unique"
+		 * );
+		 * }
+		 * }
+		 */
 	}
 
 	/**
-	 * Method checking the postconditions, if any, after the <code>method</code> invoke
+	 * Method checking the postconditions, if any, after the <code>method</code>
+	 * invoke
 	 * 
 	 * @param method
-	 *            Just-invoked method
+	 *                    Just-invoked method
 	 * @param returnValue
-	 *            Return Value of the invoked method
+	 *                    Return Value of the invoked method
 	 */
 	private void checkPostcondition(Method method, Object returnValue) {
 		if (PamelaUtils.methodIsEquivalentTo(method, getPatternDefinition().authenticateMethod)) {
 			if (proofOfIdentity == null) {
 				throw new ModelExecutionException(String.format(
 						"Subject authenticate method postcondition violation (Pattern %s, Class %s)",
-						getPatternDefinition().getIdentifier(), getPatternDefinition().subjectModelEntity.getImplementedInterface()));
+						getPatternDefinition().getIdentifier(),
+						getPatternDefinition().subjectModelEntity.getImplementedInterface()));
 			}
 
 		}
 	}
 
 	/**
-	 * Method checking the preconditions, if any, before the <code>method</code> invoke
+	 * Method checking the preconditions, if any, before the <code>method</code>
+	 * invoke
 	 * 
 	 * @param method
-	 *            Method to be invoked after check
+	 *               Method to be invoked after check
 	 */
 	private void checkPreconditions(Method method) {
 

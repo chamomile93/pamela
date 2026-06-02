@@ -49,6 +49,7 @@ import org.openflexo.pamela.annotations.XMLElement;
 @ModelEntity
 @ImplementationClass(MyContainerImpl.class)
 @XMLElement
+
 public interface MyContainer {
 
 	@PropertyIdentifier(type = String.class)
@@ -69,5 +70,4 @@ public interface MyContainer {
 
 	@Setter(value = CONTENT_URI)
 	public void setContentURI(String uri);
-
 }

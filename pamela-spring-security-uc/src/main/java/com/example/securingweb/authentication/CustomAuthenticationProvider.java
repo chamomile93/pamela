@@ -34,12 +34,17 @@ public interface CustomAuthenticationProvider extends AuthenticationProvider {
 	public void setUserDetailsService(UserDetailsService userDetailsService);
 
 	@Override
-	@Requires(
-			patternID = SessionInfo.PATTERN_ID,
-			type = PropertyParadigmType.TemporalLogic,
-			property = "assert always auth_fail[*3] & time_limit<3min @ (auth_fail)"/*,
-																					exceptionWhenViolated = TooManyLoginAttemptsException.class*/)
-	// @Requires(patternID = SessionInfo.PATTERN_ID, type = PropertyParadigmType.TemporalLogic, property = "assert always not(a)[*0:10];a")
+	@Requires(patternID = SessionInfo.PATTERN_ID, type = PropertyParadigmType.TemporalLogic, property = "assert always auth_fail[*3] & time_limit<3min @ (auth_fail)"/*
+																																										 * ,
+																																										 * exceptionWhenViolated
+																																										 * =
+																																										 * TooManyLoginAttemptsException
+																																										 * .
+																																										 * class
+																																										 */)
+	// @Requires(patternID = SessionInfo.PATTERN_ID, type =
+	// PropertyParadigmType.TemporalLogic, property = "assert always
+	// not(a)[*0:10];a")
 	// Another idea :
 	// event e1,e2,e3
 	// {
@@ -54,7 +59,8 @@ public interface CustomAuthenticationProvider extends AuthenticationProvider {
 	@RequestAuthentication(patternID = SessionInfo.PATTERN_ID)
 	int request(@AuthenticationInformation(patternID = SessionInfo.PATTERN_ID, paramID = USER_NAME) String userName);
 
-	abstract class CustomAuthenticationProviderImpl extends DaoAuthenticationProvider implements CustomAuthenticationProvider {
+	abstract class CustomAuthenticationProviderImpl extends DaoAuthenticationProvider
+			implements CustomAuthenticationProvider {
 
 		@Override
 		public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -62,7 +68,8 @@ public interface CustomAuthenticationProvider extends AuthenticationProvider {
 			try {
 				System.out.println("On utilise bien le CustomAuthenticationProvider pour " + authentication);
 				Thread.dumpStack();
-				UsernamePasswordAuthenticationToken returned = (UsernamePasswordAuthenticationToken) super.authenticate(authentication);
+				UsernamePasswordAuthenticationToken returned = (UsernamePasswordAuthenticationToken) super.authenticate(
+						authentication);
 				String name = authentication.getName();
 				String password = authentication.getCredentials().toString();
 				WebAuthenticationDetails details = (WebAuthenticationDetails) authentication.getDetails();
@@ -70,6 +77,17 @@ public interface CustomAuthenticationProvider extends AuthenticationProvider {
 				Authentication authenticationIP = authentication;
 				SessionInfo.getCurrentSessionInfo().setUserName(name);
 				SessionInfo.getCurrentSessionInfo().setIpAdress(userIp);
+				/*
+				 * //TODO the article says that their should be a call to authenticate() and
+				 * "checkSecure()" here ?
+				 * “We overwrite this method, line 11, with the management of the current
+				 * session information (from lines 13 to 25), and the authenticate() and
+				 * checkSecure() of the SessionInfo entity, lines 21 to 24, guarantees the use
+				 * of the security pattern to ensure contract properties.” ([Guérin et al.,
+				 * 2024, p. 108](zotero://select/groups/5473375/items/YDQCSL3Y))
+				 * ([pdf](zotero://open-pdf/groups/5473375/items/XGVYBYR5?page=6&annotation=
+				 * 33TZYISS))
+				 */
 				System.out.println("Current session info: " + SessionInfo.getCurrentSessionInfo());
 				return returned;
 			} catch (AuthenticationException e) {
@@ -81,41 +99,52 @@ public interface CustomAuthenticationProvider extends AuthenticationProvider {
 				throw new SessionAuthenticationException("Cannot open more than one session for a given user");
 			}
 
-			/*try {
-				System.out.println("On utilise bien le CustomAuthenticationProvider pour " + authentication);
-				Thread.dumpStack();
-			
-				String name = authentication.getName();
-				String password = authentication.getCredentials().toString();
-			
-				SessionInfo.getCurrentSessionInfo().setUserName(name);
-				System.out.println("Current session info: " + SessionInfo.getCurrentSessionInfo());
-			
-				if (shouldAuthenticateAgainstThirdPartySystem()) {
-			
-					// use the credentials
-					// and authenticate against the third-party system
-					return new UsernamePasswordAuthenticationToken(name, password, new ArrayList<>());
-				}
-				else {
-					return null;
-				}
-			} catch (ModelExecutionException e) {
-				e.printStackTrace();
-				System.out.println("Oulala ca craint");
-				// return null;
-				throw new SessionAuthenticationException("Cannot open more than one session for a given user");
-			}*/
+			/*
+			 * try {
+			 * System.out.println("On utilise bien le CustomAuthenticationProvider pour " +
+			 * authentication);
+			 * Thread.dumpStack();
+			 * 
+			 * String name = authentication.getName();
+			 * String password = authentication.getCredentials().toString();
+			 * 
+			 * SessionInfo.getCurrentSessionInfo().setUserName(name);
+			 * System.out.println("Current session info: " +
+			 * SessionInfo.getCurrentSessionInfo());
+			 * 
+			 * if (shouldAuthenticateAgainstThirdPartySystem()) {
+			 * 
+			 * // use the credentials
+			 * // and authenticate against the third-party system
+			 * return new UsernamePasswordAuthenticationToken(name, password, new
+			 * ArrayList<>());
+			 * }
+			 * else {
+			 * return null;
+			 * }
+			 * } catch (ModelExecutionException e) {
+			 * e.printStackTrace();
+			 * System.out.println("Oulala ca craint");
+			 * // return null;
+			 * throw new
+			 * SessionAuthenticationException("Cannot open more than one session for a given user"
+			 * );
+			 * }
+			 */
 		}
 
-		/*private boolean shouldAuthenticateAgainstThirdPartySystem() {
-			return true;
-		}*/
+		/*
+		 * private boolean shouldAuthenticateAgainstThirdPartySystem() {
+		 * return true;
+		 * }
+		 */
 
-		/*@Override
-		public boolean supports(Class<?> authentication) {
-			return authentication.equals(UsernamePasswordAuthenticationToken.class);
-		}*/
+		/*
+		 * @Override
+		 * public boolean supports(Class<?> authentication) {
+		 * return authentication.equals(UsernamePasswordAuthenticationToken.class);
+		 * }
+		 */
 
 		/*
 		 * @Override public int request(String id) { if (this.check(id)) { return

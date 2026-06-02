@@ -44,11 +44,11 @@ public abstract class MyContentsImpl implements MyContents {
 
 	private String something = null;
 
-	public static MyContents fromString(PamelaModelFactory MF, String someString) {
-
-		MyContents inst = MF.newInstance(MyContents.class);
-		inst.setValue(someString);
-		return inst;
+	public static MyContents getMyContentEntityFromString(PamelaModelFactory MF, String someString) {
+		//TODO why this method need a PamelaModelFactory ?
+		MyContents myContentEntity = MF.newInstance(MyContents.class);
+		myContentEntity.setValue(someString);
+		return myContentEntity;
 	}
 
 	@Override

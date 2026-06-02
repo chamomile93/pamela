@@ -41,6 +41,8 @@ package org.openflexo.pamela.factory;
 
 import java.lang.reflect.InvocationTargetException;
 
+// TODO this might not be a great place to put
+// TODO is access policy correctly defined ?
 public class ClipboardOperationException extends RuntimeException {
 
 	public ClipboardOperationException(String message) {

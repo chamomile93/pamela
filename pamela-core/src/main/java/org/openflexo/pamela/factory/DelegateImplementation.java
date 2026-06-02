@@ -64,6 +64,7 @@ import javassist.util.proxy.ProxyFactory;
  * 
  * @param <I>
  */
+// TODO this seems to be a utility class for ProxyMethodHandler
 public class DelegateImplementation<I> extends ProxyFactory implements MethodHandler {
 
 	private final I delegateObject;

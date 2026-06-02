@@ -1,8 +1,5 @@
 /**
  * 
- */
-/**
- * 
  * Copyright (c) 2013-2014, Openflexo
  * Copyright (c) 2012-2012, AgileBirds
  * 
@@ -52,7 +49,10 @@ import org.openflexo.pamela.model.StringConverterLibrary.Converter;
 
 import com.google.common.primitives.Primitives;
 
+//TODO idf about this, seems to be an utility class
+// TODO is the access policy correctly defined ?
 public class StringEncoder {
+	//TODO this might be look into more detail as it involves Converter concept as I am working on the Deserialization
 	private Map<Class<?>, Converter<?>> converters = new Hashtable<>();
 
 	private PamelaModelFactory pamelaModelFactory;
@@ -93,6 +93,7 @@ public class StringEncoder {
 		}
 		Converter<T> converter = converterForClass(type);
 		if (converter != null) {
+			//TODO this will return a null value since my IAuthenticatorConverter does not define a mapping
 			return converter.convertFromString(value, pamelaModelFactory);
 		}
 		else if (type.isEnum()) {

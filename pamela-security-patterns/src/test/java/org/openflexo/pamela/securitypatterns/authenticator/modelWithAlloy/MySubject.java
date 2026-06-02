@@ -1,4 +1,4 @@
-package org.openflexo.pamela.securitypatterns.authenticator.model2;
+package org.openflexo.pamela.securitypatterns.authenticator.modelWithAlloy;
 
 import org.openflexo.pamela.annotations.ModelEntity;
 import org.openflexo.pamela.securitypatterns.authenticator.annotations.AuthenticateMethod;

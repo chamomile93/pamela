@@ -12,12 +12,14 @@ import org.openflexo.connie.type.WildcardTypeImpl.DefaultWildcardType;
 import org.openflexo.pamela.converter.TypeConverter;
 
 public class TestTypeConverter extends AbstractPAMELATest {
+	// TODO I am looking at this class to probably get an understanding of how this
+	// concept of TypeConverter could be use to define a Converter for the
+	// IAuthenticator
 
 	private TypeConverter typeConverter;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-
 	}
 
 	@AfterClass
@@ -27,11 +29,14 @@ public class TestTypeConverter extends AbstractPAMELATest {
 	@Override
 	@Before
 	public void setUp() throws Exception {
+		// TODO what factories could be given if any ?
 		typeConverter = new TypeConverter(null);
 
-		/*new File("/tmp").mkdirs();
-		pamelaMetaModel = new PamelaMetaModel(FlexoProcess.class);
-		factory = new PamelaModelFactory(pamelaMetaModel);*/
+		/*
+		 * new File("/tmp").mkdirs();
+		 * pamelaMetaModel = new PamelaMetaModel(FlexoProcess.class);
+		 * factory = new PamelaModelFactory(pamelaMetaModel);
+		 */
 	}
 
 	@Override
@@ -39,38 +44,43 @@ public class TestTypeConverter extends AbstractPAMELATest {
 	public void tearDown() throws Exception {
 	}
 
-	public void test1() throws Exception {
+	public void testConvertStringClassFromFQNisStringClassSucceed() throws Exception {
 		assertEquals(String.class, typeConverter.convertFromString("java.lang.String", null));
 	}
 
-	public void test2() throws Exception {
+	public void testConvertListClassFromFQNisListClassSucceed() throws Exception {
 		assertEquals(List.class, typeConverter.convertFromString("java.util.List", null));
 	}
 
-	public void test3() throws Exception {
+	public void testConvertParameterizedClassFromFQNisListOfStringClassSucceed() throws Exception {
 		assertEquals(new ParameterizedTypeImpl(List.class, String.class),
 				typeConverter.convertFromString("java.util.List<java.lang.String>", null));
 	}
 
-	public void test4() throws Exception {
-		assertEquals(new ParameterizedTypeImpl(Map.class, String.class, new ParameterizedTypeImpl(Map.class, String.class, Object.class)),
-				typeConverter.convertFromString("java.util.Map<java.lang.String,java.util.Map<java.lang.String,java.lang.Object>>", null));
+	public void testConvertParameterizedClassFromFQNisParameterizedClassSucceed() throws Exception {
+		assertEquals(
+				new ParameterizedTypeImpl(Map.class, String.class,
+						new ParameterizedTypeImpl(Map.class, String.class, Object.class)),
+				typeConverter.convertFromString(
+						"java.util.Map<java.lang.String,java.util.Map<java.lang.String,java.lang.Object>>", null));
 	}
 
-	public void test5() throws Exception {
+	public void testConvertWildcardClassFromUpperBoundWildcardStringSucceed() throws Exception {
 		assertEquals(DefaultWildcardType.makeUpperBoundWilcard(Object.class),
 				typeConverter.convertFromString("? extends java.lang.Object", null));
 	}
 
-	public void test6() throws Exception {
+	public void testConvertDefaultWildcardClassFromWildcardStringSucceed() throws Exception {
 		assertEquals(new DefaultWildcardType(), typeConverter.convertFromString("?", null));
 	}
 
-	public void test7() throws Exception {
+	public void testConvertParameterizedClassWithWildcardTypeClassFromUpperBoundWildcardStringSucceed() throws Exception {
 		assertEquals(
 				new ParameterizedTypeImpl(Map.class, DefaultWildcardType.makeUpperBoundWilcard(Object.class),
-						DefaultWildcardType.makeUpperBoundWilcard(new ParameterizedTypeImpl(List.class, new DefaultWildcardType()))),
-				typeConverter.convertFromString("java.util.Map<? extends java.lang.Object, ? extends java.util.List<?>>", null));
+						DefaultWildcardType.makeUpperBoundWilcard(
+								new ParameterizedTypeImpl(List.class, new DefaultWildcardType()))),
+				typeConverter.convertFromString(
+						"java.util.Map<? extends java.lang.Object, ? extends java.util.List<?>>", null));
 	}
 
 }

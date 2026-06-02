@@ -73,7 +73,7 @@ import org.openflexo.pamela.exceptions.ModelDefinitionException;
 public class PamelaMetaModelLibrary {
 
 	private static final Map<Class<?>, PamelaMetaModel> metaModelsForClasses = new Hashtable<>();
-	private static final Map<Set<Class<?>>, PamelaMetaModel> metaModelsForClassSets = new Hashtable<>();//TODO idf why put the a set of class as a Key
+	private static final Map<Set<Class<?>>, PamelaMetaModel> metaModelsForClassSets = new Hashtable<>();//TODO idf why put a set of class as a Key
 
 	/**
 	 * Return (compute when not existant) a {@link PamelaMetaModel} from supplied base class a unique entry point
@@ -101,7 +101,6 @@ public class PamelaMetaModelLibrary {
 	static synchronized PamelaMetaModel retrieveMetaModel(Class<?> baseClass, boolean isFinalMetaModel) throws ModelDefinitionException {
 		PamelaMetaModel returned = metaModelsForClasses.get(baseClass);
 		if (returned == null) {
-			//TODO idf what the value of the baseClass in my testing case?
 			returned = new PamelaMetaModel(baseClass, isFinalMetaModel);
 			metaModelsForClasses.put(baseClass, returned);
 		}
@@ -133,7 +132,7 @@ public class PamelaMetaModelLibrary {
 
 		Set<Class<?>> set = new HashSet<>(classes);
 		PamelaMetaModel context = metaModelsForClassSets.get(set);
-		//TODO idf why
+		//TODO idf why, i still idf why store a set of classes in a map
 		if (context == null) {
 			metaModelsForClassSets.put(set, context = new PamelaMetaModel(classes));
 		}

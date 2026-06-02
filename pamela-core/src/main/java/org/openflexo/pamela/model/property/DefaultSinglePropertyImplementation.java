@@ -23,18 +23,27 @@ import javassist.util.proxy.ProxyObject;
  * @param <T>
  *            accessed type for the property
  */
+// TODO why this appear in the test of InitializePropertyTest when initializing a @Getter method with @Initialize ?
+//TODO might need to understand this, I came here while trying to understand the test of InitializePropertyTest. I am not familiar with this concept yet
 public class DefaultSinglePropertyImplementation<I, T> extends AbstractPropertyImplementation<I, T>
 		implements SinglePropertyImplementation<I, T> {
 
 	private T internalValue = null;
 	private T oldValue = null;
 
-	public DefaultSinglePropertyImplementation(ProxyMethodHandler<I> handler, ModelProperty<I> property) throws InvalidDataException {
+	public DefaultSinglePropertyImplementation(ProxyMethodHandler<I> handler, ModelProperty<I> property)
+			throws InvalidDataException {
 		super(handler, property);
 	}
 
 	protected void setInternalValue(T aValue) {
 		this.internalValue = aValue;
+	}
+
+	@Override
+	protected Object getDebugValue() {
+		//TODO this was added by copilot after a suggestion during a debug session
+		return internalValue;
 	}
 
 	@Override
@@ -55,12 +64,12 @@ public class DefaultSinglePropertyImplementation<I, T> extends AbstractPropertyI
 					if (st.hasMoreTokens()) {
 						if (!(value instanceof ProxyObject)) {
 							throw new ModelExecutionException("Cannot invoke " + st.nextToken() + " on object of type "
-									+ value.getClass().getName() + " (caused by returned value: " + returnedValue + ")");
+									+ value.getClass().getName() + " (caused by returned value: " + returnedValue
+									+ ")");
 						}
 						handler = (ProxyMethodHandler<?>) ((ProxyObject) value).getHandler();
 					}
-				}
-				else {
+				} else {
 					return null;
 				}
 			}
@@ -69,14 +78,15 @@ public class DefaultSinglePropertyImplementation<I, T> extends AbstractPropertyI
 		T returned = internalValue;
 		if (returned != null) {
 			return returned;
-		}
-		else {
+		} else {
 			T defaultValue;
 			try {
 				defaultValue = (T) getProperty().getDefaultValue(getModelFactory());
 			} catch (InvalidDataException e) {
-				throw new ModelExecutionException("Invalid default value '" + getProperty().getGetter().defaultValue() + "' for property "
-						+ getProperty() + " with type " + getProperty().getType(), e);
+				throw new ModelExecutionException(
+						"Invalid default value '" + getProperty().getGetter().defaultValue() + "' for property "
+								+ getProperty() + " with type " + getProperty().getType(),
+						e);
 			}
 			if (defaultValue != null) {
 				internalValue = defaultValue;
@@ -95,24 +105,31 @@ public class DefaultSinglePropertyImplementation<I, T> extends AbstractPropertyI
 
 	@Override
 	public void set(T aValue) throws ModelDefinitionException {
-		/*if ((aValue == null && get() != null) || (aValue != null && !aValue.equals(get()))) {
-			T oldValue = get();
-			this.internalValue = aValue;
-			if (this instanceof HasPropertyChangeSupport) {
-				((HasPropertyChangeSupport) this).getPropertyChangeSupport().firePropertyChange(getProperty().getPropertyIdentifier(),
-						oldValue, aValue);
-			}
-		}*/
+		/*
+		 * if ((aValue == null && get() != null) || (aValue != null &&
+		 * !aValue.equals(get()))) {
+		 * T oldValue = get();
+		 * this.internalValue = aValue;
+		 * if (this instanceof HasPropertyChangeSupport) {
+		 * ((HasPropertyChangeSupport)
+		 * this).getPropertyChangeSupport().firePropertyChange(getProperty().
+		 * getPropertyIdentifier(),
+		 * oldValue, aValue);
+		 * }
+		 * }
+		 */
 
 		if ((aValue != null && getHandler().getScheduledSets().get(getProperty()) == aValue)
 				|| (aValue == null && getHandler().getScheduledSets().get(getProperty()) == NULL_OBJECT)) {
-			// This set was already scheduled (we are entering in an infinite loop): break NOW
+			// This set was already scheduled (we are entering in an infinite loop): break
+			// NOW
 			return;
 		}
 
 		getHandler().getScheduledSets().remove(getProperty());
 
-		// System.out.println("Object " + getModelEntity().getImplementedInterface().getSimpleName() + " set "
+		// System.out.println("Object " +
+		// getModelEntity().getImplementedInterface().getSimpleName() + " set "
 		// + property.getPropertyIdentifier() + " with " + value);
 
 		if (getProperty().getSetter() == null && !getHandler().isDeserializing() && !getHandler().isInitializing()
@@ -134,20 +151,22 @@ public class DefaultSinglePropertyImplementation<I, T> extends AbstractPropertyI
 				ProxyMethodHandler<Object> oppositeHandler = getModelFactory().getHandler(oldValue);
 				if (oppositeHandler == null) {
 					// Should not happen
-					throw new ModelExecutionException("Opposite entity of " + getProperty() + " is of type " + oldValue.getClass().getName()
-							+ " is not a ModelEntity.");
+					throw new ModelExecutionException(
+							"Opposite entity of " + getProperty() + " is of type " + oldValue.getClass().getName()
+									+ " is not a ModelEntity.");
 				}
-				ModelProperty<? super Object> inverseProperty = getProperty().getInverseProperty(oppositeHandler.getModelEntity());
+				ModelProperty<? super Object> inverseProperty = getProperty()
+						.getInverseProperty(oppositeHandler.getModelEntity());
 				switch (inverseProperty.getCardinality()) {
 					case SINGLE:
 						Object oppositeOldValue = oppositeHandler.invokeGetter(inverseProperty);
 						if (oppositeOldValue != null) {
-							// System.out.println("Object " + inverseProperty.getModelEntity().getImplementedInterface().getSimpleName() +
+							// System.out.println("Object " +
+							// inverseProperty.getModelEntity().getImplementedInterface().getSimpleName() +
 							// " set "
 							// + inverseProperty.getPropertyIdentifier() + " with " + null);
 							oppositeHandler.invokeSetter(inverseProperty, null);
-						}
-						else {
+						} else {
 							// No need to reset inverse setter, as it is already set to null
 						}
 						break;
@@ -156,8 +175,7 @@ public class DefaultSinglePropertyImplementation<I, T> extends AbstractPropertyI
 						List<Object> oppositeListValue = (List<Object>) oppositeHandler.invokeGetter(inverseProperty);
 						if (oppositeListValue.contains(getObject())) {
 							oppositeHandler.invokeRemover(inverseProperty, getObject());
-						}
-						else {
+						} else {
 							// No need to remove objet from opposite property object was not inside
 						}
 						break;
@@ -167,12 +185,14 @@ public class DefaultSinglePropertyImplementation<I, T> extends AbstractPropertyI
 			}
 
 			// Now do the job, internally
-			/*if (value == null) {
-				values.remove(getProperty().getPropertyIdentifier());
-			}
-			else {
-				values.put(getProperty().getPropertyIdentifier(), value);
-			}*/
+			/*
+			 * if (value == null) {
+			 * values.remove(getProperty().getPropertyIdentifier());
+			 * }
+			 * else {
+			 * values.put(getProperty().getPropertyIdentifier(), value);
+			 * }
+			 */
 
 			internalValue = aValue;
 
@@ -186,7 +206,8 @@ public class DefaultSinglePropertyImplementation<I, T> extends AbstractPropertyI
 							.removePropertyChangeListener(ProxyMethodHandler.MODIFIED, getHandler());
 				}
 				if (aValue instanceof HasPropertyChangeSupport) {
-					((HasPropertyChangeSupport) aValue).getPropertyChangeSupport().addPropertyChangeListener(ProxyMethodHandler.MODIFIED,
+					((HasPropertyChangeSupport) aValue).getPropertyChangeSupport().addPropertyChangeListener(
+							ProxyMethodHandler.MODIFIED,
 							getHandler());
 				}
 			}
@@ -195,20 +216,22 @@ public class DefaultSinglePropertyImplementation<I, T> extends AbstractPropertyI
 				ProxyMethodHandler<Object> oppositeHandler = getModelFactory().getHandler(aValue);
 				if (oppositeHandler == null) {
 					// Should not happen
-					throw new ModelExecutionException("Opposite entity of " + getProperty() + " is of type " + aValue.getClass().getName()
-							+ " is not a ModelEntity.");
+					throw new ModelExecutionException(
+							"Opposite entity of " + getProperty() + " is of type " + aValue.getClass().getName()
+									+ " is not a ModelEntity.");
 				}
-				ModelProperty<? super Object> inverseProperty = getProperty().getInverseProperty(oppositeHandler.getModelEntity());
+				ModelProperty<? super Object> inverseProperty = getProperty()
+						.getInverseProperty(oppositeHandler.getModelEntity());
 				switch (inverseProperty.getCardinality()) {
 					case SINGLE:
 						Object oppositeOldValue = oppositeHandler.invokeGetter(inverseProperty);
 						if (oppositeOldValue != getObject()) {
-							// System.out.println("Object " + inverseProperty.getModelEntity().getImplementedInterface().getSimpleName() +
+							// System.out.println("Object " +
+							// inverseProperty.getModelEntity().getImplementedInterface().getSimpleName() +
 							// " set "
 							// + inverseProperty.getPropertyIdentifier() + " with " + getObject());
 							oppositeHandler.invokeSetter(inverseProperty, getObject());
-						}
-						else {
+						} else {
 							// No need to set inverse property, because this is already right value
 						}
 						break;
@@ -217,8 +240,7 @@ public class DefaultSinglePropertyImplementation<I, T> extends AbstractPropertyI
 						List<Object> oppositeListValue = (List<Object>) oppositeHandler.invokeGetter(inverseProperty);
 						if (!oppositeListValue.contains(getObject())) {
 							oppositeHandler.invokeAdder(inverseProperty, getObject());
-						}
-						else {
+						} else {
 							// No need to add object to inverse property, because this is already inside
 						}
 						break;
@@ -249,8 +271,7 @@ public class DefaultSinglePropertyImplementation<I, T> extends AbstractPropertyI
 		// Otherwise nullify using setter
 		if (getProperty().getSetterMethod() != null) {
 			getHandler().invokeSetter(getProperty(), null);
-		}
-		else {
+		} else {
 			getHandler().internallyInvokeSetter(getProperty(), null, true);
 		}
 
@@ -267,8 +288,7 @@ public class DefaultSinglePropertyImplementation<I, T> extends AbstractPropertyI
 		// Otherwise nullify using setter
 		if (getProperty().getSetterMethod() != null) {
 			getHandler().invokeSetter(getProperty(), oldValue);
-		}
-		else {
+		} else {
 			getHandler().internallyInvokeSetter(getProperty(), oldValue, true);
 		}
 	}

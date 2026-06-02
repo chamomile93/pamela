@@ -16,6 +16,9 @@ import org.openflexo.pamela.model.ModelEntity;
  * @author xtof
  * 
  */
+// TODO I don't understand why this test exists alone.
+// TODO Why there's a need for more than one overriden method for this test ?
+// TODO why introduce another method "setContentURI"?
 public class PamelaCoreTests4 {
 
 	/**
@@ -23,13 +26,16 @@ public class PamelaCoreTests4 {
 	 */
 	@Test
 	public void testFactory() {
-		//TODO what other test could be done on the factory ?
-		// testing nonnull reference is kind of lowentry
+		// TODO what other test could be done on the factory ?
+		// testing nonnull reference is kind of simple
 		try {
-			PamelaModelFactory factory = new PamelaModelFactory(PamelaMetaModelLibrary.retrieveMetaModel(MyContainer.class, MyContents.class));
+			PamelaModelFactory myContainerContentsfactory = new PamelaModelFactory(
+					PamelaMetaModelLibrary.retrieveMetaModel(MyContainer.class, MyContents.class));
 
-			ModelEntity<MyContainer> myContainerEntity = factory.getPamelaMetaModel().getModelEntity(MyContainer.class);
-			ModelEntity<MyContents> myContentsEntity = factory.getPamelaMetaModel().getModelEntity(MyContents.class);
+			ModelEntity<MyContainer> myContainerEntity = myContainerContentsfactory.getPamelaMetaModel()
+					.getModelEntity(MyContainer.class);
+			ModelEntity<MyContents> myContentsEntity = myContainerContentsfactory.getPamelaMetaModel()
+					.getModelEntity(MyContents.class);
 
 			assertNotNull(myContainerEntity);
 			assertNotNull(myContentsEntity);
@@ -46,12 +52,13 @@ public class PamelaCoreTests4 {
 	@Test
 	public void testInstanciate() throws Exception {
 
-		PamelaModelFactory factory = new PamelaModelFactory(PamelaMetaModelLibrary.retrieveMetaModel(MyContainer.class, MyContents.class));
+		PamelaModelFactory myContainerContentsfactory = new PamelaModelFactory(
+				PamelaMetaModelLibrary.retrieveMetaModel(MyContainer.class, MyContents.class));
 
-		MyContainer container1 = factory.newInstance(MyContainer.class);
-		MyContainer container2 = factory.newInstance(MyContainer.class);
-		((MyContainerImpl) container1).setFactory(factory);
-		((MyContainerImpl) container2).setFactory(factory);
+		MyContainer container1 = myContainerContentsfactory.newInstance(MyContainer.class);
+		MyContainer container2 = myContainerContentsfactory.newInstance(MyContainer.class);
+		((MyContainerImpl) container1).setFactory(myContainerContentsfactory);
+		((MyContainerImpl) container2).setFactory(myContainerContentsfactory);
 
 		try {
 			container1.setContents("Bonjour");
@@ -67,7 +74,9 @@ public class PamelaCoreTests4 {
 			fail(e.getMessage());
 		}
 
+		// TODO is the following comment still relevant ?
 		// TODO : this should be assertTrue!!
+
 		assertTrue(container1.getContents().equals("A demain"));
 
 		assertTrue(container2.getContents().equals("Je suis méchant"));

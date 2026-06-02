@@ -50,6 +50,8 @@ public interface AContainer {
 
 	@Getter(CONTAINED) @Initialize
 	AContained getContained();
+	//TODO I suppose that @Getter is doing some kind of association with the string "contained" and the method name "getContained" ?
+	// I am suppose to understand that @Initialize is "calling the constructor" of the AContained class when getContained is called for the first time ?
 
 	@Setter(CONTAINED)
 	void setContained(AContained value);

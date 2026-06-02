@@ -49,6 +49,8 @@ import org.openflexo.pamela.undo.UndoManager;
  * @author sylvain
  * 
  */
+//TODO why do we need this concept ?
+//TODO is this the correct package ? somewhere else would be better suited ?
 public interface EditingContext {
 
 	/**

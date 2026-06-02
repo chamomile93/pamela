@@ -53,6 +53,7 @@ import java.lang.annotation.Target;
  * @author sylvain
  *
  */
+//TODO might need to understand this, I came here while trying to understand the test of InitializePropertyTest. I am not familiar with this concept yet
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Target(value = ElementType.METHOD)

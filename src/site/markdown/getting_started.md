@@ -26,7 +26,7 @@ You just need to bring Pamela artifacts in your environment.
 
 #### 1.1. Use PAMELA with gradle
 
-It's easy to use it from Gradle. 
+It's easy to use it from Gradle.
 
 In order to use Pamela in your gradle project, add the repository adding the following in the `build.gradle`:
 
@@ -56,7 +56,7 @@ or to use a SNAPSHOT version (Java 11 or later required):
 implementation group: 'org.openflexo', name: 'pamela-core', version: '1.6.1-SNAPSHOT'
 ```
 
-**Important notice : **
+**Important notice :**
 Note that Java 8 (1.8) is required for 1.5 last stable version but Java 11 is required from 1.6.1 version.
 
 #### 1.2. Use PAMELA with Maven
@@ -105,7 +105,7 @@ or to use a SNAPSHOT version (Java 11 or later required)
 </dependency>
 ```
 
-**Important notice : **
+**Important notice :**
 Note that Java 8 (1.8) is required for 1.5 last stable version but Java 11 is required from 1.6.1 version.
 
 #### 1.3. Test PAMELA by building your first model
@@ -118,13 +118,13 @@ Look at the examples (download links) at the end of this webpage, and run exampl
 
 For each example, we can do :
 
-```
+```sh
 gradle test
 ```
 
 and
 
-```
+```sh
 gradle run
 ```
 
@@ -139,7 +139,7 @@ Here are the different versions:
 
 Advanced users : do that only if you want to download PAMELA sources, review the code, run the tests, define your own annotations, implementations, and/or contribute to the project.
 
-**Prerequisite**
+**Prerequisite** :
 
 - [Maven](https://maven.apache.org/) or [Gradle](https://gradle.org)
 - Using an IDE (such as Eclise or IntelliJ) is recommended and might help
@@ -148,18 +148,18 @@ Advanced users : do that only if you want to download PAMELA sources, review the
 
 In order to get the most up to date code you can clone and build Pamela yourself.
 
-**Prerequisite**
+**Prerequisite** :
 
 - [git](https://git-scm.com).
 - [Java](http://www.oracle.com/technetwork/java/index.html) JDK 8
 
-**Checkout sources**
+**Checkout sources** :
 
 PAMELA framework is hosted on github: [https://github.com/openflexo-team/pamela](https://github.com/openflexo-team/pamela).
 
 Clone PAMELA in your environment:
 
-```
+```sh
 git clone git@github.com:openflexo-team/pamela.git
 ```
 
@@ -168,10 +168,12 @@ git clone git@github.com:openflexo-team/pamela.git
 Unit tests located in src/test/java in pamela-core are a good starting point to discover the framework (run the tests and analyse the test source code).
 
 All tests are sorted and labelled with an explicit name which help to know which feature is beeing tested.
+<!-- TODO this doesn't hold -->
 
 For example the package ``org.openflexo.pamela.test.jml`` contains unit tests for JML features. ``BankAccount.java`` is the class containing business code to be tested while ``JMLTests.java`` contains the tests themselves. It is really interesting to read and understand both classes to have a good overview and understanding for JML feature.
 
 The package ``org.openflexo.pamela.test.test1`` contains basic unit tests for core features.
+<!-- TODO this is a counterexample of the assertion above -->
 
 #### 2.3 Discover PAMELA main features
 
@@ -193,7 +195,5 @@ The package ``org.openflexo.pamela.test.test1`` contains basic unit tests for co
 
 #### 2.4 Reference documentation
 
-The javadoc for Pamela can be found .
-
-   
-  
+The javadoc for Pamela can be found.
+<!-- TODO idf where ? -->

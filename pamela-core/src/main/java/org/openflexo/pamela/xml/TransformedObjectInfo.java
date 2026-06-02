@@ -52,6 +52,7 @@ import org.xml.sax.SAXException;
  * @author christophe
  */
 public class TransformedObjectInfo {
+	//TODO might need to remember this as I came here while working on DeserializationTests case for AuthenticatorPattern
 
 	private static final Object[] EMPTY_ARGS = new Object[0];
 
@@ -63,6 +64,8 @@ public class TransformedObjectInfo {
 	private final Class<Object> implementedInterface;
 
 	private boolean resolved = false;
+	//TODO this is supposed to be a reference to deserialized file
+	//TODO idf why have a null reference in the DeserializationTest Authenticator Pattern case which should succeed
 	private Object object;
 
 	public TransformedObjectInfo(PamelaModelFactory factory, Object parent, ModelProperty<Object> leadingProperty,
@@ -76,6 +79,7 @@ public class TransformedObjectInfo {
 		}
 		else {
 			this.implementedInterface = (Class<Object>) leadingProperty.getType();
+			//TODO idf why we even have  "java.lang.String" as the implementedInterface of the string "Bob", which I don't know if this should return null or not
 			this.modelEntity = factory.getPamelaMetaModel().getModelEntity(implementedInterface);
 		}
 	}

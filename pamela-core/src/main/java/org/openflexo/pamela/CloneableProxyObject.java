@@ -48,6 +48,7 @@ import org.openflexo.pamela.factory.ProxyMethodHandler;
  * @author sylvain
  * 
  */
+//TODO not sure to follow why I have to add this to support serizalization
 public interface CloneableProxyObject {
 
 	/**

@@ -58,6 +58,8 @@ import org.openflexo.toolbox.HasPropertyChangeSupport;
  * @author sylvain
  *
  */
+
+//TODO could I find a better place to put this "interface"
 public class IProxyMethodHandler {
 	//TODO idf the comment says "interface but the "Java" type is "class", should I change the type to reflect this ? this is probably a breaking change. I need to try. And it seems to act as an "interface"
 
@@ -130,6 +132,9 @@ public class IProxyMethodHandler {
 			PERFORM_SUPER_UNDELETER = DeletableProxyObject.class.getMethod("performSuperUndelete", Boolean.TYPE);
 			PERFORM_SUPER_FINDER = AccessibleProxyObject.class.getMethod("performSuperFinder", String.class, Object.class);
 			PERFORM_SUPER_INITIALIZER = AccessibleProxyObject.class.getMethod("performSuperInitializer", Object[].class);
+			
+			//TODO idf why is there a version suffix with "ENTITY" having a third args with value "Object.class" or "Class.class" or Array.newInstanceee(...)
+
 			PERFORM_SUPER_GETTER_ENTITY = AccessibleProxyObject.class.getMethod("performSuperGetter", String.class, Class.class);
 			PERFORM_SUPER_SETTER_ENTITY = AccessibleProxyObject.class.getMethod("performSuperSetter", String.class, Object.class,
 					Class.class);
@@ -141,9 +146,12 @@ public class IProxyMethodHandler {
 					Array.newInstance(Object.class, 0).getClass());
 			PERFORM_SUPER_FINDER_ENTITY = AccessibleProxyObject.class.getMethod("performSuperFinder", String.class, Object.class,
 					Class.class);
+
 			IS_SERIALIZING = AccessibleProxyObject.class.getMethod("isSerializing");
 			IS_DESERIALIZING = AccessibleProxyObject.class.getMethod("isDeserializing");
-			//TODO why
+			
+			//TODO why do we have any of the field below ?
+
 			IS_MODIFIED = AccessibleProxyObject.class.getMethod("isModified");
 			IS_DELETED = DeletableProxyObject.class.getMethod("isDeleted");
 			SET_MODIFIED = AccessibleProxyObject.class.getMethod("setModified", boolean.class);
@@ -173,6 +181,9 @@ public class IProxyMethodHandler {
 			GET_TYPE_FOR_KEY = KeyValueCoding.class.getMethod("getTypeForKey", String.class);
 			ENABLE_ASSERTION_CHECKING = SpecifiableProxyObject.class.getMethod("enableAssertionChecking");
 			DISABLE_ASSERTION_CHECKING = SpecifiableProxyObject.class.getMethod("disableAssertionChecking");
+
+			//TODO I added this to support my usecase maybe do something else ?
+
 			REGISTER_RUNTIME_METHOD = AccessibleProxyObject.class.getMethod("registerRuntimeMethod", String.class,
 					org.openflexo.pamela.RuntimeMethod.class);
 			HAS_RUNTIME_METHOD = AccessibleProxyObject.class.getMethod("hasRuntimeMethod", String.class);

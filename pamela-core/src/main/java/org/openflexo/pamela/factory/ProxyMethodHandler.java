@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.IdentityHashMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -133,7 +134,8 @@ import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyObject;
 
 /**
- * Invocation handler in the core of PAMELA: main class for PAMELA interpreter<br>
+ * Invocation handler in the core of PAMELA: main class for PAMELA
+ * interpreter<br>
  *
  * This is the class where method call dispatching is performed.
  *
@@ -151,7 +153,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 
 	/**
 	 * This map contains all scheduled set for a given property<br>
-	 * We need to retain values beeing set in case of bidirectional inverse properties patterns, to avoid infinite loop
+	 * We need to retain values beeing set in case of bidirectional inverse
+	 * properties patterns, to avoid infinite loop
 	 */
 	private final Map<ModelProperty<? super I>, Object> scheduledSets = new HashMap<>();
 
@@ -179,7 +182,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 	private Stack<Method> assertionCheckingStack = new Stack<>();
 	private Map<Method, Map<String, Object>> historyValues;
 
-	public ProxyMethodHandler(PAMELAProxyFactory<I> pamelaProxyFactory, EditingContext editingContext) throws ModelDefinitionException {
+	public ProxyMethodHandler(PAMELAProxyFactory<I> pamelaProxyFactory, EditingContext editingContext)
+			throws ModelDefinitionException {
 		this.pamelaProxyFactory = pamelaProxyFactory;
 		this.editingContext = editingContext;
 		// values = new HashMap<>(getModelEntity().getPropertiesSize(), 1.0f);
@@ -197,15 +201,17 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 
 	private void initDelegateImplementations(ModelEntity<? super I> entity) throws ModelDefinitionException {
 		if (entity.getDelegateImplementations().size() > 0) {
-			// System.out.println("***** init delegate implementations for " + entity.getImplementedInterface());
+			// System.out.println("***** init delegate implementations for " +
+			// entity.getImplementedInterface());
 			for (Class<? super I> delegateImplementationClass : entity.getDelegateImplementations().keySet()) {
 				try {
-					DelegateImplementation<? super I> delegateImplementation = new DelegateImplementation(this, delegateImplementationClass,
+					DelegateImplementation<? super I> delegateImplementation = new DelegateImplementation(this,
+							delegateImplementationClass,
 							entity.getDelegateImplementations().get(delegateImplementationClass));
 					delegateImplementations.add(delegateImplementation);
 				} catch (Exception e) {
 					e.printStackTrace();
-					throw new ModelDefinitionException(e.getMessage());
+					throw new ModelDefinitionException(e.getMessage()); //TODO improve the exception message why is this happening ?
 				}
 			}
 		}
@@ -278,8 +284,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 
 	@Override
 	public Object invoke(Object self, Method method, Method proceed, Object[] args) throws Throwable {
-		//TODO it's marked override, but override what ? the JVM default invoke ?
-		//TODO do I need to understand this ?
+		// TODO it's marked override, but override what ? the JVM default invoke ?
+		// TODO do I need to understand this ?
 		if (PamelaUtils.methodIsEquivalentTo(method, IProxyMethodHandler.REGISTER_RUNTIME_METHOD)) {
 			registerRuntimeMethod((String) args[0], (RuntimeMethod) args[1]);
 			return null;
@@ -288,7 +294,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 			return hasRuntimeMethod((String) args[0]);
 		}
 		if (PamelaUtils.methodIsEquivalentTo(method, IProxyMethodHandler.INVOKE_RUNTIME_METHOD)) {
-			return invokeRuntimeMethod((String) args[0], args != null && args.length > 1 ? (Object[]) args[1] : new Object[0]);
+			return invokeRuntimeMethod((String) args[0],
+					args != null && args.length > 1 ? (Object[]) args[1] : new Object[0]);
 		}
 
 		// :TODO review the args in above code
@@ -311,19 +318,21 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 				// :TODO: Perf issue : implement a cache here
 				List<Requires> preconditions = patternInstance.getPatternDefinition().getPreconditions(method);
 				if (preconditions != null) {
-					System.out.println("Invoking preconditions for " + method + " in pattern instance : " + patternInstance);
+					System.out.println(
+							"Invoking preconditions for " + method + " in pattern instance : " + patternInstance);
 					for (Requires precondition : preconditions) {
 						try {
 							patternInstance.invokePrecondition(precondition, method);
 						} catch (PropertyViolationException e) {
 							if (!precondition.exceptionWhenViolated().equals(PreconditionViolationException.class)) {
 								// A specific exception should be thrown
-								Constructor<? extends Exception> c = precondition.exceptionWhenViolated().getConstructor(String.class,
-										Throwable.class);
-								Exception thrownException = c.newInstance("Violated property " + precondition.property(), e);
+								Constructor<? extends Exception> c = precondition.exceptionWhenViolated()
+										.getConstructor(String.class,
+												Throwable.class);
+								Exception thrownException = c
+										.newInstance("Violated property " + precondition.property(), e);
 								throw thrownException;
-							}
-							else {
+							} else {
 								throw e;
 							}
 						}
@@ -345,17 +354,29 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 			}
 		}
 
-		/*ArrayList<PatternClassWrapper> patternsOfInterest = patternContext.getRelatedPatternsFromInstance(self);
-		for (PatternClassWrapper wrapper : patternsOfInterest) {
-			ReturnWrapper returnWrapper = wrapper.getPattern().processMethodBeforeInvoke(self, method, wrapper.getKlass(), args);
-			if (!returnWrapper.mustContinue()) {
-				keepGoing = false;
-				invoke = returnWrapper.getReturnValue();
-			}
-		}*/
+		/*
+		 * ArrayList<PatternClassWrapper> patternsOfInterest =
+		 * patternContext.getRelatedPatternsFromInstance(self);
+		 * for (PatternClassWrapper wrapper : patternsOfInterest) {
+		 * ReturnWrapper returnWrapper =
+		 * wrapper.getPattern().processMethodBeforeInvoke(self, method,
+		 * wrapper.getKlass(), args);
+		 * if (!returnWrapper.mustContinue()) {
+		 * keepGoing = false;
+		 * invoke = returnWrapper.getReturnValue();
+		 * }
+		 * }
+		 */
 
 		if (keepGoing) {
-			invoke = _invoke(self, method, proceed, args); //TODO idf why we get here, in the trace that makes the SerializationTest fails
+			invoke = _invoke(self, method, proceed, args);
+			// TODO this seems to be important ? I suppose when using a ModelEntity
+			// interface, this method will run a number of checks to find the right
+			// implementation of the method, and then invoke it. I was motivated by the
+			// InitializePropertyTest case
+			// in this case "proceed" is null, and idf why
+			// TODO idf why we get here, in the trace that makes the SerializationTest
+			// fails
 			if (method.getReturnType().isPrimitive() && invoke == null) {
 				// Avoids an NPE
 				invoke = Defaults.defaultValue(method.getReturnType());
@@ -376,19 +397,21 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 				// TODO: Perf issue : implement a cache here
 				List<Ensures> postconditions = patternInstance.getPatternDefinition().getPostconditions(method);
 				if (postconditions != null) {
-					System.out.println("Invoking postconditions for " + method + " in pattern instance : " + patternInstance);
+					System.out.println(
+							"Invoking postconditions for " + method + " in pattern instance : " + patternInstance);
 					for (Ensures postcondition : postconditions) {
 						try {
 							patternInstance.invokePostcondition(postcondition, method);
 						} catch (PropertyViolationException e) {
 							if (!postcondition.exceptionWhenViolated().equals(PostconditionViolationException.class)) {
 								// A specific exception should be thrown
-								Constructor<? extends Exception> c = postcondition.exceptionWhenViolated().getConstructor(String.class,
-										Throwable.class);
-								Exception thrownException = c.newInstance("Violated property " + postcondition.property(), e);
+								Constructor<? extends Exception> c = postcondition.exceptionWhenViolated()
+										.getConstructor(String.class,
+												Throwable.class);
+								Exception thrownException = c
+										.newInstance("Violated property " + postcondition.property(), e);
 								throw thrownException;
-							}
-							else {
+							} else {
 								throw e;
 							}
 						}
@@ -401,9 +424,12 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 			monitor.leavingMethod(self, method, args, invoke);
 		}
 
-		/*for (PatternClassWrapper wrapper : patternsOfInterest) {
-			wrapper.getPattern().processMethodAfterInvoke(self, method, wrapper.getKlass(), invoke, args);
-		}*/
+		/*
+		 * for (PatternClassWrapper wrapper : patternsOfInterest) {
+		 * wrapper.getPattern().processMethodAfterInvoke(self, method,
+		 * wrapper.getKlass(), invoke, args);
+		 * }
+		 */
 
 		if (enableAssertionChecking && assertionChecking) {
 			checkOnExit(method, args);
@@ -413,15 +439,19 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 	}
 
 	private Object _invoke(Object self, Method method, Method proceed, Object[] args) throws Throwable {
-		//TODO why is this "underscored" ? the naming convention seems unusual
+		// TODO why is this "underscored" ? the naming convention seems unusual
+		// TODO maybe to "enforce" it's 'private' nature
 
 		// System.out.println("_invoke " + method);
 
-		// First, we iterate on all delegate implementations to look for eventual partial implementation (in this case, prioritar)
+		// TODO Idf this yet
+		// First, we iterate on all delegate implementations to look for eventual
+		// partial implementation (in this case, prioritar)
 		for (DelegateImplementation<? super I> delegateImplementation : delegateImplementations) {
 			if (delegateImplementation.handleMethod(method)) {
 				// This delegate provides an implementation of that method, use it
-				// System.out.println("Delegating implementation of method=" + method + " to delegate "
+				// System.out.println("Delegating implementation of method=" + method + " to
+				// delegate "
 				// + delegateImplementation.getDelegateImplementationClass());
 				return delegateImplementation.invoke(self, method, proceed, args);
 			}
@@ -434,13 +464,15 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 				if (PamelaUtils.methodIsEquivalentTo(method, property.getSetterMethod())
 						|| PamelaUtils.methodIsEquivalentTo(method, property.getUpdaterMethod())) {
 					// We have found a concrete implementation of that method as a setter call
-					// We will invoke it, but also notify UndoManager, and call setModified() after setter invoking
+					// We will invoke it, but also notify UndoManager, and call setModified() after
+					// setter invoking
 					// System.out.println("DETECTS SET with " + proceed + " instead of " + method);
 					Object oldValue = invokeGetter(property);
 					if (getUndoManager() != null) {
 						if (oldValue != args[0]) {
 							getUndoManager().addEdit(
-									new SetCommand<>(getObject(), getModelEntity(), property, oldValue, args[0], getModelFactory()));
+									new SetCommand<>(getObject(), getModelEntity(), property, oldValue, args[0],
+											getModelFactory()));
 						}
 					}
 					if (property.isSerializable()) {
@@ -449,10 +481,12 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 				}
 				if (PamelaUtils.methodIsEquivalentTo(method, property.getAdderMethod())) {
 					// We have found a concrete implementation of that method as a adder call
-					// We will invoke it, but also notify UndoManager, and call setModified() after adder invoking
+					// We will invoke it, but also notify UndoManager, and call setModified() after
+					// adder invoking
 					// System.out.println("DETECTS ADD with " + proceed + " instead of " + method);
 					if (getUndoManager() != null) {
-						getUndoManager().addEdit(new AddCommand<>(getObject(), getModelEntity(), property, args[0], getModelFactory()));
+						getUndoManager().addEdit(
+								new AddCommand<>(getObject(), getModelEntity(), property, args[0], getModelFactory()));
 					}
 					if (property.isSerializable()) {
 						callSetModifiedAtTheEnd = true;
@@ -460,10 +494,13 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 				}
 				if (PamelaUtils.methodIsEquivalentTo(method, property.getRemoverMethod())) {
 					// We have found a concrete implementation of that method as a remover call
-					// We will invoke it, but also notify UndoManager, and call setModified() after remover invoking
-					// System.out.println("DETECTS REMOVE with " + proceed + " instead of " + method);
+					// We will invoke it, but also notify UndoManager, and call setModified() after
+					// remover invoking
+					// System.out.println("DETECTS REMOVE with " + proceed + " instead of " +
+					// method);
 					if (getUndoManager() != null) {
-						getUndoManager().addEdit(new RemoveCommand<>(getObject(), getModelEntity(), property, args[0], getModelFactory()));
+						getUndoManager().addEdit(new RemoveCommand<>(getObject(), getModelEntity(), property, args[0],
+								getModelFactory()));
 					}
 					if (property.isSerializable()) {
 						callSetModifiedAtTheEnd = true;
@@ -473,7 +510,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 			try {
 				// Now we invoke the found concrete implementation
 				Object returned = proceed.invoke(self, args);
-				//TODO idf why this raises an exception while debugging the SerializationTest case setup of process.init()
+				// TODO idf why this raises an exception while debugging the SerializationTest
+				// case setup of process.init()
 				// Then we call setModified() if required
 				if (callSetModifiedAtTheEnd) {
 					invokeSetModified(true);
@@ -484,7 +522,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 				// There are two cases here:
 				// - this exception was expected (part of business model)
 				// - this exception is really unexpected
-				// To see it, we iterate on all exceptions that are declared as throwable, and throw target exception when matching
+				// To see it, we iterate on all exceptions that are declared as throwable, and
+				// throw target exception when matching
 				for (Class<?> exceptionType : proceed.getExceptionTypes()) {
 					if (exceptionType.isAssignableFrom(e.getTargetException().getClass())) {
 						throw e.getTargetException();
@@ -495,7 +534,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 					throw e.getTargetException();
 				}
 				// If we come here, this means that this exception was unexpected
-				// In this case, we wrap this exception in a ModelExecutionException and we throw it
+				// In this case, we wrap this exception in a ModelExecutionException and we
+				// throw it
 				e.printStackTrace();
 				throw new ModelExecutionException(e.getCause());
 			}
@@ -503,11 +543,14 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		// System.out.println("Invoke " + method);
 		Initializer initializer = method.getAnnotation(Initializer.class);
 		if (initializer != null) {
-			internallyInvokeInitializer(getModelEntity().getInitializers(method), args);//TODO idf why we get here from "process.init" in SerializationTest setUp
+			internallyInvokeInitializer(getModelEntity().getInitializers(method), args);// TODO idf why we get here from
+																						// "process.init" in
+																						// SerializationTest setUp
 			return self;
 		}
 		if (!initialized && !initializing) {
 			throw new UnitializedEntityException(getModelEntity());
+			// TODO idf why serialization raise this
 		}
 		Getter getter = method.getAnnotation(Getter.class);
 		if (getter != null) {
@@ -558,200 +601,160 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 
 		if (PamelaUtils.methodIsEquivalentTo(method, GET_PROPERTY_CHANGE_SUPPORT)) {
 			return getPropertyChangeSuppport();
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_GETTER)) {
-			return internallyInvokeGetter((String) args[0] /*getModelEntity().getModelProperty((String) args[0])*/);
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_SETTER)) {
-			internallyInvokeSetter((String) args[0] /*getModelEntity().getModelProperty((String) args[0])*/, args[1], false);
+		} else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_GETTER)) {
+			return internallyInvokeGetter((String) args[0] /* getModelEntity().getModelProperty((String) args[0]) */);
+		} else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_SETTER)) {
+			internallyInvokeSetter((String) args[0] /* getModelEntity().getModelProperty((String) args[0]) */, args[1],
+					false);
 			return null;
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_ADDER)) {
-			internallyInvokeAdder((String) args[0] /*getModelEntity().getModelProperty((String) args[0])*/, args[1], false);
+		} else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_ADDER)) {
+			internallyInvokeAdder((String) args[0] /* getModelEntity().getModelProperty((String) args[0]) */, args[1],
+					false);
 			return null;
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_ADDER_AT_INDEX)) {
-			internallyInvokeAdder((String) args[0] /*getModelEntity().getModelProperty((String) args[0])*/, args[1], (int) args[2], false);
+		} else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_ADDER_AT_INDEX)) {
+			internallyInvokeAdder((String) args[0] /* getModelEntity().getModelProperty((String) args[0]) */, args[1],
+					(int) args[2], false);
 			return null;
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_REMOVER)) {
-			internallyInvokeRemover((String) args[0] /*getModelEntity().getModelProperty((String) args[0])*/, args[1], false);
+		} else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_REMOVER)) {
+			internallyInvokeRemover((String) args[0] /* getModelEntity().getModelProperty((String) args[0]) */, args[1],
+					false);
 			return null;
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_FINDER)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_FINDER)) {
 			internallyInvokeFinder(finder, args);
 			return null;
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_GETTER_ENTITY)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_GETTER_ENTITY)) {
 			ModelEntity<? super I> e = getModelEntityFromArg((Class<?>) args[1]);
-			return internallyInvokeGetter((String) args[0]/*e.getModelProperty((String) args[0])*/);
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_SETTER_ENTITY)) {
+			return internallyInvokeGetter((String) args[0]/* e.getModelProperty((String) args[0]) */);
+		} else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_SETTER_ENTITY)) {
 			ModelEntity<? super I> e = getModelEntityFromArg((Class<?>) args[2]);
-			internallyInvokeSetter((String) args[0] /*e.getModelProperty((String) args[0])*/, args[1], false);
+			internallyInvokeSetter((String) args[0] /* e.getModelProperty((String) args[0]) */, args[1], false);
 			return null;
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_ADDER_ENTITY)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_ADDER_ENTITY)) {
 			ModelEntity<? super I> e = getModelEntityFromArg((Class<?>) args[2]);
-			internallyInvokeAdder((String) args[0] /*e.getModelProperty((String) args[0])*/, args[1], false);
+			internallyInvokeAdder((String) args[0] /* e.getModelProperty((String) args[0]) */, args[1], false);
 			return null;
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_REMOVER_ENTITY)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_REMOVER_ENTITY)) {
 			ModelEntity<? super I> e = getModelEntityFromArg((Class<?>) args[2]);
 			internallyInvokeRemover(e.getModelProperty((String) args[0]), args[1], false);
 			return null;
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_DELETER_ENTITY)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_DELETER_ENTITY)) {
 			return internallyInvokeDeleter(true);
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_FINDER_ENTITY)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_FINDER_ENTITY)) {
 			Class<?> class1 = (Class<?>) args[2];
 			ModelEntity<? super I> e = getModelEntityFromArg(class1);
 			finder = e.getFinder((String) args[0]);
 			if (finder != null) {
 				return internallyInvokeFinder(finder, args);
-			}
-			else {
+			} else {
 				throw new ModelExecutionException(
-						"No such finder defined. Finder '" + args[0] + "' could not be found on entity " + class1.getName());
+						"No such finder defined. Finder '" + args[0] + "' could not be found on entity "
+								+ class1.getName());
 			}
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_FINDER)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_FINDER)) {
 			finder = getModelEntity().getFinder((String) args[0]);
 			if (finder != null) {
 				return internallyInvokeFinder(finder, args);
+			} else {
+				throw new ModelExecutionException(
+						"No such finder defined. Finder '" + args[0] + "' could not be found on entity "
+								+ getModelEntity().getImplementedInterface().getName());
 			}
-			else {
-				throw new ModelExecutionException("No such finder defined. Finder '" + args[0] + "' could not be found on entity "
-						+ getModelEntity().getImplementedInterface().getName());
-			}
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_INITIALIZER)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_INITIALIZER)) {
 			Object[] developpedArgs = (Object[]) args[0];
 			internallyInvokeInitializer(getModelEntity().getInitializerForArgs(developpedArgs), developpedArgs);
 			return null;
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, IS_SERIALIZING)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, IS_SERIALIZING)) {
 			return isSerializing();
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, IS_DESERIALIZING)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, IS_DESERIALIZING)) {
 			return isDeserializing();
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, IS_MODIFIED)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, IS_MODIFIED)) {
 			return isModified();
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, SET_MODIFIED)
+		} else if (PamelaUtils.methodIsEquivalentTo(method, SET_MODIFIED)
 				|| PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_SET_MODIFIED)) {
 			internallyInvokeSetModified((Boolean) args[0]);
 			return null;
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, TO_STRING)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, TO_STRING)) {
 			return internallyInvokeToString();
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, DESTROY)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, DESTROY)) {
 			destroy();
 			return null;
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, CLONE_OBJECT)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, CLONE_OBJECT)) {
 			return cloneObject();
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, EQUALS_OBJECT)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, EQUALS_OBJECT)) {
 			return equalsObject(args[0]);
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, EQUALS_OBJECT_USING_FILTER)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, EQUALS_OBJECT_USING_FILTER)) {
 			return equalsObject(args[0], (Function) args[1]);
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, UPDATE_WITH_OBJECT)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, UPDATE_WITH_OBJECT)) {
 			return updateWith((I) args[0]);
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, GET_EMBEDDED)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, GET_EMBEDDED)) {
 			return getDirectEmbeddedObjects();
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, GET_EMBEDDED_VALIDABLE)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, GET_EMBEDDED_VALIDABLE)) {
 			return getDirectEmbeddedObjects();
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, GET_REFERENCED)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, GET_REFERENCED)) {
 			return getReferencedObjects();
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, ACCEPT_VISITOR)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, ACCEPT_VISITOR)) {
 			return acceptVisitor((PamelaVisitor) args[0]);
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, ACCEPT_WITH_STRATEGY_VISITOR)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, ACCEPT_WITH_STRATEGY_VISITOR)) {
 			return acceptVisitor((PamelaVisitor) args[0], (VisitingStrategy) args[1]);
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, IS_DELETED)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, IS_DELETED)) {
 			return deleted;
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, IS_BEING_CLONED)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, IS_BEING_CLONED)) {
 			return beingCloned;
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, IS_CREATED_BY_CLONING)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, IS_CREATED_BY_CLONING)) {
 			return createdByCloning;
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, GET_DELETED_PROPERTY)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, GET_DELETED_PROPERTY)) {
 			return DELETED;
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_DELETER)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_DELETER)) {
 			return internallyInvokeDeleter(false);
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, DELETE_OBJECT)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, DELETE_OBJECT)) {
 			return internallyInvokeDeleter(true, args);
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_UNDELETER)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, PERFORM_SUPER_UNDELETER)) {
 			return internallyInvokeUndeleter((Boolean) args[0], false);
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, UNDELETE_OBJECT)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, UNDELETE_OBJECT)) {
 			return internallyInvokeUndeleter((Boolean) args[0], true);
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, CLONE_OBJECT_WITH_CONTEXT)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, CLONE_OBJECT_WITH_CONTEXT)) {
 			return cloneObject(args);
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, HAS_KEY)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, HAS_KEY)) {
 			ModelProperty<? super I> property = getModelEntity().getModelProperty((String) args[0]);
 			return (property != null);
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, OBJECT_FOR_KEY)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, OBJECT_FOR_KEY)) {
 			ModelProperty<? super I> property = getModelEntity().getModelProperty((String) args[0]);
 			if (property != null) {
 				return invokeGetter(property);
-			}
-			else {
+			} else {
 				System.err.println("Cannot handle property " + args[0] + " for " + getObject());
 				return null;
 			}
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, SET_OBJECT_FOR_KEY)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, SET_OBJECT_FOR_KEY)) {
 			ModelProperty<? super I> property = getModelEntity().getModelProperty((String) args[1]);
 			if (property != null) {
 				Object newValue = args[0];
-				/*Object oldValue = invokeGetter(property);
-				if (getModelFactory().getUndoManager() != null) {
-					getModelFactory().getUndoManager().addEdit(
-							new SetCommand<>(getObject(), getModelEntity(), property, oldValue, newValue, getModelFactory()));
-				}*/
+				/*
+				 * Object oldValue = invokeGetter(property);
+				 * if (getModelFactory().getUndoManager() != null) {
+				 * getModelFactory().getUndoManager().addEdit(
+				 * new SetCommand<>(getObject(), getModelEntity(), property, oldValue, newValue,
+				 * getModelFactory()));
+				 * }
+				 */
 				invokeSetter(property, newValue);
 				return null;
-			}
-			else {
+			} else {
 				System.err.println("Cannot handle property " + args[0] + " for " + getObject());
 				return null;
 			}
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, GET_TYPE_FOR_KEY)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, GET_TYPE_FOR_KEY)) {
 			ModelProperty<? super I> property = getModelEntity().getModelProperty((String) args[0]);
 			if (property != null) {
 				return property.getType();
-			}
-			else {
+			} else {
 				System.err.println("Cannot handle property " + args[0] + " for " + getObject());
 				return null;
 			}
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, ENABLE_ASSERTION_CHECKING)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, ENABLE_ASSERTION_CHECKING)) {
 			invokeEnableAssertionChecking();
 			return null;
-		}
-		else if (PamelaUtils.methodIsEquivalentTo(method, DISABLE_ASSERTION_CHECKING)) {
+		} else if (PamelaUtils.methodIsEquivalentTo(method, DISABLE_ASSERTION_CHECKING)) {
 			invokeDisableAssertionChecking();
 			return null;
 		}
@@ -759,26 +762,23 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		if (property != null) {
 			if (PamelaUtils.methodIsEquivalentTo(method, property.getGetterMethod())) {
 				return internallyInvokeGetter(property);
-			}
-			else if (PamelaUtils.methodIsEquivalentTo(method, property.getSetterMethod())) {
+			} else if (PamelaUtils.methodIsEquivalentTo(method, property.getSetterMethod())) {
 				internallyInvokeSetter(property, args[0], true);
 				return null;
-			}
-			else if (PamelaUtils.methodIsEquivalentTo(method, property.getUpdaterMethod())) {
+			} else if (PamelaUtils.methodIsEquivalentTo(method, property.getUpdaterMethod())) {
 				internallyInvokeUpdater(property, args[0], true);
 				return null;
-			}
-			else if (PamelaUtils.methodIsEquivalentTo(method, property.getAdderMethod())) {
+			} else if (PamelaUtils.methodIsEquivalentTo(method, property.getAdderMethod())) {
 				internallyInvokeAdder(property, args[0], true);
 				return null;
-			}
-			else if (PamelaUtils.methodIsEquivalentTo(method, property.getRemoverMethod())) {
+			} else if (PamelaUtils.methodIsEquivalentTo(method, property.getRemoverMethod())) {
 				internallyInvokeRemover(property, args[0], true);
 				return null;
 			}
 
 		}
-		System.err.println("Cannot handle method " + method + " for " + getObject().getClass() + ". Dumping stack for analysis.");
+		System.err.println(
+				"Cannot handle method " + method + " for " + getObject().getClass() + ". Dumping stack for analysis.");
 		Thread.dumpStack();
 		return null;
 	}
@@ -841,40 +841,50 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		}
 		if (!e.isAncestorOf(getModelEntity())) {
 			throw new ModelExecutionException(
-					((Class<?>) class1).getName() + " is not a super interface of " + getModelEntity().getImplementedInterface().getName());
+					((Class<?>) class1).getName() + " is not a super interface of "
+							+ getModelEntity().getImplementedInterface().getName());
 		}
-		// Is e is an ancestor of modelEntity, this means that e is a super interface of the implementedInterface of modelEntity and we can
+		// Is e is an ancestor of modelEntity, this means that e is a super interface of
+		// the implementedInterface of modelEntity and we can
 		// therefore cast e to ModelEntity<? super I>
 		return (ModelEntity<? super I>) e;
 	}
 
+	// TODO what is this ? I might need to understand this method in the test case
+	// of InitializePropertyTest
 	private PropertyImplementation<? super I, ?> getPropertyImplementation(ModelProperty<? super I> property)
 			throws ModelExecutionException {
+		// TODO idf why at debug the value is still null for "contained" property in
+		// InitializePropertyTest? at some point, it should be set by the call to
+		// getPropertyImplementation in the same test case ?
+		// TODO this method is called at least once when there's an annotation like
+		// @Getter, @Setter, @Adder, @Remover, or @Reindexer, which trigger a call to
+		// internallyInvokeGetter, internallyInvokeSetter, internallyInvokeAdder,
+		// internallyInvokeRemover, etc. then the following is done
 		PropertyImplementation<? super I, ?> returned = propertyImplementations.get(property.getPropertyIdentifier());
 		if (returned == null) {
 			Class<? extends PropertyImplementation<? super I, ?>> implementationClass = null;
 			try {
 				if (property.getPropertyImplementation() != null) {
-					implementationClass = (Class<? extends PropertyImplementation<? super I, ?>>) property.getPropertyImplementation()
+					implementationClass = (Class<? extends PropertyImplementation<? super I, ?>>) property
+							.getPropertyImplementation()
 							.value();
 					Constructor<? extends PropertyImplementation<? super I, ?>> constructor = implementationClass
 							.getConstructor(ProxyMethodHandler.class, ModelProperty.class);
 					returned = constructor.newInstance(this, property);
-				}
-				else {
+				} else {
 					if (property.getCardinality() == Cardinality.SINGLE) {
 						implementationClass = (Class) DefaultSinglePropertyImplementation.class;
 						Constructor<? extends PropertyImplementation<? super I, ?>> constructor = implementationClass
 								.getConstructor(ProxyMethodHandler.class, ModelProperty.class);
 						returned = constructor.newInstance(this, property);
-					}
-					else if (property.getCardinality() == Cardinality.LIST) {
+					} else if (property.getCardinality() == Cardinality.LIST) {
 						implementationClass = (Class) DefaultMultiplePropertyImplementation.class;
 						Constructor<? extends PropertyImplementation<? super I, ?>> constructor = implementationClass
 								.getConstructor(ProxyMethodHandler.class, ModelProperty.class, Class.class);
-						returned = constructor.newInstance(this, property, getModelFactory().getListImplementationClass());
-					}
-					else {
+						returned = constructor.newInstance(this, property,
+								getModelFactory().getListImplementationClass());
+					} else {
 						throw new ModelExecutionException("Unexpected cardinality for property " + property);
 					}
 				}
@@ -908,9 +918,9 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 			throws ModelDefinitionException {
 		PropertyImplementation<? super I, ?> propertyImplementation = getPropertyImplementation(property);
 		if (propertyImplementation instanceof SettablePropertyImplementation) {
-			internallyInvokeSetter(property, (SettablePropertyImplementation) propertyImplementation, value, trackAtomicEdit);
-		}
-		else {
+			internallyInvokeSetter(property, (SettablePropertyImplementation) propertyImplementation, value,
+					trackAtomicEdit);
+		} else {
 			throw new ModelDefinitionException(
 					"Property implementation does not support SET protocol: " + property.getPropertyImplementation());
 		}
@@ -926,9 +936,9 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 			throws ModelDefinitionException {
 		PropertyImplementation<? super I, ?> propertyImplementation = getPropertyImplementation(property);
 		if (propertyImplementation instanceof SettablePropertyImplementation) {
-			internallyInvokeUpdater(property, (SettablePropertyImplementation) propertyImplementation, value, trackAtomicEdit);
-		}
-		else {
+			internallyInvokeUpdater(property, (SettablePropertyImplementation) propertyImplementation, value,
+					trackAtomicEdit);
+		} else {
 			throw new ModelDefinitionException(
 					"Property implementation does not support SET protocol: " + property.getPropertyImplementation());
 		}
@@ -939,7 +949,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		internallyInvokeAdder(propertyIdentifier, addedValue, -1, trackAtomicEdit);
 	}
 
-	protected void internallyInvokeAdder(String propertyIdentifier, Object addedValue, int index, boolean trackAtomicEdit)
+	protected void internallyInvokeAdder(String propertyIdentifier, Object addedValue, int index,
+			boolean trackAtomicEdit)
 			throws ModelDefinitionException {
 		ModelProperty<? super I> property = getModelEntity().getModelProperty(propertyIdentifier);
 		internallyInvokeAdder(property, addedValue, index, trackAtomicEdit);
@@ -950,13 +961,14 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		internallyInvokeAdder(property, addedValue, -1, trackAtomicEdit);
 	}
 
-	protected void internallyInvokeAdder(ModelProperty<? super I> property, Object addedValue, int index, boolean trackAtomicEdit)
+	protected void internallyInvokeAdder(ModelProperty<? super I> property, Object addedValue, int index,
+			boolean trackAtomicEdit)
 			throws ModelDefinitionException {
 		PropertyImplementation<? super I, ?> propertyImplementation = getPropertyImplementation(property);
 		if (propertyImplementation instanceof MultiplePropertyImplementation) {
-			internallyInvokeAdder(property, (MultiplePropertyImplementation) propertyImplementation, addedValue, index, trackAtomicEdit);
-		}
-		else {
+			internallyInvokeAdder(property, (MultiplePropertyImplementation) propertyImplementation, addedValue, index,
+					trackAtomicEdit);
+		} else {
 			throw new ModelDefinitionException(
 					"Property implementation does not support ADD protocol: " + property.getPropertyImplementation());
 		}
@@ -968,50 +980,61 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		internallyInvokeRemover(property, removedValue, trackAtomicEdit);
 	}
 
-	protected void internallyInvokeRemover(ModelProperty<? super I> property, Object removedValue, boolean trackAtomicEdit)
+	protected void internallyInvokeRemover(ModelProperty<? super I> property, Object removedValue,
+			boolean trackAtomicEdit)
 			throws ModelDefinitionException {
 		PropertyImplementation<? super I, ?> propertyImplementation = getPropertyImplementation(property);
 		if (propertyImplementation instanceof MultiplePropertyImplementation) {
-			internallyInvokeRemover(property, (MultiplePropertyImplementation) propertyImplementation, removedValue, trackAtomicEdit);
-		}
-		else {
+			internallyInvokeRemover(property, (MultiplePropertyImplementation) propertyImplementation, removedValue,
+					trackAtomicEdit);
+		} else {
 			throw new ModelDefinitionException(
-					"Property implementation does not support REMOVE protocol: " + property.getPropertyImplementation());
+					"Property implementation does not support REMOVE protocol: "
+							+ property.getPropertyImplementation());
 		}
 	}
 
-	protected void internallyInvokeReindexer(String propertyIdentifier, Object value, int index, boolean trackAtomicEdit)
+	protected void internallyInvokeReindexer(String propertyIdentifier, Object value, int index,
+			boolean trackAtomicEdit)
 			throws ModelDefinitionException {
 		ModelProperty<? super I> property = getModelEntity().getModelProperty(propertyIdentifier);
 		internallyInvokeReindexer(property, value, index, trackAtomicEdit);
 	}
 
-	protected void internallyInvokeReindexer(ModelProperty<? super I> property, Object value, int index, boolean trackAtomicEdit)
+	protected void internallyInvokeReindexer(ModelProperty<? super I> property, Object value, int index,
+			boolean trackAtomicEdit)
 			throws ModelDefinitionException {
 		PropertyImplementation<? super I, ?> propertyImplementation = getPropertyImplementation(property);
 		if (propertyImplementation instanceof ReindexableListPropertyImplementation) {
-			internallyInvokeReindexer(property, (ReindexableListPropertyImplementation) propertyImplementation, value, index,
+			internallyInvokeReindexer(property, (ReindexableListPropertyImplementation) propertyImplementation, value,
+					index,
 					trackAtomicEdit);
-		}
-		else {
+		} else {
 			throw new ModelDefinitionException(
-					"Property implementation does not support REINDEX protocol: " + property.getPropertyImplementation());
+					"Property implementation does not support REINDEX protocol: "
+							+ property.getPropertyImplementation());
 		}
 	}
 
 	/**
-	 * Deletes the current object and all its embedded properties as defined by the {@link Embedded} and {@link ComplexEmbedded}
-	 * annotations. Moreover, the provided <code>context</code> represents a list of objects that will also be eventually deleted and which
-	 * should be taken into account when computing embedded objects according to the deletion conditions. Invoking this method may result in
-	 * deleting indirectly the objects provided by the <code>context</code>, however the invoker should make sure that they have been
+	 * Deletes the current object and all its embedded properties as defined by the
+	 * {@link Embedded} and {@link ComplexEmbedded}
+	 * annotations. Moreover, the provided <code>context</code> represents a list of
+	 * objects that will also be eventually deleted and which
+	 * should be taken into account when computing embedded objects according to the
+	 * deletion conditions. Invoking this method may result in
+	 * deleting indirectly the objects provided by the <code>context</code>, however
+	 * the invoker should make sure that they have been
 	 * actually deleted.
 	 *
 	 * @param context
-	 *            the list of objects that will also be deleted and which should be taken into account when computing embedded objects.
+	 *                the list of objects that will also be deleted and which should
+	 *                be taken into account when computing embedded objects.
 	 * @see Embedded#deletionConditions()
 	 * @see ComplexEmbedded#deletionConditions()
 	 */
-	protected boolean internallyInvokeDeleter(boolean trackAtomicEdit, Object... context) throws ModelDefinitionException {
+	protected boolean internallyInvokeDeleter(boolean trackAtomicEdit, Object... context)
+			throws ModelDefinitionException {
 
 		// System.out.println("Called internallyInvokeDeleter() for " + getObject());
 
@@ -1022,8 +1045,7 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		deleting = true;
 		if (context == null) {
 			context = new Object[] { getObject() };
-		}
-		else {
+		} else {
 			context = Arrays.copyOf(context, context.length + 1);
 			context[context.length - 1] = getObject();
 		}
@@ -1047,50 +1069,51 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 			if (property.getType().isPrimitive()) {
 				// Primitive do not need to be nullified
 				// Do nothing
-			}
-			else {
+			} else {
 
 				PropertyImplementation<? super I, ?> propertyImplementation = getPropertyImplementation(property);
 
 				propertyImplementation.delete(embeddedObjects, context);
 
 				/*
-				// We retrieve and store old value for a potential undelete
-				Object oldValue = invokeGetter(property);
-
-				List<Object> oldValuesList = null;
-				if (property.getCardinality() == Cardinality.LIST) {
-					oldValuesList = new ArrayList<>((List) oldValue);
-				}
-
-				oldValues.put(property.getPropertyIdentifier(), oldValue);
-				// Otherwise nullify using setter
-				if (property.getSetterMethod() != null) {
-					invokeSetter(property, null);
-				}
-				else {
-					internallyInvokeSetter(property, null, true);
-				}
-
-				if (property.getCardinality() == Cardinality.SINGLE) {
-					if ((oldValue instanceof DeletableProxyObject) && embeddedObjects.contains(oldValue)) {
-						// By the way, this object was embedded, delete it
-						((DeletableProxyObject) oldValue).delete(context);
-						embeddedObjects.remove(oldValue);
-					}
-				}
-
-				else if (property.getCardinality() == Cardinality.LIST) {
-					if (oldValuesList != null) {
-						for (Object toBeDeleted : oldValuesList) {
-							if ((toBeDeleted instanceof DeletableProxyObject) && embeddedObjects.contains(toBeDeleted)) {
-								// By the way, this object was embedded, delete it
-								((DeletableProxyObject) toBeDeleted).delete(context);
-								embeddedObjects.remove(toBeDeleted);
-							}
-						}
-					}
-				}
+				 * // We retrieve and store old value for a potential undelete
+				 * Object oldValue = invokeGetter(property);
+				 * 
+				 * List<Object> oldValuesList = null;
+				 * if (property.getCardinality() == Cardinality.LIST) {
+				 * oldValuesList = new ArrayList<>((List) oldValue);
+				 * }
+				 * 
+				 * oldValues.put(property.getPropertyIdentifier(), oldValue);
+				 * // Otherwise nullify using setter
+				 * if (property.getSetterMethod() != null) {
+				 * invokeSetter(property, null);
+				 * }
+				 * else {
+				 * internallyInvokeSetter(property, null, true);
+				 * }
+				 * 
+				 * if (property.getCardinality() == Cardinality.SINGLE) {
+				 * if ((oldValue instanceof DeletableProxyObject) &&
+				 * embeddedObjects.contains(oldValue)) {
+				 * // By the way, this object was embedded, delete it
+				 * ((DeletableProxyObject) oldValue).delete(context);
+				 * embeddedObjects.remove(oldValue);
+				 * }
+				 * }
+				 * 
+				 * else if (property.getCardinality() == Cardinality.LIST) {
+				 * if (oldValuesList != null) {
+				 * for (Object toBeDeleted : oldValuesList) {
+				 * if ((toBeDeleted instanceof DeletableProxyObject) &&
+				 * embeddedObjects.contains(toBeDeleted)) {
+				 * // By the way, this object was embedded, delete it
+				 * ((DeletableProxyObject) toBeDeleted).delete(context);
+				 * embeddedObjects.remove(toBeDeleted);
+				 * }
+				 * }
+				 * }
+				 * }
 				 */
 			}
 		}
@@ -1123,10 +1146,12 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 
 		// Also notify using core PropertyChangeSupport
 
-		// :TODO: maybe we have to check that is is not the same PropertyChangeSupport ???
+		// :TODO: maybe we have to check that is is not the same PropertyChangeSupport
+		// ???
 		getPropertyChangeSuppport().firePropertyChange(DELETED, false, true);
 
-		// :TODO ASK Syl if we should not remove all the listeners from pcSupport here?!?
+		// :TODO ASK Syl if we should not remove all the listeners from pcSupport
+		// here?!?
 		// Did it by default
 		for (PropertyChangeListener cl : propertyChangeSupport.getPropertyChangeListeners()) {
 			// :TODO => notify the listener when it forgot to stop listening
@@ -1138,7 +1163,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		return deleted;
 	}
 
-	protected boolean internallyInvokeUndeleter(boolean restoreProperties, boolean trackAtomicEdit) throws ModelDefinitionException {
+	protected boolean internallyInvokeUndeleter(boolean restoreProperties, boolean trackAtomicEdit)
+			throws ModelDefinitionException {
 
 		if (!deleted || deleting) {
 			return false;
@@ -1158,19 +1184,21 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 				if (property.getType().isPrimitive()) {
 					// No need to restore for primitives
 					// Do nothing
-				}
-				else {
+				} else {
 
 					PropertyImplementation<? super I, ?> propertyImplementation = getPropertyImplementation(property);
 					propertyImplementation.undelete();
 
 					// Otherwise nullify using setter
-					/*if (property.getSetterMethod() != null) {
-						invokeSetter(property, oldValues.get(property.getPropertyIdentifier()));
-					}
-					else {
-						internallyInvokeSetter(property, oldValues.get(property.getPropertyIdentifier()), true);
-					}*/
+					/*
+					 * if (property.getSetterMethod() != null) {
+					 * invokeSetter(property, oldValues.get(property.getPropertyIdentifier()));
+					 * }
+					 * else {
+					 * internallyInvokeSetter(property,
+					 * oldValues.get(property.getPropertyIdentifier()), true);
+					 * }
+					 */
 				}
 			}
 		}
@@ -1183,18 +1211,22 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 
 	/**
 	 * Destroy current object<br>
-	 * After invoking this, the object won't be accessible and all operation performed on this will be in undetermined state.<br>
-	 * To implements deleting/undeleting facilities, use {@link DeletableProxyObject} interface instead
+	 * After invoking this, the object won't be accessible and all operation
+	 * performed on this will be in undetermined state.<br>
+	 * To implements deleting/undeleting facilities, use
+	 * {@link DeletableProxyObject} interface instead
 	 */
 	public void destroy() {
-		/*if (values != null) {
-			values.clear();
-		}
-		values = null;
-		if (oldValues != null) {
-			oldValues.clear();
-		}
-		oldValues = null;*/
+		/*
+		 * if (values != null) {
+		 * values.clear();
+		 * }
+		 * values = null;
+		 * if (oldValues != null) {
+		 * oldValues.clear();
+		 * }
+		 * oldValues = null;
+		 */
 
 		if (propertyImplementations != null) {
 			propertyImplementations.clear();
@@ -1264,7 +1296,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		try {
 			property.getAdderMethod().invoke(getObject(), value);
 		} catch (IllegalArgumentException e) {
-			throw new ModelExecutionException("Illegal argument exception adder:" + property.getAdderMethod() + " value=" + value, e);
+			throw new ModelExecutionException(
+					"Illegal argument exception adder:" + property.getAdderMethod() + " value=" + value, e);
 		} catch (IllegalAccessException e) {
 			throw new ModelExecutionException(e);
 		} catch (InvocationTargetException e) {
@@ -1288,8 +1321,7 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		try {
 			if (property.getReindexerMethod() != null) {
 				property.getReindexerMethod().invoke(getObject(), value, index);
-			}
-			else {
+			} else {
 				internallyInvokeReindexer(property, value, index, true);
 			}
 		} catch (IllegalArgumentException e) {
@@ -1344,12 +1376,12 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		invokeReindexer(getModelEntity().getModelProperty(propertyIdentifier), value, index);
 	}
 
-	public void invokeSetterForDeserialization(ModelProperty<? super I> property, Object value) throws ModelDefinitionException {
+	public void invokeSetterForDeserialization(ModelProperty<? super I> property, Object value)
+			throws ModelDefinitionException {
 		// TODO: why do we need this ?
 		if (property.getSetterMethod() != null) {
 			invokeSetter(property, value);
-		}
-		else {
+		} else {
 			internallyInvokeSetter(property, value, true);
 		}
 	}
@@ -1361,7 +1393,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 	@Deprecated
 	private void firePropertyChange(String propertyIdentifier, Object oldValue, Object value) {
 		if (getObject() instanceof HasPropertyChangeSupport && !deleting) {
-			PropertyChangeSupport propertyChangeSupport = ((HasPropertyChangeSupport) getObject()).getPropertyChangeSupport();
+			PropertyChangeSupport propertyChangeSupport = ((HasPropertyChangeSupport) getObject())
+					.getPropertyChangeSupport();
 			if (propertyChangeSupport != null) {
 				propertyChangeSupport.firePropertyChange(propertyIdentifier, oldValue, value);
 			}
@@ -1388,17 +1421,16 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 	public void invokeSetModified(boolean modified) throws ModelDefinitionException {
 		if (getObject() instanceof AccessibleProxyObject) {
 			((AccessibleProxyObject) getObject()).setModified(modified);
-		}
-		else {
+		} else {
 			internallyInvokeSetModified(modified);
 		}
 	}
 
-	public void invokeAdderForDeserialization(ModelProperty<? super I> property, Object value) throws ModelDefinitionException {
+	public void invokeAdderForDeserialization(ModelProperty<? super I> property, Object value)
+			throws ModelDefinitionException {
 		if (property.getAdderMethod() != null) {
 			invokeAdder(property, value);
-		}
-		else {
+		} else {
 			internallyInvokeAdder(property, value, true);
 		}
 	}
@@ -1406,7 +1438,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 	private Object internallyInvokeFinder(@Nonnull Finder finder, Object[] args) throws ModelDefinitionException {
 		if (args.length == 0) {
 			throw new ModelDefinitionException(
-					"Finder " + finder.collection() + " by attribute " + finder.attribute() + " does not declare enough argument!");
+					"Finder " + finder.collection() + " by attribute " + finder.attribute()
+							+ " does not declare enough argument!");
 		}
 		String collectionID = finder.collection();
 		ModelProperty<? super I> property = getModelEntity().getModelProperty(collectionID);
@@ -1428,8 +1461,7 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 					}
 				}
 				return objects;
-			}
-			else {
+			} else {
 				// Prevent ConcurrentModificationException
 				if (collection instanceof Collection) {
 					for (Object o : new ArrayList<>((Collection<?>) collection)) {
@@ -1437,8 +1469,7 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 							return o;
 						}
 					}
-				}
-				else {
+				} else {
 					for (Object o : (Iterable<?>) collection) {
 						if (isObjectAttributeEquals(o, attribute, value)) {
 							return o;
@@ -1451,58 +1482,70 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		throw new ModelDefinitionException("finder works only on maps and iterable");
 	}
 
-	private <T> T internallyInvokeGetter(ModelProperty<? super I> property, PropertyImplementation<? super I, T> propertyImplementation)
+	private <T> T internallyInvokeGetter(ModelProperty<? super I> property,
+			PropertyImplementation<? super I, T> propertyImplementation)
 			throws ModelDefinitionException {
 		return propertyImplementation.get();
 	}
 
-	private <T> void internallyInvokeSetter(ModelProperty<? super I> property, SettablePropertyImplementation<I, T> propertyImplementation,
+	private <T> void internallyInvokeSetter(ModelProperty<? super I> property,
+			SettablePropertyImplementation<I, T> propertyImplementation,
 			T value, boolean trackAtomicEdit) throws ModelDefinitionException {
 		Object oldValue = invokeGetter(property);
 		if (trackAtomicEdit && getUndoManager() != null) {
 			if (oldValue != value) {
-				getUndoManager().addEdit(new SetCommand<>(getObject(), getModelEntity(), property, oldValue, value, getModelFactory()));
+				getUndoManager().addEdit(
+						new SetCommand<>(getObject(), getModelEntity(), property, oldValue, value, getModelFactory()));
 			}
 		}
 		propertyImplementation.set(value);
 	}
 
-	private <T> void internallyInvokeUpdater(ModelProperty<? super I> property, SettablePropertyImplementation<I, T> propertyImplementation,
+	private <T> void internallyInvokeUpdater(ModelProperty<? super I> property,
+			SettablePropertyImplementation<I, T> propertyImplementation,
 			T value, boolean trackAtomicEdit) throws ModelDefinitionException {
 		if (trackAtomicEdit && getUndoManager() != null) {
 			Object oldValue = invokeGetter(property);
 			if (oldValue != value) {
-				getUndoManager().addEdit(new SetCommand<>(getObject(), getModelEntity(), property, oldValue, value, getModelFactory()));
+				getUndoManager().addEdit(
+						new SetCommand<>(getObject(), getModelEntity(), property, oldValue, value, getModelFactory()));
 			}
 		}
 		propertyImplementation.update(value);
 	}
 
-	private <T> void internallyInvokeAdder(ModelProperty<? super I> property, MultiplePropertyImplementation<I, T> propertyImplementation,
+	private <T> void internallyInvokeAdder(ModelProperty<? super I> property,
+			MultiplePropertyImplementation<I, T> propertyImplementation,
 			T value, int index, boolean trackAtomicEdit) throws ModelDefinitionException {
 		// System.out.println("Invoke ADDER "+property.getPropertyIdentifier());
 		if (trackAtomicEdit && getUndoManager() != null) {
-			getUndoManager().addEdit(new AddCommand<>(getObject(), getModelEntity(), property, value, getModelFactory()));
+			getUndoManager()
+					.addEdit(new AddCommand<>(getObject(), getModelEntity(), property, value, getModelFactory()));
 		}
 		propertyImplementation.addTo(value, index);
 	}
 
-	private <T> void internallyInvokeRemover(ModelProperty<? super I> property, MultiplePropertyImplementation<I, T> propertyImplementation,
+	private <T> void internallyInvokeRemover(ModelProperty<? super I> property,
+			MultiplePropertyImplementation<I, T> propertyImplementation,
 			T value, boolean trackAtomicEdit) throws ModelDefinitionException {
 		// System.out.println("Invoke ADDER "+property.getPropertyIdentifier());
 		if (trackAtomicEdit && getUndoManager() != null) {
-			getUndoManager().addEdit(new RemoveCommand<>(getObject(), getModelEntity(), property, value, getModelFactory()));
+			getUndoManager()
+					.addEdit(new RemoveCommand<>(getObject(), getModelEntity(), property, value, getModelFactory()));
 		}
 		propertyImplementation.removeFrom(value);
 	}
 
 	private <T> void internallyInvokeReindexer(ModelProperty<? super I> property,
-			ReindexableListPropertyImplementation<I, T> propertyImplementation, T value, int index, boolean trackAtomicEdit)
+			ReindexableListPropertyImplementation<I, T> propertyImplementation, T value, int index,
+			boolean trackAtomicEdit)
 			throws ModelDefinitionException {
 		// System.out.println("Invoke ADDER "+property.getPropertyIdentifier());
 		if (trackAtomicEdit && getUndoManager() != null) {
-			getUndoManager().addEdit(new RemoveCommand<>(getObject(), getModelEntity(), property, value, getModelFactory()));
-			getUndoManager().addEdit(new AddCommand<>(getObject(), getModelEntity(), property, value, getModelFactory()));
+			getUndoManager()
+					.addEdit(new RemoveCommand<>(getObject(), getModelEntity(), property, value, getModelFactory()));
+			getUndoManager()
+					.addEdit(new AddCommand<>(getObject(), getModelEntity(), property, value, getModelFactory()));
 		}
 		propertyImplementation.reindex(value, index);
 	}
@@ -1512,8 +1555,7 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		if (handler != null) {
 			Object attributeValue = handler.invokeGetter(attribute);
 			return isEqual(attributeValue, value);
-		}
-		else {
+		} else {
 			throw new ModelDefinitionException(
 					"Found object of type " + o.getClass().getName() + " but is not an instanceof ProxyObject:\n" + o);
 		}
@@ -1522,10 +1564,12 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 	private Object acceptVisitor(PamelaVisitor pamelaVisitor, VisitingStrategy visitingStrategy) {
 		switch (visitingStrategy) {
 			case Embedding:
-				acceptVisitorEmbeddingStrategy((AccessibleProxyObject) getObject(), pamelaVisitor, new HashSet<Object>());
+				acceptVisitorEmbeddingStrategy((AccessibleProxyObject) getObject(), pamelaVisitor,
+						new HashSet<Object>());
 				break;
 			case Exhaustive:
-				acceptVisitorExhaustiveStrategy((AccessibleProxyObject) getObject(), pamelaVisitor, new HashSet<Object>());
+				acceptVisitorExhaustiveStrategy((AccessibleProxyObject) getObject(), pamelaVisitor,
+						new HashSet<Object>());
 				break;
 
 			default:
@@ -1686,14 +1730,12 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 			if (o1 == null) {
 				if (other.o1 != null)
 					return false;
-			}
-			else if (!o1.equals(other.o1))
+			} else if (!o1.equals(other.o1))
 				return false;
 			if (o2 == null) {
 				if (other.o2 != null)
 					return false;
-			}
-			else if (!o2.equals(other.o2))
+			} else if (!o2.equals(other.o2))
 				return false;
 			return true;
 		}
@@ -1735,7 +1777,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		}
 		while (properties.hasNext()) {
 			ModelProperty p = properties.next();
-			// System.out.println("property " + p + " relevant: " + p.isRelevantForEqualityComputation());
+			// System.out.println("property " + p + " relevant: " +
+			// p.isRelevantForEqualityComputation());
 			if (considerProperty.apply(p) && p.isRelevantForEqualityComputation()) {
 				switch (p.getCardinality()) {
 					case SINGLE:
@@ -1748,24 +1791,26 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 								String singleValueAsString = se.toString(singleValue);
 								String oppositeValueAsString = se.toString(oppositeValue);
 								if ((singleValueAsString == null && oppositeValueAsString != null)
-										|| (singleValueAsString != null && !singleValueAsString.equals(oppositeValueAsString))) {
-									// System.out.println("Equals fails because of SINGLE serializable property " + p + " value=" +
+										|| (singleValueAsString != null
+												&& !singleValueAsString.equals(oppositeValueAsString))) {
+									// System.out.println("Equals fails because of SINGLE serializable property " +
+									// p + " value=" +
 									// singleValue
 									// + " opposite=" + oppositeValue);
-									// System.out.println("object1=" + getObject() + " of " + getObject().getClass());
+									// System.out.println("object1=" + getObject() + " of " +
+									// getObject().getClass());
 									// System.out.println("object2=" + obj + " of " + obj.getClass());
 									return false;
 								}
 							} catch (InvalidDataException e) {
 								e.printStackTrace();
 							}
-						}
-						else {
+						} else {
 							if (seen.contains(new Compared(singleValue, oppositeValue))) {
 								// Ignore
-							}
-							else if (!_isEqual(singleValue, oppositeValue, seen, considerProperty)) {
-								// System.out.println("Equals fails because of SINGLE property " + p + " value=" + singleValue + "opposite="
+							} else if (!_isEqual(singleValue, oppositeValue, seen, considerProperty)) {
+								// System.out.println("Equals fails because of SINGLE property " + p + " value="
+								// + singleValue + "opposite="
 								// + oppositeValue);
 								return false;
 							}
@@ -1777,7 +1822,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 						if (!_isEqual(values, oppositeValues, seen, considerProperty)) {
 							// System.out.println("values=" + values);
 							// System.out.println("oppositeValues=" + oppositeValues);
-							// System.out.println("Equals fails because of LIST property difference for " + p);
+							// System.out.println("Equals fails because of LIST property difference for " +
+							// p);
 							return false;
 						}
 						break;
@@ -1786,11 +1832,13 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 				}
 			}
 		}
-		// System.out.println("ok, equals return true for " + getObject() + " and " + object);
+		// System.out.println("ok, equals return true for " + getObject() + " and " +
+		// object);
 		return true;
 	}
 
-	private boolean _isEqual(Object oldValue, Object newValue, Set<Compared> seen, Function<ModelProperty, Boolean> considerProperty) {
+	private boolean _isEqual(Object oldValue, Object newValue, Set<Compared> seen,
+			Function<ModelProperty, Boolean> considerProperty) {
 		seen.add(new Compared(oldValue, newValue));
 
 		if (oldValue == null) {
@@ -1803,8 +1851,7 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 			ProxyMethodHandler<Object> handler = getModelFactory().getHandler(oldValue);
 			if (handler != null) {
 				return handler.equalsObject(newValue, seen, considerProperty);
-			}
-			else {
+			} else {
 				System.err.println("Unexpected object without ProxyMethodHandler : " + oldValue);
 				return false;
 			}
@@ -1832,11 +1879,15 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 	}
 
 	/**
-	 * Called to update current object while comparing it to opposite object, (which must be of right type!), examining each property
+	 * Called to update current object while comparing it to opposite object, (which
+	 * must be of right type!), examining each property
 	 * values.<br>
-	 * Collections are handled while trying to match updated objects with a given strategy<br>
-	 * Perform required changes on this object so that at the end of the call, equalsObject(object) shoud return true<br>
-	 * Also perform required notifications, so that it is safe to call that method in a deployed environment
+	 * Collections are handled while trying to match updated objects with a given
+	 * strategy<br>
+	 * Perform required changes on this object so that at the end of the call,
+	 * equalsObject(object) shoud return true<br>
+	 * Also perform required notifications, so that it is safe to call that method
+	 * in a deployed environment
 	 *
 	 * @param obj
 	 *            object to update with, which must be of same type
@@ -1847,10 +1898,14 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 	}
 
 	/**
-	 * Clone current object, using meta informations provided by related class All property should be annoted with a @CloningStrategy
-	 * annotation which determine the way of handling this property Supplied context is used to determine the closure of objects graph being
-	 * constructed during this operation. If a property is marked as @CloningStrategy.CLONE but lead to an object outside scope of cloning
-	 * (the closure being computed), then resulting value is nullified. When context is not set, don't compute any closure, and clone all
+	 * Clone current object, using meta informations provided by related class All
+	 * property should be annoted with a @CloningStrategy
+	 * annotation which determine the way of handling this property Supplied context
+	 * is used to determine the closure of objects graph being
+	 * constructed during this operation. If a property is marked
+	 * as @CloningStrategy.CLONE but lead to an object outside scope of cloning
+	 * (the closure being computed), then resulting value is nullified. When context
+	 * is not set, don't compute any closure, and clone all
 	 * required objects
 	 *
 	 * @param context
@@ -1858,14 +1913,18 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 	 * @throws ModelExecutionException
 	 * @throws ModelDefinitionException
 	 * @throws CloneNotSupportedException
-	 *             when supplied object is not implementing CloneableProxyObject interface
+	 *                                    when supplied object is not implementing
+	 *                                    CloneableProxyObject interface
 	 */
-	protected I cloneObject(Object... context) throws ModelExecutionException, ModelDefinitionException, CloneNotSupportedException {
+	protected I cloneObject(Object... context)
+			throws ModelExecutionException, ModelDefinitionException, CloneNotSupportedException {
 
-		/*System.out.println("Cloning " + getObject());
-			for (Object o : context) {
-				System.out.println("Context: " + o);
-			}*/
+		/*
+		 * System.out.println("Cloning " + getObject());
+		 * for (Object o : context) {
+		 * System.out.println("Context: " + o);
+		 * }
+		 */
 
 		if (context != null && context.length == 1 && context[0].getClass().isArray()) {
 			context = (Object[]) context[0];
@@ -1907,7 +1966,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		}
 		ProxyMethodHandler<?> clonedValueHandler = getModelFactory().getHandler(objectToCloneOrReference);
 		returned = clonedValueHandler.performClone(clonedObjects);
-		// System.out.println("CLONING " + objectToCloneOrReference + " clone is " + returned);
+		// System.out.println("CLONING " + objectToCloneOrReference + " clone is " +
+		// returned);
 		return returned;
 	}
 
@@ -1936,30 +1996,30 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 							Object singleValue = invokeGetter(p);
 							switch (p.getCloningStrategy()) {
 								case CLONE:
-									if (ModelEntity.isModelEntity(p.getType()) && singleValue instanceof CloneableProxyObject) {
+									if (ModelEntity.isModelEntity(p.getType())
+											&& singleValue instanceof CloneableProxyObject) {
 										if (!isPartOfContext(singleValue, EmbeddingType.CLOSURE, context)) {
 											// Don't do it, outside of context
-										}
-										else {
+										} else {
 											// Unused var Object clonedValue =
 											appendToClonedObjects(clonedObjects, (CloneableProxyObject) singleValue);
 											// System.out.println("Cloned " + clonedValue + " for " + p);
 										}
-									}
-									else {
+									} else {
 										if (singleValue != null) {
-											/*if (singleValue instanceof String) {
-														clonedObjectHandler.invokeSetter(p, new String((String) singleValue));
-													}
-													else*/ if (singleValue instanceof DataBinding) {
-												clonedObjectHandler.invokeSetter(p, ((DataBinding<?>) singleValue).clone());
-											}
-											else {
+											/*
+											 * if (singleValue instanceof String) {
+											 * clonedObjectHandler.invokeSetter(p, new String((String) singleValue));
+											 * }
+											 * else
+											 */ if (singleValue instanceof DataBinding) {
+												clonedObjectHandler.invokeSetter(p,
+														((DataBinding<?>) singleValue).clone());
+											} else {
 												// TODO: handle primitive types and some basic types (eg. String)
 												clonedObjectHandler.invokeSetter(p, singleValue);
 											}
-										}
-										else {
+										} else {
 											clonedObjectHandler.invokeSetter(p, null);
 										}
 									}
@@ -1972,7 +2032,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 								case CUSTOM_CLONE:
 									// We have here to invoke custom code (encoded in getStrategyTypeFactory())
 									try {
-										Object computedValue = JavaBindingEvaluator.evaluateBinding(p.getStrategyTypeFactory(),
+										Object computedValue = JavaBindingEvaluator.evaluateBinding(
+												p.getStrategyTypeFactory(),
 												getObject());
 										clonedObjectHandler.invokeSetter(p, computedValue);
 									} catch (InvalidKeyValuePropertyException e1) {
@@ -1996,17 +2057,19 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 								for (Object value : values2) {
 									switch (p.getCloningStrategy()) {
 										case CLONE:
-											if (ModelEntity.isModelEntity(p.getType()) && value instanceof CloneableProxyObject) {
+											if (ModelEntity.isModelEntity(p.getType())
+													&& value instanceof CloneableProxyObject) {
 												if (!isPartOfContext(value, EmbeddingType.CLOSURE, context)) {
 													// Don't do it, outside of context
-												}
-												else {
+												} else {
 													appendToClonedObjects(clonedObjects, (CloneableProxyObject) value);
 												}
 											} // SGU: removed this code i think it's wrong
-											/*else {
-													clonedObjectHandler.invokeAdder(p, value);
-													}*/
+											/*
+											 * else {
+											 * clonedObjectHandler.invokeAdder(p, value);
+											 * }
+											 */
 											break;
 										case REFERENCE:
 											clonedObjectHandler.invokeAdder(p, value);
@@ -2026,7 +2089,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 				}
 
 				clonedObjects.put((CloneableProxyObject) getObject(), returned);
-				// System.out.println("Registering " + returned + " as clone of " + getObject());
+				// System.out.println("Registering " + returned + " as clone of " +
+				// getObject());
 
 			} finally {
 				clonedObjectHandler.createdByCloning = false;
@@ -2054,8 +2118,10 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 			while (properties.hasNext()) {
 				ModelProperty p = properties.next();
 				// TODO: cross-check that we should invoke continue
-				// In the case of the deletedProperty, it is only normal that there are no setters.
-				// We should either prevent this by validating that all properties (that are not deleted properties)
+				// In the case of the deletedProperty, it is only normal that there are no
+				// setters.
+				// We should either prevent this by validating that all properties (that are not
+				// deleted properties)
 				// have a setter or allow properties to live without a setter.
 				switch (p.getCardinality()) {
 					case SINGLE:
@@ -2066,31 +2132,41 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 									if (getModelFactory().getStringEncoder().isConvertable(p.getType())) {
 										Object clonedValue = null;
 										try {
-											String clonedValueAsString = getModelFactory().getStringEncoder().toString(singleValue);
-											clonedValue = getModelFactory().getStringEncoder().fromString(p.getType(), clonedValueAsString);
+											String clonedValueAsString = getModelFactory().getStringEncoder()
+													.toString(singleValue);
+											clonedValue = getModelFactory().getStringEncoder().fromString(p.getType(),
+													clonedValueAsString);
 										} catch (InvalidDataException e) {
 											throw new ModelExecutionException(e);
 										}
 										clonedObjectHandler.invokeSetter(p, clonedValue);
 										// clonedObjectHandler.internallyInvokeSetter(p, clonedValue);
-									}
-									else if (ModelEntity.isModelEntity(p.getType()) && singleValue instanceof CloneableProxyObject) {
+									} else if (ModelEntity.isModelEntity(p.getType())
+											&& singleValue instanceof CloneableProxyObject) {
 										// boolean debug = false;
-										/*if (p.getPropertyIdentifier().equals("startShape")) {
-												System.out.println("Tiens, pour startShape, singleValue=" + singleValue);
-												debug = true;
-												}*/
+										/*
+										 * if (p.getPropertyIdentifier().equals("startShape")) {
+										 * System.out.println("Tiens, pour startShape, singleValue=" + singleValue);
+										 * debug = true;
+										 * }
+										 */
 										Object clonedValue = clonedObjects.get(singleValue);
-										/*if (debug) {
-												System.out.println("clonedValue=" + clonedValue + " singleValue=" + singleValue);
-												System.out.println("context=" + context);
-												System.out.println("isPartOfContext=" + isPartOfContext(singleValue, EmbeddingType.CLOSURE, context));
-												}*/
+										/*
+										 * if (debug) {
+										 * System.out.println("clonedValue=" + clonedValue + " singleValue=" +
+										 * singleValue);
+										 * System.out.println("context=" + context);
+										 * System.out.println("isPartOfContext=" + isPartOfContext(singleValue,
+										 * EmbeddingType.CLOSURE, context));
+										 * }
+										 */
 										if (!isPartOfContext(singleValue, EmbeddingType.CLOSURE, context)) {
 											clonedValue = null;
-											/*if (debug) {
-													System.out.println("mais pas dans le contexte !!!");
-													}*/
+											/*
+											 * if (debug) {
+											 * System.out.println("mais pas dans le contexte !!!");
+											 * }
+											 */
 										}
 										clonedObjectHandler.invokeSetter(p, clonedValue);
 										// clonedObjectHandler.internallyInvokeSetter(p, clonedValue);
@@ -2111,8 +2187,9 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 								case FACTORY:
 									// We have here to invoke custom code (encoded in getStrategyTypeFactory())
 									try {
-										Object computedValue = JavaBindingEvaluator.evaluateBinding(p.getStrategyTypeFactory(),
-												clonedObject /*getObject()*/);
+										Object computedValue = JavaBindingEvaluator.evaluateBinding(
+												p.getStrategyTypeFactory(),
+												clonedObject /* getObject() */);
 										clonedObjectHandler.invokeSetter(p, computedValue);
 									} catch (InvalidKeyValuePropertyException e1) {
 										e1.printStackTrace();
@@ -2133,27 +2210,31 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 						List<?> values = (List<?>) invokeGetter(p);
 						if (values != null) {
 							List<?> valuesToClone = new ArrayList<>(values);
-							/*System.out.println("Cloning of property " + p);
-									System.out.println("Values to clone are: ");
-									for (Object value : valuesToClone) {
-									System.out.println("* " + value);
-									}*/
+							/*
+							 * System.out.println("Cloning of property " + p);
+							 * System.out.println("Values to clone are: ");
+							 * for (Object value : valuesToClone) {
+							 * System.out.println("* " + value);
+							 * }
+							 */
 							for (Object value : valuesToClone) {
 								switch (p.getCloningStrategy()) {
 									case CLONE:
 										if (getModelFactory().getStringEncoder().isConvertable(p.getType())) {
 											Object clonedValue = null;
 											try {
-												String clonedValueAsString = getModelFactory().getStringEncoder().toString(value);
-												clonedValue = getModelFactory().getStringEncoder().fromString(p.getType(),
+												String clonedValueAsString = getModelFactory().getStringEncoder()
+														.toString(value);
+												clonedValue = getModelFactory().getStringEncoder().fromString(
+														p.getType(),
 														clonedValueAsString);
 											} catch (InvalidDataException e) {
 												throw new ModelExecutionException(e);
 											}
 											List<?> l = (List<?>) clonedObjectHandler.invokeGetter(p);
 											clonedObjectHandler.invokeAdder(p, clonedValue);
-										}
-										else if (ModelEntity.isModelEntity(p.getType()) && value instanceof CloneableProxyObject) {
+										} else if (ModelEntity.isModelEntity(p.getType())
+												&& value instanceof CloneableProxyObject) {
 											Object clonedValue = clonedObjects.get(value);
 											if (!isPartOfContext(value, EmbeddingType.CLOSURE, context)) {
 												clonedValue = null;
@@ -2193,7 +2274,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 	}
 
 	/**
-	 * Internally used for cloning computation This is the method which determine if a value belongs to derived object graph closure
+	 * Internally used for cloning computation This is the method which determine if
+	 * a value belongs to derived object graph closure
 	 */
 	private boolean isPartOfContext(Object aValue, EmbeddingType embeddingType, Object... context) {
 		if (context == null || context.length == 0) {
@@ -2216,11 +2298,14 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 	}
 
 	/**
-	 * Clone several object, using meta informations provided by related class All property should be annoted with a @CloningStrategy
+	 * Clone several object, using meta informations provided by related class All
+	 * property should be annoted with a @CloningStrategy
 	 * annotation which determine the way of handling this property
 	 *
-	 * The list of objects is used as the context considered to determine the closure of objects graph being constructed during this
-	 * operation. If a property is marked as @CloningStrategy.CLONE but lead to an object outside scope of cloning (the closure being
+	 * The list of objects is used as the context considered to determine the
+	 * closure of objects graph being constructed during this
+	 * operation. If a property is marked as @CloningStrategy.CLONE but lead to an
+	 * object outside scope of cloning (the closure being
 	 * computed), then resulting value is nullified.
 	 *
 	 * @param someObjects
@@ -2263,7 +2348,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 	}
 
 	/**
-	 * Return boolean indicating if supplied clipboard is valid for pasting in object monitored by this method handler<br>
+	 * Return boolean indicating if supplied clipboard is valid for pasting in
+	 * object monitored by this method handler<br>
 	 *
 	 * @param clipboard
 	 * @return
@@ -2276,7 +2362,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		}
 
 		for (Class<?> type : clipboard.getTypes()) {
-			Collection<ModelProperty<? super I>> propertiesAssignableFrom = modelEntity.getPropertiesAssignableFrom(type);
+			Collection<ModelProperty<? super I>> propertiesAssignableFrom = modelEntity
+					.getPropertiesAssignableFrom(type);
 			Collection<ModelProperty<? super I>> pastingPointProperties = Collections2.filter(propertiesAssignableFrom,
 					new Predicate<ModelProperty<?>>() {
 						@Override
@@ -2289,12 +2376,14 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 					});
 			if (pastingPointProperties.size() == 0) {
 				// no properties are compatible for pasting type
-				// System.out.println("No property declared as pasting point found for " + type + " in " + modelEntity);
+				// System.out.println("No property declared as pasting point found for " + type
+				// + " in " + modelEntity);
 				return false;
-			}
-			else if (pastingPointProperties.size() > 1) {
-				// Ambiguous pasting operations: several properties are compatible for pasting type
-				// System.out.println("Ambiguous pasting operations: several properties declared as pasting point found for " + type + " in
+			} else if (pastingPointProperties.size() > 1) {
+				// Ambiguous pasting operations: several properties are compatible for pasting
+				// type
+				// System.out.println("Ambiguous pasting operations: several properties declared
+				// as pasting point found for " + type + " in
 				// "
 				// + modelEntity);
 				return true;
@@ -2305,7 +2394,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 	}
 
 	/**
-	 * Return boolean indicating if supplied clipboard is valid for pasting in object monitored by this method handler<br>
+	 * Return boolean indicating if supplied clipboard is valid for pasting in
+	 * object monitored by this method handler<br>
 	 *
 	 * @param clipboard
 	 * @return
@@ -2317,7 +2407,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 
 	/**
 	 * Paste supplied clipboard in object monitored by this method handler<br>
-	 * Return pasted objects (a single object for a single contents clipboard, and a list of objects for a multiple contents)
+	 * Return pasted objects (a single object for a single contents clipboard, and a
+	 * list of objects for a multiple contents)
 	 *
 	 * @param clipboard
 	 * @return
@@ -2325,7 +2416,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 	 * @throws ModelDefinitionException
 	 * @throws CloneNotSupportedException
 	 */
-	protected Object paste(Clipboard clipboard) throws ModelExecutionException, ModelDefinitionException, CloneNotSupportedException {
+	protected Object paste(Clipboard clipboard)
+			throws ModelExecutionException, ModelDefinitionException, CloneNotSupportedException {
 
 		// System.out.println("PASTING in " + getObject());
 
@@ -2340,7 +2432,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 
 			// System.out.println("pasting as " + type);
 
-			Collection<ModelProperty<? super I>> propertiesAssignableFrom = getModelEntity().getPropertiesAssignableFrom(type);
+			Collection<ModelProperty<? super I>> propertiesAssignableFrom = getModelEntity()
+					.getPropertiesAssignableFrom(type);
 			Collection<ModelProperty<? super I>> pastingPointProperties = Collections2.filter(propertiesAssignableFrom,
 					new Predicate<ModelProperty<?>>() {
 						@Override
@@ -2355,30 +2448,32 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 			ModelProperty<? super I> pastingProperty;
 
 			if (pastingPointProperties.size() == 0) {
-				throw new ClipboardOperationException("Pasting operation: no property is compatible with pasting type " + type);
+				throw new ClipboardOperationException(
+						"Pasting operation: no property is compatible with pasting type " + type);
 				// System.out.println("modelEntity=" + getModelEntity());
 				// System.out.println("clipboard type=" + type);
 				// System.out.println("propertiesAssignableFrom=" + propertiesAssignableFrom);
 				// System.out.println("pastingPointProperties=" + pastingPointProperties);
 
-			}
-			else if (pastingPointProperties.size() > 1) {
+			} else if (pastingPointProperties.size() > 1) {
 
 				List<ModelProperty<? super I>> list = new ArrayList<>(pastingPointProperties);
 				Collections.sort(list, new Comparator<ModelProperty<? super I>>() {
 					@Override
 					public int compare(ModelProperty<? super I> o1, ModelProperty<? super I> o2) {
-						int p1 = o1.getAddPastingPoint() != null ? o1.getAddPastingPoint().priority() : o1.getSetPastingPoint().priority();
-						int p2 = o2.getAddPastingPoint() != null ? o2.getAddPastingPoint().priority() : o2.getSetPastingPoint().priority();
+						int p1 = o1.getAddPastingPoint() != null ? o1.getAddPastingPoint().priority()
+								: o1.getSetPastingPoint().priority();
+						int p2 = o2.getAddPastingPoint() != null ? o2.getAddPastingPoint().priority()
+								: o2.getSetPastingPoint().priority();
 						return p1 - p2;
 					}
 				});
 				// Take the most prioritar
 				pastingProperty = list.get(0);
 				// throw new ClipboardOperationException(
-				// "Ambiguous pasting operations: several properties are compatible for pasting type " + type);
-			}
-			else {
+				// "Ambiguous pasting operations: several properties are compatible for pasting
+				// type " + type);
+			} else {
 				pastingProperty = pastingPointProperties.iterator().next();
 			}
 
@@ -2386,8 +2481,7 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 			if (clipboard.isSingleObject()) {
 				clipboard.consume();
 				return pastedContents;
-			}
-			else if (pastedContents != null) {
+			} else if (pastedContents != null) {
 				returned.addAll((List) pastedContents);
 				somethingWasPasted = true;
 			}
@@ -2403,7 +2497,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 	}
 
 	/**
-	 * Paste using supplied clipboard and property, asserting a pasting point could be found<br>
+	 * Paste using supplied clipboard and property, asserting a pasting point could
+	 * be found<br>
 	 * Return pasted objects for supplied property
 	 *
 	 * @param clipboard
@@ -2421,13 +2516,13 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		}
 		if (modelProperty.getSetPastingPoint() != null && modelProperty.getAddPastingPoint() != null) {
 			throw new ClipboardOperationException(
-					"Ambiguous pasting operations: both add and set operations are available for property " + modelProperty);
+					"Ambiguous pasting operations: both add and set operations are available for property "
+							+ modelProperty);
 		}
 		// Do it as a SET
 		if (modelProperty.getSetPastingPoint() != null) {
 			return paste(clipboard, modelProperty, modelProperty.getSetPastingPoint());
-		}
-		else {
+		} else {
 			// Do it as a ADD
 			Object returned = paste(clipboard, modelProperty, modelProperty.getAddPastingPoint());
 			return returned;
@@ -2460,35 +2555,36 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 
 		// System.out.println("entity=" + entity);
 		// System.out.println("modelProperty=" + modelProperty);
-		// System.out.println("entity.hasProperty(modelProperty)=" + entity.hasProperty(modelProperty));
+		// System.out.println("entity.hasProperty(modelProperty)=" +
+		// entity.hasProperty(modelProperty));
 
 		if (entity.hasProperty(modelProperty) || modelProperty.getModelEntity().isAncestorOf(entity)) {
 			if (modelProperty.getSetPastingPoint() == pp) {
 				if (!clipboard.isSingleObject()) {
-					throw new ClipboardOperationException("Cannot paste here: multiple cardinality clipboard for a SINGLE property");
+					throw new ClipboardOperationException(
+							"Cannot paste here: multiple cardinality clipboard for a SINGLE property");
 				}
 				Object valueToSet = clipboard.getSingleContents();
 				invokeSetter(modelProperty, valueToSet);
 				// clipboard.consume();
 				return valueToSet;
-			}
-			else if (modelProperty.getAddPastingPoint() == pp) {
+			} else if (modelProperty.getAddPastingPoint() == pp) {
 				if (clipboard.isSingleObject()) {
 					Object valueToAdd = clipboard.getSingleContents();
 					invokeAdder(modelProperty, valueToAdd);
 					// clipboard.consume();
 					return valueToAdd;
-				}
-				else {
+				} else {
 					List<Object> returned = new ArrayList<>();
 					for (Object o : clipboard.getMultipleContents()) {
 						if (TypeUtils.isTypeAssignableFrom(modelProperty.getType(), o.getClass())) {
-							// System.out.println("PASTE: add " + o + " to " + getObject() + " with " + modelProperty);
+							// System.out.println("PASTE: add " + o + " to " + getObject() + " with " +
+							// modelProperty);
 							invokeAdder(modelProperty, o);
 							returned.add(o);
-						}
-						else {
-							// System.out.println("PASTE: cannot add " + o + " to " + getObject() + " with " + modelProperty);
+						} else {
+							// System.out.println("PASTE: cannot add " + o + " to " + getObject() + " with "
+							// + modelProperty);
 						}
 					}
 					// clipboard.consume();
@@ -2503,7 +2599,7 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 	@Override
 	public String toString() {
 		try {
-			return internallyInvokeToString();
+			return internallyInvokeToString(Collections.newSetFromMap(new IdentityHashMap<>()));
 		} catch (ModelDefinitionException e) {
 			e.printStackTrace();
 			return super.toString();
@@ -2511,6 +2607,18 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 	}
 
 	private String internallyInvokeToString() throws ModelDefinitionException {
+		return internallyInvokeToString(Collections.newSetFromMap(new IdentityHashMap<>()));
+	}
+
+	private String internallyInvokeToString(Set<Object> visitedObjects) throws ModelDefinitionException {
+		//TODO this overloadding was added by copilot after a suggestion during a debug session
+		Object currentObject = getObject();
+		if (currentObject != null) {
+			if (!visitedObjects.add(currentObject)) {
+				//TODO this branch was added by copilot after a suggestion during a debug session	
+				return getModelEntity().getImplementedInterface().getSimpleName() + "[<cycle>]";
+			}
+		}
 		StringBuilder sb = new StringBuilder();
 		sb.append(getModelEntity().getImplementedInterface().getSimpleName() + "[");
 		List<String> variables = new ArrayList<>(propertyImplementations.keySet());
@@ -2521,20 +2629,20 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 			if (obj != null) {
 				if (!(obj instanceof ProxyObject)) {
 					s = indent(obj.toString(), var.length() + 1);
-				}
-				else {
-					s = ((ProxyMethodHandler) ((ProxyObject) obj).getHandler()).getModelEntity().getImplementedInterface().getSimpleName();
-					/*
-						* TODO this is how we can get a ProxyObject instance at runtime
-						* TODO why in invokeToString ?
-					*/
-
+				} else {
+					ProxyMethodHandler nestedHandler = (ProxyMethodHandler) ((ProxyObject) obj).getHandler();
+					s = nestedHandler.getModelEntity().getImplementedInterface().getSimpleName();
+					//TODO this was modified by copilot after a suggestion during a debug session
 				}
 
 			}
 			sb.append(var).append("=").append(s).append('\n');
 		}
 		sb.append("]");
+		if (currentObject != null) {
+		//TODO this branch was added by copilot after a suggestion during a debug session	
+			visitedObjects.remove(currentObject);
+		}
 		return sb.toString();
 	}
 
@@ -2578,10 +2686,10 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		if (this.deserializing != deserializing) {
 			this.deserializing = deserializing;
 			if (deserializing) {
-				// At the begining of the deserialization process, we also need to mark the object as initialized
+				// At the begining of the deserialization process, we also need to mark the
+				// object as initialized
 				initialized = true;
-			}
-			else {
+			} else {
 				modified = false;
 			}
 			firePropertyChange(DESERIALIZING, !deserializing, deserializing);
@@ -2601,18 +2709,19 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 				if (!old) {
 					firePropertyChange(MODIFIED, old, modified);
 					if (getModelEntity().getModify() != null && getModelEntity().getModify().forward() != null) {
-						ModelProperty<? super I> modelProperty = getModelEntity().getModelProperty(getModelEntity().getModify().forward());
+						ModelProperty<? super I> modelProperty = getModelEntity()
+								.getModelProperty(getModelEntity().getModify().forward());
 						if (modelProperty != null) {
 							Object forward = invokeGetter(modelProperty);
 							if (forward instanceof ProxyObject) {
-								((ProxyMethodHandler<?>) ((ProxyObject) forward).getHandler()).invokeSetModified(modified);
+								((ProxyMethodHandler<?>) ((ProxyObject) forward).getHandler())
+										.invokeSetModified(modified);
 							}
 						}
 					}
 				}
 			}
-		}
-		else if (this.modified != modified) {
+		} else if (this.modified != modified) {
 			this.modified = modified;
 			firePropertyChange(MODIFIED, !modified, modified);
 		}
@@ -2648,12 +2757,15 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		if (jmlMethodDefinition != null) {
 			ModelProperty<? super I> property = getModelEntity().getPropertyForMethod(method);
 			if (jmlMethodDefinition.getRequires() != null) {
-				// System.out.println("Check pre-condition " + jmlMethodDefinition.getRequires().getExpression());
+				// System.out.println("Check pre-condition " +
+				// jmlMethodDefinition.getRequires().getExpression());
 				((JMLRequires) jmlMethodDefinition.getRequires()).check(this, args);
 			}
 			if (jmlMethodDefinition.getEnsures() != null) {
-				// System.out.println("Init post-condition " + jmlMethodDefinition.getEnsures().getExpression());
-				Map<String, Object> historyValuesForThisMethod = ((JMLEnsures) jmlMethodDefinition.getEnsures()).checkOnEntry(this, args);
+				// System.out.println("Init post-condition " +
+				// jmlMethodDefinition.getEnsures().getExpression());
+				Map<String, Object> historyValuesForThisMethod = ((JMLEnsures) jmlMethodDefinition.getEnsures())
+						.checkOnEntry(this, args);
 				historyValues.put(method, historyValuesForThisMethod);
 			}
 		}
@@ -2677,7 +2789,8 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		if (jmlMethodDefinition != null) {
 			ModelProperty<? super I> property = getModelEntity().getPropertyForMethod(method);
 			if (jmlMethodDefinition.getEnsures() != null) {
-				// System.out.println("Check post-condition " + jmlMethodDefinition.getEnsures().getExpression());
+				// System.out.println("Check post-condition " +
+				// jmlMethodDefinition.getEnsures().getExpression());
 				((JMLEnsures) jmlMethodDefinition.getEnsures()).checkOnExit(this, args, historyValues.get(method));
 			}
 		}

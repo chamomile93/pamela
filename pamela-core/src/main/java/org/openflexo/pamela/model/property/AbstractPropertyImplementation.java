@@ -23,6 +23,8 @@ import org.openflexo.toolbox.HasPropertyChangeSupport;
  * @param <M>
  *            internal memory adressable for a given entity instance and property
  */
+//TODO might need to understand this, I came here while trying to understand the test of InitializePropertyTest. I am not familiar with this concept yet
+//TODO might need to understand this, I came here while trying to understand the test of InitializePropertyTest. I am not familiar with this concept yet
 public abstract class AbstractPropertyImplementation<I, T> implements PropertyImplementation<I, T> {
 
 	private final ProxyMethodHandler<I> handler;
@@ -57,6 +59,28 @@ public abstract class AbstractPropertyImplementation<I, T> implements PropertyIm
 	@Override
 	public ModelProperty<I> getProperty() {
 		return property;
+	}
+
+	protected Object getDebugValue() {
+		return null;
+	}
+
+	@Override
+	public String toString() {
+		//TODO this was added by copilot after a suggestion during a debug session
+		StringBuilder sb = new StringBuilder();
+		sb.append(getModelEntity().getImplementedInterface().getSimpleName());
+		sb.append('.');
+		sb.append(getProperty().getPropertyIdentifier());
+		sb.append("=");
+		Object debugValue = getDebugValue();
+		sb.append(String.valueOf(debugValue));
+		if (debugValue != null) {
+			sb.append(" (");
+			sb.append(debugValue.getClass().getSimpleName());
+			sb.append(')');
+		}
+		return sb.toString();
 	}
 
 	protected void firePropertyChange(String propertyIdentifier, Object oldValue, Object value) {

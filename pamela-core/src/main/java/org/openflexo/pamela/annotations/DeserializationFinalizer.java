@@ -51,6 +51,7 @@ import java.lang.annotation.Target;
  * @author sylvain
  * 
  */
+//TODO currently c/C without really having to
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface DeserializationFinalizer {

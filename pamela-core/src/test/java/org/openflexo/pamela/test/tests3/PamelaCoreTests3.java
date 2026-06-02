@@ -25,20 +25,21 @@ public class PamelaCoreTests3 {
 	public void testFactory() {
 
 		try {
-			PamelaModelFactory factory = new PamelaModelFactory(PamelaMetaModelLibrary.retrieveMetaModel(MySpecializedContainer.class,
+			PamelaModelFactory mySpecializedContainerContentFactory = new PamelaModelFactory(PamelaMetaModelLibrary.retrieveMetaModel(MySpecializedContainer.class,
 					MySpecializedContents.class));
 
-			ModelEntity<MyContainer> myContainerEntity = factory.getPamelaMetaModel().getModelEntity(MyContainer.class);
-			ModelEntity<MySpecializedContainer> mySpecializedContainerEntity = factory.getPamelaMetaModel().getModelEntity(
+			ModelEntity<MyContainer> myContainerEntity = mySpecializedContainerContentFactory.getPamelaMetaModel().getModelEntity(MyContainer.class);
+			ModelEntity<MySpecializedContainer> mySpecializedContainerEntity = mySpecializedContainerContentFactory.getPamelaMetaModel().getModelEntity(
 					MySpecializedContainer.class);
-			ModelEntity<MyContents> myContentsEntity = factory.getPamelaMetaModel().getModelEntity(MyContents.class);
-			ModelEntity<MySpecializedContents> mySpecializedContentsEntity = factory.getPamelaMetaModel().getModelEntity(
+			ModelEntity<MyContents> myContentsEntity = mySpecializedContainerContentFactory.getPamelaMetaModel().getModelEntity(MyContents.class);
+			ModelEntity<MySpecializedContents> mySpecializedContentsEntity = mySpecializedContainerContentFactory.getPamelaMetaModel().getModelEntity(
 					MySpecializedContents.class);
 
 			assertNotNull(myContainerEntity);
 			assertNotNull(mySpecializedContainerEntity);
 			assertNotNull(myContentsEntity);
 			assertNotNull(mySpecializedContentsEntity);
+			//TODO what other test could be done ?
 
 		} catch (ModelDefinitionException e) {
 			e.printStackTrace();
@@ -52,20 +53,20 @@ public class PamelaCoreTests3 {
 	@Test
 	public void testInstanciate() throws Exception {
 
-		PamelaModelFactory factory = new PamelaModelFactory(PamelaMetaModelLibrary.retrieveMetaModel(MySpecializedContainer.class,
+		PamelaModelFactory mySpecializedContainerContentFactory = new PamelaModelFactory(PamelaMetaModelLibrary.retrieveMetaModel(MySpecializedContainer.class,
 				MySpecializedContents.class));
 
-		MySpecializedContainer container = factory.newInstance(MySpecializedContainer.class);
-		MySpecializedContents contents = factory.newInstance(MySpecializedContents.class);
+		MySpecializedContainer mySpecializedContainer = mySpecializedContainerContentFactory.newInstance(MySpecializedContainer.class);
+		MySpecializedContents mySpecializedContents = mySpecializedContainerContentFactory.newInstance(MySpecializedContents.class);
 
 		try {
-			container.setContents(contents);
+			mySpecializedContainer.setContents(mySpecializedContents);
 		} catch (Throwable e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
 
-		assertEquals(contents, container.getContents());
+		assertEquals(mySpecializedContents, mySpecializedContainer.getContents());
 
 	}
 

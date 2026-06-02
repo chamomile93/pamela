@@ -4,24 +4,55 @@ sidebar_position: 10
 
 # Persistance support, XML serialization/deserialization
 
-In most applications, persistency is generally required to guarantee the recovery and communication of structured data along time and applications.
+In most applications, persistence is generally required to guarantee the recovery and communication of structured data along time and applications.
 
 While PAMELA framework is agnostic from a serialization format, today only `XML` serialization is provided, but other serialization formats are beeing considered, such as `JSON`.
 
 Support for XML serialization in PAMELA requires that underlying model is annotated using those two annotations `@XMLElement` and `@XMLAttribute`.
 
 - `@XMLElement` : This annotation should be defined either on a *ModelEntity* or on a *ModelProperty* (in this case with an eventual contextual prefix to avoid ambiguities between properties addressing this type).
+
+```java
+@XMLElement
+@ModelEntity
+public interface Node extends AccessibleProxyObject {...}
+```
+
+```java
+@XMLElement(primary = true)
+@Getter(value = NODES, cardinality = Cardinality.LIST, inverse = PARENT_NODE)
+@Embedded
+public List<Node> getNodes();
+```
+
 - `@XMLAttribute`: This annotation should be defined on a *ModelProperty*
+
+```java
+@XMLAttribute(xmlTag = NAME)
+@Getter(value = NAME, defaultValue = "???")
+public String getName();
+```
 
 Serialization scheme relies on a String serializer/deserializer for common types, and allows alternatives types custom serializer/deserializer, which should be defined as add-ons.
 
 The encoding of the object graph structure (and not only trees, as reflected by XML structure) relies on references (use of `idref` attributes). The serialization strategy is highly configurable, and allows a persistent-stable structure using a `primary` feature defined on some *ModelProperties* (referenced object will be preferably extensively serialized as this location).
-
-//TODO idf
+<!-- TODO idf the usage of this attribute and how this support "stable structure" ? -->
+<!-- TODO idf the part "referenced object" , "will be preferably" , "extensively serialized" and "at this location" -->
+<!-- TODO idf so "primary" says that the type will be referenced ? -->
 
 Serialization and deserialization processes are provided with extension points (serialization/deserialization initializers/deserializers), where the developer may inject some specific code.
+<!-- TODO confused by the "serialization initializers. I didn't find this concept in the code -->
+<!-- TODO confused by "initializers/deserializers". should be "initializers/finalizers" ? -->
 
-//TODO idf
+```java
+@DeserializationInitializer
+public void initializeDeserialization();
+
+@DeserializationFinalizer
+public void finalizeDeserialization();
+```
+
+<!-- TODO idf what overloading I would do today in @DeseralizationFinalizer and Initializer -->
 
 Excerpt of code showing XML serialization directives, and exposing deserialization extension points.
 
@@ -95,6 +126,5 @@ public interface Node extends AccessibleProxyObject {
 			System.out.println("Finalize deserialization for Node " + getName());
 		}
 	}
-
 }
 ```java

@@ -19,6 +19,7 @@ public class ContainmentTest {
 
 	/**
 	 * Test the diagram factory
+	 * //TODO why use the term "diagram" ?
 	 */
 	@Test
 	public void testFactory() {

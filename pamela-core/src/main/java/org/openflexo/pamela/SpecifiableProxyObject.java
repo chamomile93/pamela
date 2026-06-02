@@ -45,6 +45,7 @@ package org.openflexo.pamela;
  * @author sylvain
  * 
  */
+//TODO idf and might be needed
 public interface SpecifiableProxyObject {
 
 	public void enableAssertionChecking();

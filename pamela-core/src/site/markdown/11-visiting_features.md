@@ -4,12 +4,13 @@ sidebar_position: 12
 
 # Visiting features
 
-Visitor pattern is offered by `AccessibleProxyObject` base API, with the two methods `accept(PAMELAVisitor)` and `accept(PAMELAVisitor,VisitingStrategy)`. 
+Visitor pattern is offered by `AccessibleProxyObject` base API, with the two methods `accept(PAMELAVisitor)` and `accept(PAMELAVisitor,VisitingStrategy)`.
 
-The visiting strategy should be one of `Embedding` or `Exhaustive` (default strategy is `Embedding`), where `PAMELAVisitor` is a trivial Java interface presenting the method `visit(Object(Object)`. 
+The visiting strategy should be one of `Embedding` or `Exhaustive` (default strategy is `Embedding`), where `PAMELAVisitor` is a trivial Java interface presenting the method `visit(Object(Object)`.
 
-- `Embedding` visiting strategy results in a deep-first tree exploration where the tree is the covering tree supported by embedding properties. 
+- `Embedding` visiting strategy results in a deep-first tree exploration where the tree is the covering tree supported by embedding properties.
 - `Exhaustive` visiting strategy result in a full exploration of the object graph.
+<!-- TODO idf the difference -->
 
 Here is the API of visitor pattern:
 
@@ -20,16 +21,16 @@ public interface AccessibleProxyObject extends HasPropertyChangeSupport, KeyValu
 
 	/**
 	 * Called to be visited by a {@link PAMELAVisitor}
-	 * 
+	 *
 	 * Default strategy is Embedding
-	 * 
+	 *
 	 * @param visitor
 	 */
 	public void accept(PAMELAVisitor visitor);
 
 	/**
 	 * Called to be visited by a {@link PAMELAVisitor}
-	 * 
+	 *
 	 * @param visitor
 	 * @param strategy
 	 */
@@ -39,7 +40,7 @@ public interface AccessibleProxyObject extends HasPropertyChangeSupport, KeyValu
 }
 ```
 
-With a visitor declared as a class implementing:
+With a visitor declared as a class implementing `PAMELAVisitor` :
 
 ```java
 public interface PAMELAVisitor {
@@ -51,11 +52,3 @@ public interface PAMELAVisitor {
 	}
 }
 ```
-
-
-
-
- 
-
-    
-  

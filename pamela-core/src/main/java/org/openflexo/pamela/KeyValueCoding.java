@@ -52,6 +52,7 @@ import java.lang.reflect.Type;
  * @author sguerin
  * 
  */
+//TODO idf and seems to be important
 public interface KeyValueCoding {
 
 	/**

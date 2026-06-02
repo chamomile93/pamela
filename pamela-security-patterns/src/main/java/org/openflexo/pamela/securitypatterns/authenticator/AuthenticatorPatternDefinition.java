@@ -53,12 +53,14 @@ import org.openflexo.pamela.patterns.PatternDefinition;
 import org.openflexo.pamela.securitypatterns.authenticator.annotations.RequiresAuthentication;
 
 /**
- * Represents an occurence of an <code>Authenticator Pattern</code>. An instance is uniquely identified by the <code>patternID</code> field
+ * Represents an occurence of an <code>Authenticator Pattern</code>. An instance
+ * is uniquely identified by the <code>patternID</code> field
  * of associated annotations.<br>
  *
  * It has the responsibility of:
  * <ul>
- * <li>Managing life-cycle of {@link AuthenticatorPatternInstance}, while beeing notified from the creation of new instances by the
+ * <li>Managing life-cycle of {@link AuthenticatorPatternInstance}, while beeing
+ * notified from the creation of new instances by the
  * {@link PamelaModelFactory} and {@link PamelaMetaModel}</li>
  * <li>Tagging which methods have to be involved in pattern</li>
  * </ul>
@@ -72,9 +74,36 @@ public class AuthenticatorPatternDefinition extends PatternDefinition {
 	public static final String AUTHENTICATOR_ROLE = "Authenticator";
 
 	public ModelEntity<?> authenticatorModelEntity; // @Authenticator
+
+	// TODO this refer to the method annotated with @AuthenticateMethod ?
+	/*
+	 * “The method authenticate() (line 24 of the listing 2 is identified via the
+	 * annotation @AuthenticateMethod to the method request of the pattern
+	 * Authenticator as presented in Figure 2.” ([Guérin et al., 2024, p.
+	 * 108](zotero://select/groups/5473375/items/YDQCSL3Y))
+	 * ([pdf](zotero://open-pdf/groups/5473375/items/XGVYBYR5?page=6&annotation=
+	 * PGXHDZ9W))
+	 */
+	/*
+	 * TODO then idf why
+	 * “The checkSecure() method is annotated as @RequiresAuthentication, line
+	 * 25-26,” ([Guérin et al., 2024, p.
+	 * 108](zotero://select/groups/5473375/items/YDQCSL3Y))
+	 * ([pdf](zotero://open-pdf/groups/5473375/items/XGVYBYR5?page=6&annotation=
+	 * 2TBHYYAY))
+	 * 
+	 */
 	public Method requestAuthentificationMethod; // @RequestAuthentication
 	public int authentificationInfoParameterIndex; // @AuthenticationInformation in parameter
 
+	/**
+	 * TODO maybe FIX this? since this assumes ISubject is part of the model
+	 * library, which is not
+	 * necessarily the case, as this happened in the {@link SerializationTests} case
+	 * for IAuthenticator current fix is to add ISubject in the of the
+	 * IAuthenticator, and this seems not satisfying as it creates a dependency
+	 * between the two, which doesn't seem necessary yet.
+	 */
 	public ModelEntity<?> subjectModelEntity; // @AuthenticatorSubject
 	public Method authentificationInfoMethod; // @AuthenticationInformation
 	public Method proofOfIdentitySetterMethod; // @ProofOfIdentitySetter
@@ -87,30 +116,32 @@ public class AuthenticatorPatternDefinition extends PatternDefinition {
 		super(identifier, pamelaMetaModel);
 	}
 
-	/* TODO
-		when updating code in this package
-		do not forget :
-
-		./gradlew clean jar publishMavenJavaPublicationToMavenLocal
-
-		to get acces to this interface in other packages, such as hillary
+	/*
+	 * TODO
+	 * when updating code in this package
+	 * do not forget :
+	 * 
+	 * ./gradlew clean jar publishMavenJavaPublicationToMavenLocal
+	 * 
+	 * to get acces to this interface in other packages, such as hillary
 	 */
 	public static void updateAuthenticator() throws ModelDefinitionException {
-		//TODO idk yet
+		// TODO idk yet
 		/*
-		this might use the runtime method proxy newly added to add the invariant to the AuthenticatorInstance ? */
-		PamelaModelFactory factory = new PamelaModelFactory(PamelaMetaModelLibrary.retrieveMetaModel(AuthenticatorPatternInstance.class));
-		AuthenticatorPatternInstance authenticatorPatternInstance = factory.newInstance(AuthenticatorPatternInstance.class);
+		 * this might use the runtime method proxy newly added to add the invariant to
+		 * the AuthenticatorInstance ?
+		 */
+		PamelaModelFactory factory = new PamelaModelFactory(
+				PamelaMetaModelLibrary.retrieveMetaModel(AuthenticatorPatternInstance.class));
+		AuthenticatorPatternInstance authenticatorPatternInstance = factory
+				.newInstance(AuthenticatorPatternInstance.class);
 		AccessibleProxyObject proxyAuthenticatorPatternInstance = (AccessibleProxyObject) authenticatorPatternInstance;
 
-		proxyAuthenticatorPatternInstance.registerRuntimeMethod("checkAuthInfoIsFinal", (receiver, args)
-			-> {((AuthenticatorPatternInstance<?, ?, ?, ?>) receiver).checkAuthInfoIsFinal();
-				return null;
-			}
-		);
+		proxyAuthenticatorPatternInstance.registerRuntimeMethod("checkAuthInfoIsFinal", (receiver, args) -> {
+			((AuthenticatorPatternInstance<?, ?, ?, ?>) receiver).checkAuthInfoIsFinal();
+			return null;
+		});
 	}
-
-
 
 	@Override
 	public void finalizeDefinition() throws ModelDefinitionException {
@@ -125,7 +156,8 @@ public class AuthenticatorPatternDefinition extends PatternDefinition {
 			}
 		}
 		if (proofOfIdentityGetterMethod == null) {
-			throw new ModelDefinitionException("No getter for Proof of identity in " + subjectModelEntity.getImplementedInterface());
+			throw new ModelDefinitionException(
+					"No getter for Proof of identity in " + subjectModelEntity.getImplementedInterface());
 		}
 	}
 
@@ -134,7 +166,8 @@ public class AuthenticatorPatternDefinition extends PatternDefinition {
 		// System.out.println("notifiedNewInstance " + newInstance);
 		if (modelEntity == subjectModelEntity) {
 			// We create a new PatternInstance for each new instance of subjectModelEntity
-			AuthenticatorPatternInstance<?, I, ?, ?> newPatternInstance = new AuthenticatorPatternInstance(this, newInstance);
+			AuthenticatorPatternInstance<?, I, ?, ?> newPatternInstance = new AuthenticatorPatternInstance(this,
+					newInstance);
 		}
 	}
 
@@ -151,7 +184,8 @@ public class AuthenticatorPatternDefinition extends PatternDefinition {
 			return true;
 		}
 		try {
-			Method apiMethod = subjectModelEntity.getImplementedInterface().getMethod(method.getName(), method.getParameterTypes());
+			Method apiMethod = subjectModelEntity.getImplementedInterface().getMethod(method.getName(),
+					method.getParameterTypes());
 			if (apiMethod.getAnnotation(RequiresAuthentication.class) != null) {
 				return true;
 			}

@@ -60,12 +60,14 @@ import org.openflexo.pamela.model.StringConverterLibrary.Converter;
  * @author gpolet
  * 
  */
+//TODO maybe use this to convert "any" "Type" to string like IAuthenticator ?
 public class TypeConverter extends Converter<Type> {
 
 	private final Map<Class<? extends CustomType>, CustomTypeFactory<?>> factories;
 
 	private final List<CustomType> deserializedTypes = new ArrayList<>();
 
+	//TODO maybe my ISubject should extend CustomType?
 	public TypeConverter(Map<Class<? extends CustomType>, CustomTypeFactory<?>> factories) {
 		super(Type.class);
 		this.factories = factories;
@@ -185,7 +187,7 @@ public class TypeConverter extends Converter<Type> {
 
 	@Override
 	public String convertToString(Type value) {
-
+		//TODO what is this CustomType concept?
 		if (value instanceof CustomType) {
 			return value.getClass().getName() + "<" + ((CustomType) value).getSerializationRepresentation() + ">";
 		}

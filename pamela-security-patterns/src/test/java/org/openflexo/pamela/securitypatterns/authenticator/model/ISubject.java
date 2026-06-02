@@ -18,7 +18,7 @@ import org.openflexo.pamela.securitypatterns.authenticator.annotations.RequiresA
 @AuthenticatorSubject(patternID = ISubject.PATTERN_ID)
 public interface ISubject extends AccessibleProxyObject {
 	String PATTERN_ID = "patternID";
-	String AUTH_INFO = "auth_info1";
+	String AUTH_INFO = "auth_info";
 	String MANAGER = "manager";
 	String ID_PROOF = "id_proof";
 
@@ -60,7 +60,7 @@ public interface ISubject extends AccessibleProxyObject {
 	@RequiresAuthentication
 	public void thisMethodRequiresToBeAuthenticated();
 
-	abstract class SubjectImp implements ISubject {
+	public static abstract class SubjectImp implements ISubject {
 
 		@Override
 		public void thisMethodRequiresToBeAuthenticated() {

@@ -49,6 +49,7 @@ import org.openflexo.pamela.model.StringConverterLibrary.Converter;
  * @author gpolet
  * 
  */
+//TODO idf how I could use this while working on the deserialization test case ?
 public class DataBindingConverter extends Converter<DataBinding<?>> {
 
 	public DataBindingConverter() {

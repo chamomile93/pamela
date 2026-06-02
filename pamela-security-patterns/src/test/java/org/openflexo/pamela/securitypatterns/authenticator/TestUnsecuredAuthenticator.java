@@ -1,8 +1,8 @@
 package org.openflexo.pamela.securitypatterns.authenticator;
 
 import org.junit.Test;
-import org.openflexo.pamela.securitypatterns.authenticator.model2.MyAuthenticator;
-import org.openflexo.pamela.securitypatterns.authenticator.model2.MySubject;
+import org.openflexo.pamela.securitypatterns.authenticator.modelWithAlloy.MyAuthenticator;
+import org.openflexo.pamela.securitypatterns.authenticator.modelWithAlloy.MySubject;
 
 import junit.framework.TestCase;
 

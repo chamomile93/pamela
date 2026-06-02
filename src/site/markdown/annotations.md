@@ -12,13 +12,20 @@ Here is a non-exhaustive list of the most common Java annotations used for a PAM
 - `@Getter(String)`: tag annotating method as unique getter for implicit *ModelProperty* whose identifier is the declared String value. May also declares cardinality, eventual inverse property, default value and some other features.
 - `@Setter(String)`: tag annotating method as unique setter for implicit *ModelProperty* whose identifier is the declared String value.
 - `@Adder(String)`: tag annotating method as unique adder for implicit multiple cardinality *ModelProperty* whose identifier is the declared String value.
+<!-- TODO this annotation is still confusing -->
 - `@Remover(String)`: tag annotating method as unique remover for implicit multiple cardinality *ModelProperty* whose identifier is the declared String value.
+<!-- TODO this annotation is still confusing -->
 - `@Reindexer(String)`: tag annotating method as unique reindexer for implicit multiple cardinality *ModelProperty* whose identifier is the declared String value.
+<!-- TODO this annotation is still confusing -->
 - `@Initializer`: tag annotating a method used as a constructor for related *ModelEntity*.
 - `@Deleter`: tag annotating a method used as explicit destructor for related *ModelEntity*.
+<!-- TODO this annotation is still confusing -->
 - `@Finder(String,String)`: tag annotating method as a fetching request for a given *ModelProperty* with a given attribute.
+<!-- TODO this annotation is still confusing -->
 - `@CloningStrategy`: allows to customize cloning strategy for a given *ModelProperty*.
+<!-- TODO this annotation is still confusing -->
 - `@Embedded`: allows to declare a given *ModelProperty* as embedded according to PAMELA semantics.
+<!-- TODO this annotation is still confusing, as well as the "semantics" -->
 - `@Imports` and `@Imports`: allows to declare entities to be included in the inferred metamodel by `ModelContext` computation.
 - `@XMLElement` and `@XMLAttribute`: used to specify XML serialization for PAMELA instances.
 

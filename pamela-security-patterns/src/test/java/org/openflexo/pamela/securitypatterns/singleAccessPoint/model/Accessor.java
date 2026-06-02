@@ -3,8 +3,8 @@ package org.openflexo.pamela.securitypatterns.singleAccessPoint.model;
 import org.openflexo.pamela.annotations.Getter;
 import org.openflexo.pamela.annotations.ModelEntity;
 import org.openflexo.pamela.annotations.Setter;
-import org.openflexo.pamela.securitypatterns.singleAccessPoint.SingleAccessPointPatternDefinition;
-import org.openflexo.pamela.securitypatterns.singleAccessPoint.annotations.*;
+import org.openflexo.pamela.securitypatterns.singleAccessPoint.annotations.RequiredForAccess;
+import org.openflexo.pamela.securitypatterns.singleAccessPoint.annotations.SingleAccessPointClient;
 
 @ModelEntity
 @SingleAccessPointClient(patternID = ProtectedSystem.PATTERN_ID)

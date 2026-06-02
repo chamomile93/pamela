@@ -15,6 +15,7 @@ import org.openflexo.pamela.model.ModelProperty;
  * @param <T>
  *            accessed type for the property
  */
+//TODO might need to understand this, I came here while trying to understand the test of InitializePropertyTest. I am not familiar with this concept yet
 public interface PropertyImplementation<I, T> {
 
 	public ModelProperty<I> getProperty();

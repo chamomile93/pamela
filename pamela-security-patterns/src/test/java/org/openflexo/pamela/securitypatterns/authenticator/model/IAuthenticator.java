@@ -3,9 +3,12 @@ package org.openflexo.pamela.securitypatterns.authenticator.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.openflexo.pamela.AccessibleProxyObject;
 import org.openflexo.pamela.annotations.Adder;
 import org.openflexo.pamela.annotations.Getter;
 import org.openflexo.pamela.annotations.ImplementationClass;
+import org.openflexo.pamela.annotations.Import;
+import org.openflexo.pamela.annotations.Imports;
 import org.openflexo.pamela.annotations.Initializer;
 import org.openflexo.pamela.annotations.ModelEntity;
 import org.openflexo.pamela.annotations.Remover;
@@ -18,8 +21,10 @@ import org.openflexo.pamela.securitypatterns.authenticator.annotations.RequestAu
 
 @ModelEntity
 @ImplementationClass(IAuthenticator.AuthenticatorImp.class)
+@Imports({ @Import(ISubject.class) })
 @Authenticator(patternID = ISubject.PATTERN_ID)
-public interface IAuthenticator {
+public interface IAuthenticator extends AccessibleProxyObject {
+
 	String USERS = "users";
 	String ID = "id";
 
@@ -52,7 +57,7 @@ public interface IAuthenticator {
 		return -42;
 	}
 
-	abstract class AuthenticatorImp implements IAuthenticator {
+	public static abstract class AuthenticatorImp implements IAuthenticator {
 		@Override
 		public int request(String id) {
 			if (this.check(id)) {
@@ -78,7 +83,6 @@ public interface IAuthenticator {
 		public void aMethodGuardedWithAPrecondition() {
 			System.out.println("aMethodGuardedWithAPrecondition");
 		}
-
 	}
 
 }

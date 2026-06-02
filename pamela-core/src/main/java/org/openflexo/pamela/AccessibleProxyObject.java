@@ -270,9 +270,10 @@ public interface AccessibleProxyObject extends HasPropertyChangeSupport, KeyValu
 	 * Return whether supplied object is equals to this, regarding persistant properties defined as PAMELA model
 	 * 
 	 * @param obj
-	 *            object to compare with, which should be of same type (otherwise return false)
+	 *            object to compare with, which should be of  same type (otherwise return false)
 	 * @return
 	 */
+	// TODO i might use this instead of defining my own equality in IAuthenticator ?
 	public boolean equalsObject(Object obj);
 
 	/**
@@ -284,6 +285,7 @@ public interface AccessibleProxyObject extends HasPropertyChangeSupport, KeyValu
 	 *            a function returning boolean indicating if supplied property has to be considered
 	 * @return
 	 */
+	//TODO idf the function part, also not document enough
 	public boolean equalsObject(Object obj, Function<ModelProperty<?>, Boolean> considerProperty);
 
 	/**

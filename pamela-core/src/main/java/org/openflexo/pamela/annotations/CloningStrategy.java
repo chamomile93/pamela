@@ -52,6 +52,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = ElementType.METHOD)
+//TODO i still don't follow why I would use this for serialization or in broader context
 public @interface CloningStrategy {
 
 	enum StrategyType {

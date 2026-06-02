@@ -55,6 +55,11 @@ import com.google.common.cache.LoadingCache;
 
 /**
  * A specialization for {@link AuthenticatorPatternDefinition}
+ *
+ * @param <S>  the type of the Subject
+ * @param <A>  the type of the Authenticator
+ * @param <AI> the type of the Authentication Information
+ * @param <PI> the type of the Proof of Identity
  */
 public class CustomAuthenticatorPatternInstance<A, S, AI, PI> extends AuthenticatorPatternInstance<A, S, AI, PI> {
 
@@ -66,13 +71,14 @@ public class CustomAuthenticatorPatternInstance<A, S, AI, PI> extends Authentica
 	public CustomAuthenticatorPatternInstance(CustomAuthenticatorPatternDefinition patternDefinition, S subject) {
 		super(patternDefinition, subject);
 		key = ((SessionInfo) subject).getIpAdress();
-		attemptsCache = CacheBuilder.newBuilder().expireAfterWrite(3, TimeUnit.MINUTES).build(new CacheLoader<String, Integer>() {
-			@Override
-			public Integer load(String key) {
-				return 0;
-			}
+		attemptsCache = CacheBuilder.newBuilder().expireAfterWrite(3, TimeUnit.MINUTES)
+				.build(new CacheLoader<String, Integer>() {
+					@Override
+					public Integer load(String key) {
+						return 0;
+					}
 
-		});
+				});
 	}
 
 	@Override
@@ -102,44 +108,46 @@ public class CustomAuthenticatorPatternInstance<A, S, AI, PI> extends Authentica
 
 		}
 
-		/*		else if (precondition.property().equals("assert always not(a)[*0:10];a")) {
-					
-				    private final int MAX_ATTEMPT = 10;
-				    private LoadingCache<String, Integer> attemptsCache;
-		
-				    attemptsCache = CacheBuilder.newBuilder().
-				    expireAfterWrite(1, TimeUnit.DAYS).build(new CacheLoader<String, Integer>() {
-				            public Integer load(String key) {
-				                return 0;
-				            }
-				    
-				    });
-				        
-		
-				    public void loginSucceeded(String key) {
-				        attemptsCache.invalidate(key);
-				    }
-		
-				    public void loginFailed(String key) {
-				        int attempts = 0;
-				        try {
-				            attempts = attemptsCache.get(key);
-				        } catch (ExecutionException e) {
-				            attempts = 0;
-				        }
-				        attempts++;
-				        attemptsCache.put(key, attempts);
-				    }
-		
-				    public boolean isBlocked(String key) {
-				        try {
-				            return attemptsCache.get(key) >= MAX_ATTEMPT;
-				        } catch (ExecutionException e) {
-				            return false;
-				     }
-				  }
-					
-				}*/
+		/*
+		 * else if (precondition.property().equals("assert always not(a)[*0:10];a")) {
+		 * 
+		 * private final int MAX_ATTEMPT = 10;
+		 * private LoadingCache<String, Integer> attemptsCache;
+		 * 
+		 * attemptsCache = CacheBuilder.newBuilder().
+		 * expireAfterWrite(1, TimeUnit.DAYS).build(new CacheLoader<String, Integer>() {
+		 * public Integer load(String key) {
+		 * return 0;
+		 * }
+		 * 
+		 * });
+		 * 
+		 * 
+		 * public void loginSucceeded(String key) {
+		 * attemptsCache.invalidate(key);
+		 * }
+		 * 
+		 * public void loginFailed(String key) {
+		 * int attempts = 0;
+		 * try {
+		 * attempts = attemptsCache.get(key);
+		 * } catch (ExecutionException e) {
+		 * attempts = 0;
+		 * }
+		 * attempts++;
+		 * attemptsCache.put(key, attempts);
+		 * }
+		 * 
+		 * public boolean isBlocked(String key) {
+		 * try {
+		 * return attemptsCache.get(key) >= MAX_ATTEMPT;
+		 * } catch (ExecutionException e) {
+		 * return false;
+		 * }
+		 * }
+		 * 
+		 * }
+		 */
 
 	}
 

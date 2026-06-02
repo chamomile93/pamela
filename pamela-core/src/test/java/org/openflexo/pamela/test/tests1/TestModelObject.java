@@ -31,6 +31,7 @@ public interface TestModelObject extends AccessibleProxyObject, DeletableProxyOb
 
 	@Getter(value = FLEXO_ID, defaultValue = "0000")
 	@XMLAttribute(xmlTag = FLEXO_ID)
+	//TODO why not use @CloningStrategy(StrategyType.CLONE)
 	public String getFlexoID();
 
 	// @XMLProperty(id="flexoId",kind=Kind.SETTER)

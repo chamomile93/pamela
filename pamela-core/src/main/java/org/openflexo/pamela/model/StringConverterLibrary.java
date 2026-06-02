@@ -527,7 +527,7 @@ public class StringConverterLibrary {
 	 * @author sguerin
 	 */
 	private static class ClassConverter<T> extends Converter<Class<T>> {
-
+	//TODO maybe give a try for this concept
 		private ClassConverter() {
 			super(Class.class);
 		}

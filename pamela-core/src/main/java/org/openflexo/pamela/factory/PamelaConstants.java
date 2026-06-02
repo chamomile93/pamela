@@ -45,6 +45,7 @@ import java.util.stream.Stream;
 
 import org.jdom2.Namespace;
 
+//TODO idf these constants
 public class PamelaConstants {
 	public static final String NAMESPACE_PREFIX = "p";
 	public static final String NS = "http://www.openflexo.org/pamela/";

@@ -43,6 +43,7 @@ public class PropertyImplementationTests extends AbstractPAMELATest {
 
 	@Test
 	public void testNormalBehaviour() throws Exception {
+		//TODO why is there not assertions in this unit test ? might be about "validation" ? perhaps exceptions are raised and not expected here ?
 		Concept concept = factory.newInstance(Concept.class);
 		concept.setValue("Foo");
 		concept.setValue("Toto");

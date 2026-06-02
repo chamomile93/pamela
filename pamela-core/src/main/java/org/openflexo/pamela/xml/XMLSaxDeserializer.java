@@ -82,10 +82,13 @@ public class XMLSaxDeserializer extends DefaultHandler {
 	public static final String CLASS_NAME = "className";
 
 	public static final Set<String> IGNORED_ATTRIBUTES = Stream
-			.of(ID, ID_REF, CLASS_NAME, "xmlns:p", PamelaConstants.Q_MODEL_ENTITY_ATTRIBUTE, PamelaConstants.Q_CLASS_ATTRIBUTE)
+			.of(ID, ID_REF, CLASS_NAME, "xmlns:p", PamelaConstants.Q_MODEL_ENTITY_ATTRIBUTE,
+					PamelaConstants.Q_CLASS_ATTRIBUTE)
 			.collect(Collectors.toSet());
 
 	@FunctionalInterface
+	// TODO not used to this annotation yet
+	// TODO the documentation says it's has one `abstract` method
 	private interface Resolver {
 		void resolve(TransformedObjectInfo resolved) throws SAXException;
 	}
@@ -94,7 +97,8 @@ public class XMLSaxDeserializer extends DefaultHandler {
 	private final PamelaMetaModel context;
 
 	/**
-	 * Stores already serialized objects where value is the serialized object and key is an object coding the unique identifier of the
+	 * Stores already serialized objects where value is the serialized object and
+	 * key is an object coding the unique identifier of the
 	 * object
 	 */
 	private final HashMap<String, Object> objectsWithId = new HashMap<>();
@@ -104,6 +108,8 @@ public class XMLSaxDeserializer extends DefaultHandler {
 	/**
 	 * Stores lambda to resolve forward references
 	 */
+	// TODO why use the term "lambda" ? may be "stores a lambda" ?
+	// TODO what's the type "Resolver" ?
 	private final Map<String, List<Resolver>> forwardReferences = new HashMap<>();
 
 	private final DeserializationPolicy policy;
@@ -112,6 +118,7 @@ public class XMLSaxDeserializer extends DefaultHandler {
 
 	private LinkedList<TransformedObjectInfo> stack = new LinkedList<>();
 
+	// TODO this is supposed to be the result of deserialization
 	private TransformedObjectInfo rootInfo = null;
 
 	public XMLSaxDeserializer(PamelaModelFactory factory) {
@@ -142,13 +149,18 @@ public class XMLSaxDeserializer extends DefaultHandler {
 			parser.parse(in, this);
 
 			// Close deserializing mode
+			// TODO when was the field `allObjects` updated ? was it the parser above ?
 			for (TransformedObjectInfo info : allObjects) {
 				info.finalizeDeserialization();
 			}
 
 			// checks for pending references
+			// TODO I forget if the deserialization starts from the root ? then this
+			// forwardReferences are "child element" of this root
 			if (forwardReferences.size() > 0) {
-				throw new InvalidDataException("Unresolved references to objects with identifiers " + forwardReferences.keySet());
+				// TODO not sure to follow
+				throw new InvalidDataException(
+						"Unresolved references to objects with identifiers " + forwardReferences.keySet());
 			}
 
 			return rootInfo.getObject();
@@ -161,35 +173,37 @@ public class XMLSaxDeserializer extends DefaultHandler {
 	}
 
 	@Override
+	// TODO can I do smth here ?
 	public void startDocument() throws SAXException {
 		// nothing to do
 	}
 
 	@Override
+	// TODO can I do smth here ?
 	public void endDocument() throws SAXException {
 		// nothing to do
 	}
 
-	private TransformedObjectInfo constructMetaInformations(String qName) throws SAXException {
+	private TransformedObjectInfo constructMetaInformations(String xmlTagQName) throws SAXException {
 		ModelEntity<Object> modelEntity = null;
 		ModelProperty<Object> leadingProperty = null;
 		Object parent = null;
 		if (stackEmpty()) {
-			modelEntity = (ModelEntity<Object>) factory.getPamelaMetaModel().getModelEntity(qName);
-		}
-		else {
+			modelEntity = (ModelEntity<Object>) factory.getPamelaMetaModel().getModelEntity(xmlTagQName);
+		} else {
 			try {
 				TransformedObjectInfo parentInfo = peekInfo();
 				if (parentInfo != null) {
 					parent = parentInfo.getObject();
 					if (parentInfo != null) {
 						ModelEntity<Object> parentModelEntity = parentInfo.getModelEntity();
-						ModelPropertyXMLTag<Object> modelPropertyXMLTag = context.getPropertyForXMLTag(parentModelEntity, factory, qName);
-						if (modelPropertyXMLTag != null) {
-							modelEntity = (ModelEntity<Object>) modelPropertyXMLTag.getAccessedEntity();
-							leadingProperty = modelPropertyXMLTag.getProperty();
-						}
-						else if (policy == DeserializationPolicy.RESTRICTIVE) {
+						ModelPropertyXMLTag<Object> modelPropertyByXMLTag = context
+								.getPropertyForXMLTag(parentModelEntity, factory, xmlTagQName);
+						if (modelPropertyByXMLTag != null) {
+							//TODO FIX as this return "null" , when it should return the modelEntity of an IAuthenticator given a modelProperty of getName of an IAuthenticator
+							modelEntity = (ModelEntity<Object>) modelPropertyByXMLTag.getAccessedEntity();
+							leadingProperty = modelPropertyByXMLTag.getProperty();
+						} else if (policy == DeserializationPolicy.RESTRICTIVE) {
 							throw new RestrictiveDeserializationException(
 									"Element with name does not fit any properties within entity " + parentModelEntity);
 						}
@@ -199,11 +213,15 @@ public class XMLSaxDeserializer extends DefaultHandler {
 				throw new SAXException(e);
 			}
 		}
-		return leadingProperty != null || modelEntity != null ? new TransformedObjectInfo(factory, parent, leadingProperty, modelEntity)
+		return leadingProperty != null || modelEntity != null
+				? new TransformedObjectInfo(factory, parent, leadingProperty, modelEntity)
 				: null;
 	}
 
 	@Override
+	// TODO when is this method invoked ? i am interested in the
+	// `buildObjectFromAttributes(...info...)`
+	// TODO idf why this is done for the proxy handler
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 
 		final TransformedObjectInfo info = constructMetaInformations(qName);
@@ -218,8 +236,7 @@ public class XMLSaxDeserializer extends DefaultHandler {
 					Object referenceObject = objectsWithId.get(idref);
 					if (referenceObject != null) {
 						info.setObject(referenceObject);
-					}
-					else {
+					} else {
 						// it needs to be resolved later
 						List<Resolver> forwards = forwardReferences.computeIfAbsent(idref, (v) -> new ArrayList<>());
 						forwards.add((target) -> {
@@ -227,8 +244,7 @@ public class XMLSaxDeserializer extends DefaultHandler {
 							connectObject(info);
 						});
 					}
-				}
-				else {
+				} else {
 					// object is constructed using attributes
 					if (buildObjectFromAttributes(localName, id, info, attributes)) {
 						register(id, info);
@@ -236,8 +252,7 @@ public class XMLSaxDeserializer extends DefaultHandler {
 				}
 			}
 
-		}
-		else if (policy == DeserializationPolicy.RESTRICTIVE) {
+		} else if (policy == DeserializationPolicy.RESTRICTIVE) {
 			throw new SAXException(new InvalidDataException("Could not find ModelEntity for " + qName));
 		}
 		// push current state to stack
@@ -252,6 +267,8 @@ public class XMLSaxDeserializer extends DefaultHandler {
 	}
 
 	@Override
+	// TODO this might be of interest to fix the deserialization
+	// TODO idf why this is done for the proxy handler
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		TransformedObjectInfo info = popInfo();
 		// info may be null if current object is a reference
@@ -270,7 +287,9 @@ public class XMLSaxDeserializer extends DefaultHandler {
 		currentConvertibleString = new StringBuilder();
 	}
 
+	// TODO this seems to be a helper method
 	private void connectObject(TransformedObjectInfo info) throws SAXException {
+		// TODO when is this method invoked ?
 		// don't set a null object
 		if (info.getObject() == null)
 			return;
@@ -292,9 +311,9 @@ public class XMLSaxDeserializer extends DefaultHandler {
 						default:
 							break;
 					}
-				}
-				else {
-					System.err.println("Cound not find parent for " + info + " object=" + info.getObject() + " parent=" + info.getParent());
+				} else {
+					System.err.println("Could not find proxy handler parent for " + info + " object=" + info.getObject() + " parent="
+							+ info.getParent());
 				}
 			} catch (ModelDefinitionException e) {
 				throw new SAXException(e);
@@ -307,6 +326,9 @@ public class XMLSaxDeserializer extends DefaultHandler {
 	 * 
 	 * @return true if an object was built, false other wise
 	 */
+	// TODO this seems to be a helper method
+	// TODO is `startElement(..)` the only use of this method ? I am interested in
+	// `connectObject(..)`
 	private boolean buildObjectFromAttributes(String name, String id, TransformedObjectInfo info, Attributes attributes)
 			throws SAXException {
 		// if it's the case, the serialization has problems
@@ -328,7 +350,8 @@ public class XMLSaxDeserializer extends DefaultHandler {
 			}
 
 			// ----- Warning -----
-			// This next code come from the old deserialization process, I don't fully understand what's done here.
+			// This next code come from the old deserialization process, I don't fully
+			// understand what's done here.
 			// I keep it for compatibility, I'll come back there to clean it up later
 			// ----- Warning -----
 			if (className != null) {
@@ -337,8 +360,7 @@ public class XMLSaxDeserializer extends DefaultHandler {
 				} catch (ClassNotFoundException e) {
 					throw new InvalidDataException("Class not found " + e.getMessage());
 				}
-			}
-			else if (entityName != null) {
+			} else if (entityName != null) {
 				try {
 					implementedInterface = (Class<Object>) Class.forName(entityName);
 				} catch (ClassNotFoundException e) {
@@ -352,14 +374,14 @@ public class XMLSaxDeserializer extends DefaultHandler {
 			if (implementedInterface != null) {
 				if (policy == DeserializationPolicy.EXTENSIVE) {
 					concreteEntity = factory.getExtendedContext().getModelEntity(implementedInterface);
-				}
-				else {
+				} else {
 					concreteEntity = factory.getPamelaMetaModel().getModelEntity(implementedInterface);
 				}
 			}
 			if (concreteEntity == null && policy == DeserializationPolicy.RESTRICTIVE) {
 				if (entityName != null) {
-					throw new RestrictiveDeserializationException("Entity " + entityName + " is not part of this model context");
+					throw new RestrictiveDeserializationException(
+							"Entity " + entityName + " is not part of this model context");
 				}
 				throw new RestrictiveDeserializationException("No entity found for tag " + name);
 			}
@@ -390,9 +412,9 @@ public class XMLSaxDeserializer extends DefaultHandler {
 
 				if (property == null) {
 					if (policy == DeserializationPolicy.RESTRICTIVE) {
-						throw new RestrictiveDeserializationException("No attribute found for the attribute named: " + attributeName);
-					}
-					else {
+						throw new RestrictiveDeserializationException(
+								"No attribute found for the attribute named: " + attributeName);
+					} else {
 						continue;
 					}
 				}

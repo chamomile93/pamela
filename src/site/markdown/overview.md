@@ -6,7 +6,13 @@ sidebar_position: 3
 
 ## Model serialization in source code
 
-We advocate for a strong coupling between model and source-code, to give architects and developers a way to both interact during the whole development cycle. PAMELA is an annotation-based Java modeling framework providing a smooth integration between model and code, without code generation nor externalized model serialization. The idea is to avoid separation between modeling and code to facilitate consistency management and avoid round-tripping issues.
+We advocate for a strong coupling between model and source-code, to give architects and developers a way to both interact during the whole development cycle. PAMELA is an annotation-based Java modeling framework providing a smooth integration between model and code, without code generation nor externalized model serialization.
+
+<!-- TODO idf why mention "without code generation" this does seems to generate code on the fly using a proxy layer -->
+
+<!-- TODO idf what is meant by "no externalized model serialization" ? I can serialize model using the XML annotations.  -->
+
+The idea is to avoid separation between modeling and code to facilitate consistency management and avoid round-tripping issues.
 
 To do so, we argue that source code is the right artefact to encode the model with metadata information stored in tagged code. This requires an annotation-enabled language. Such language supports the attribute-oriented programming if its grammar allows adding custom declarative tags to annotate standard program elements. Java programming language from version 1.5 is a good candidate with the support of annotations.
 
@@ -16,6 +22,8 @@ The following figure presents the PAMELA approach for storing model in source co
 
 [//]: # (@Sylvain, je ne suis pas sur que l'on comprenne bien que le modele est dans les fichiers Java)
 [//]: # (@Sylvain, avant tu n'as jamais evoqué le fait que cela permet des model @ runtime aussi)
+
+<!-- TODO what is meant with the last comment by mentionning "model@runtime" ? -->
 
 ## PAMELA use process
 
@@ -28,7 +36,21 @@ high evolution rhythm when the programmer becomes also the modeler. In fact, whe
 a generalization is identified by the programmer, s/he can use PAMELA to develop and capitalize on this
 abstraction by increasing PAMELA metamodel.
 
-The developed metamodels are implemented by annotations that relies on Java/JVM entities and mechanisms. They include consistency checking that constrains their use and help the programmer. We have experimented their use with setter/getter to define POJO entities, with traits to implement multiple inheritance or roles and rules to set security rules on classes.
+The developed metamodels are implemented by annotations that relies on Java/JVM entities and mechanisms.
+
+<!-- TODO might be better phrased as :
+- The developed metamodels are implemented by Java Language Annotations Type c.f. :
+  - “9.6. Annotation Types” ([“Chapter 9. Interfaces”](zotero://select/groups/5473375/items/57NHAUJ7)) ([snapshot](zotero://open-pdf/groups/5473375/items/24SXQCI5?sel=div%3Anth-child(17)%20%3E%20div%3Afirst-child%20%3E%20div%20%3E%20div%20%3E%20h2&annotation=AEJZEWK7)).
+-->
+
+They include consistency checking that constrains their use and help the programmer.
+
+<!-- TODO idf what is the "consistency" mentionned. Might refer to the rules defined by the Java Language Specification (JLS) ? I don't know if there's something in the Java Virtual Machine Specification ? -->
+
+We have experimented their use with setter/getter to define POJO entities, with traits to implement multiple inheritance or roles and rules to set security rules on classes.
+
+<!-- TODO idf "setter/getter to define POJO entities" this might need to refer to an example. -->
+<!-- TODO idf "traits", "multiple inheritance", "roles, "rules to set security rules on classes". For instance does the package `pamela-security-patterns` include these "rules" like the concept of `IAuthenticator` ? might need an example -->
 
 Our experience shows that introducing and reusing new concepts (1) reduce the size of the code, (2) reduce the risk of errors and (3) improve the code structure. The cycle of development between the model and the code can then be drastically reduced, leading to what we call *continuous modeling*.
 
@@ -40,12 +62,96 @@ The PAMELA metamodel is presented in the following figure.
 This metamodel is classical and reflects a common class diagram vision such as found in UML.
 
 ![PamelaMetaModel](/images/PamelaMetaModel.png)
+<!-- TODO idf why display certain field but not explain them here such as :
+- `cloningStrategy`
+- `embeddingType`
+- `defaultValue`
+- `implementation`
+-->
 
 - A `PAMELAModel` is defined as a set of references to `ModelEntity`.
-- A `ModelEntity` reflects a concept and is encoded in a Java `interface`. The PAMELA metamodel allows multiple inheritance: thus `ModelEntity` may define a set of parent entities. A `ModelEntity` also defines some properties, encoded as `ModelProperty`. Note that reification of `ModelEntity` is performed in a Java `interface` (and not a class), which only defines API without any implementation for methods. A partial base implementation can be given using an abstract class (conforming to the implemented interface).
-- A `ModelProperty` is identified by a name, a cardinality (simple or multiple) and a type, which can be a reference to another `ModelEntity`, or a Java type (a primitive or an arbitrary complex Java type). Depending on its cardinality, a `ModelProperty` **is bound to a set of methods reflecting use of property**.
-    - A *read-only single property* defines read-access of its value using a *getter* (a Java method defined in the Java interface taking no argument and returning desired value).
-    - A *read-write single property* defines a *getter* and a *setter* (a Java method taking the new value to be set as unique argument)
-    - A *read-write multiple property* defines a *getter*, a *adder* (a Java method taking a new value to be added as unique argument), a *remover* (a Java method taking a value to be removed as unique argument), and may define additional methods for extended features such as reindexing for example.
 
-A strong interest of the approach is that the model is encoded in Java, and must be compiled. It forces the Java compiler to perform required checks for a PAMELA model encoded in a strong typed program. The execution semantics of models is fully compatible with the Java semantics. Many validation rules are automatically performed by Java compilation, independently of the underlying PAMELA execution semantics.
+<!-- TODO FIX Rename in the textual documentation and the images this concept name, since it does not exist anymore under this name, maybe never was? in this version it's probably `PamelaMetaModel` and replace `baseEntities` with `modelEntities` -->
+
+- A `ModelEntity` reflects a concept and is encoded in a Java `interface`. 
+
+<!-- TODO This doesn't seem to hold anymore. It's a `class`. -->
+<!-- TODO idf not sure, this might refer to the "annotation" not it's implementation in a class, but what seems to be contradictory is the presence of the fields in the picture and the links. The picture, the text, both or something else could be improved. -->
+
+- The PAMELA metamodel allows multiple inheritance: thus `ModelEntity` may define a set of parent entities.
+
+<!-- TODO idf what is refered to by "PAMELA metamodel" ? maybe `PamelaMetaModel` ? -->
+<!-- TODO also not sure what is refered to by "parent entities" where is this in the code ? -->
+
+- A `ModelEntity` also defines some `properties`, encoded as `ModelProperty`.
+
+<!-- TODO idf I am not sure that the term "properties" is the one refered in the picture shown or the field in the class `ModelEntity` -->
+
+- Note that reification of `ModelEntity` is performed in a Java `interface` (and not a class), which only defines API without any implementation for methods.
+
+<!-- TODO the usage of the word "reification" is confusing me. -->
+
+- A partial base implementation can be given using an abstract class (conforming to the implemented interface).
+
+<!-- TODO perhaps add the following example :
+
+```java
+@ModelEntity
+@ImplementationClass(IAuthenticator.AuthenticatorImp.class)
+...
+public interface IAuthenticator extends AccessibleProxyObject, DeletableProxyObject, CloneableProxyObject {
+...
+    public static abstract class AuthenticatorImp implements IAuthenticator {...}
+}
+```
+-->
+
+- A `ModelProperty` is identified by a name, a cardinality (simple or multiple) and a type, which can be a reference to another `ModelEntity`, or a Java type (a primitive or an arbitrary complex Java type).
+
+<!-- TODO what example is there for the reference to another `ModelEntity` ? -->
+
+- Depending on its cardinality, a `ModelProperty` **is bound to a set of methods reflecting use of property**.
+<!-- TODO idf the term "bound to a set of methods" is relevant or not misleading, maybe "has a set of methods" ? -->
+  - A *read-only single property* defines read-access of its value using a *getter* :
+    - a Java method defined in the Java interface taking no argument and returning a value.
+    <!-- TODO refer to which of :
+        - `public interface SinglePropertyImplementation<I, T> extends SettablePropertyImplementation<I, T>`
+        - `public interface SettablePropertyImplementation<I, T> extends PropertyImplementation<I, T>`
+        - `public class DefaultSinglePropertyImplementation<I, T> extends AbstractPropertyImplementation<I, T> implements SinglePropertyImplementation<I, T>`   
+     -->
+  - A *read-write single property* defines a :
+    - *getter*,
+    - *setter* :
+      - a Java method taking the new value to be set as unique argument.
+    <!-- TODO idf "single property" as above ,maybe it's :
+        - `public interface SinglePropertyImplementation<I, T>`
+    -->
+    - A *read-write multiple property* defines :
+      - *getter*,
+      - *adder*:
+        - a Java method taking a new value to be added as unique argument.
+      - a *remover*:
+        - a Java method taking a value to be removed as unique argument.
+      - may define additional methods for extended features such as reindexing for example.
+    <!-- TODO idf confused, which following concept if any are relevant to this point ? :
+      - `public class MultipleProperty extends AbstractProperty`
+      - `public interface MultiplePropertyImplementation<I, T> extends PropertyImplementation<I, List<T>>`
+      - `public class DefaultMultiplePropertyImplementation<I, T> extends AbstractPropertyImplementation<I, List<T>> implements
+		MultiplePropertyImplementation<I, T>, SettablePropertyImplementation<I, List<T>>, ReindexableListPropertyImplementation<I, T>`
+    -->
+
+A strong interest of the approach is that the model is encoded in Java, and must be compiled.
+
+<!-- TODO idf necessity of "compiled" in this sentence -->
+
+It forces the Java compiler to perform required checks for a PAMELA model encoded in a strong typed program.
+
+<!-- TODO perhaps illustrates the "required checks" as is I only get a "feeling". -->
+
+The execution semantics of models is fully compatible with the Java semantics.
+
+<!-- TODO idf what is refered to and what proof is there for such a claim. personal incredulity ? I am assuming it holds. -->
+
+Many validation rules are automatically performed by Java compilation, independently of the underlying PAMELA execution semantics.
+
+<!-- TODO idf the validation rules mentionned, it seems to be taking for granted certain "general" thing and not take risk of being "incorrect". maybe list a few of these rules -->

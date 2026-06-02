@@ -109,6 +109,7 @@ public @interface Getter {
 	 * 
 	 * @return true if the type returned by this getter can be converted to a string.
 	 */
+	//TODO does it imply that if I defined a converter then the framework will provide automatically ? I forgot if I used this already. grep in this project returned no result.
 	boolean isStringConvertable() default false;
 
 	/**

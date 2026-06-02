@@ -13,6 +13,7 @@ import java.util.Stack;
  * This monitor is used when there is a need for a pattern to know previous calls (check a call
  * sequence, check a calling instance or method, etc.)
  */
+//TODO I might need to look into it
 public class CustomStack extends ExecutionMonitor {
 
     public class Frame {

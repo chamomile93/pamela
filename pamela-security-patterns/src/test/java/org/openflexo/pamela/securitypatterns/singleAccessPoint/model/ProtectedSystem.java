@@ -1,10 +1,11 @@
 package org.openflexo.pamela.securitypatterns.singleAccessPoint.model;
 
 import org.openflexo.pamela.annotations.Getter;
-import org.openflexo.pamela.annotations.ImplementationClass;
 import org.openflexo.pamela.annotations.ModelEntity;
 import org.openflexo.pamela.annotations.Setter;
-import org.openflexo.pamela.securitypatterns.singleAccessPoint.annotations.*;
+import org.openflexo.pamela.securitypatterns.singleAccessPoint.annotations.Checkpoint;
+import org.openflexo.pamela.securitypatterns.singleAccessPoint.annotations.RequiredForAccess;
+import org.openflexo.pamela.securitypatterns.singleAccessPoint.annotations.SingleAccessPointSystem;
 
 @ModelEntity
 @SingleAccessPointSystem(patternID = ProtectedSystem.PATTERN_ID)
@@ -41,7 +42,6 @@ public interface ProtectedSystem {
         return arg;
     }
 
-
     @Checkpoint(patternID = PATTERN_ID)
     default boolean onEntry(@RequiredForAccess(patternID = PATTERN_ID, paramID = PARAM_ID ) int token){
         System.out.println("Checking");
@@ -49,5 +49,4 @@ public interface ProtectedSystem {
         setCounter(getCounter() + 1);
         return token==42;
     }
-
 }

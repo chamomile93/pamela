@@ -46,6 +46,7 @@ import static org.junit.Assert.assertNotNull;
  *
  * 
  */
+//TODO watchout, some code was modified in pamela-core by copilot after I suggested a better toString representation during a debug session of PropertyImplementation
 public class InitializePropertyTest {
 
 
@@ -58,8 +59,11 @@ public class InitializePropertyTest {
 
 		AContainer container = factory.newInstance(AContainer.class);
 		assertNotNull(container);
+		// at this point the contained object is still null in the container.
 
 		AContained contained = container.getContained();
+		// the first time we call getContained, the contained object is automatically created and initialized with default values.
+		
 		assertNotNull(contained);
 		assertEquals(AContained.DEFAULT_VALUE1, contained.getValue1());
 	}

@@ -58,6 +58,7 @@ import org.openflexo.pamela.patterns.annotations.Requires;
  *
  * @param <P>
  */
+//TODO idf how is this used by PAMELA, yes when "discoverPattern"
 public abstract class AbstractPatternFactory<P extends PatternDefinition> {
 
 	private Map<String, P> patternDefinitions;

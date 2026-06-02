@@ -48,7 +48,7 @@ import org.openflexo.pamela.annotations.Setter;
 import org.openflexo.pamela.annotations.Getter.Cardinality;
 
 @ModelEntity
-public interface PAMFlexoResource<RD> {
+public interface PamelaFlexoResource<RD> {
 
 	public static final String CONTAINER = "container";
 	public static final String CONTENTS = "contents";
@@ -59,7 +59,7 @@ public interface PAMFlexoResource<RD> {
 	 * @return the container of this resource.
 	 */
 	@Getter(value = CONTAINER, inverse = CONTENTS)
-	public PAMFlexoResource<?> getContainer();
+	public PamelaFlexoResource<?> getContainer();
 
 	/**
 	 * Sets the resource in which this resource is contained.
@@ -68,7 +68,7 @@ public interface PAMFlexoResource<RD> {
 	 * @param resource
 	 */
 	@Setter(CONTAINER)
-	public void setContainer(PAMFlexoResource<?> resource);
+	public void setContainer(PamelaFlexoResource<?> resource);
 
 	/**
 	 * Returns a list of resources contained by this resource.
@@ -76,7 +76,7 @@ public interface PAMFlexoResource<RD> {
 	 * @return the list of contained resources.
 	 */
 	@Getter(value = CONTENTS, cardinality = Cardinality.LIST, inverse = CONTAINER)
-	public List<PAMFlexoResource<?>> getContents();
+	public List<PamelaFlexoResource<?>> getContents();
 
 	/**
 	 * Adds a resource to the contents.
@@ -85,7 +85,7 @@ public interface PAMFlexoResource<RD> {
 	 *            the resource to add
 	 */
 	@Adder(CONTENTS)
-	public void addToContents(PAMFlexoResource<?> resource);
+	public void addToContents(PamelaFlexoResource<?> resource);
 
 	/**
 	 * Removes a resource from the contents.
@@ -94,6 +94,6 @@ public interface PAMFlexoResource<RD> {
 	 *            the resource to remove
 	 */
 	@Remover(CONTENTS)
-	public void removeFromContents(PAMFlexoResource<?> resource);
+	public void removeFromContents(PamelaFlexoResource<?> resource);
 
 }

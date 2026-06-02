@@ -12,6 +12,7 @@ import org.openflexo.pamela.exceptions.ModelDefinitionException;
  * @param <T>
  *            accessed type for the property
  */
+//TODO might need to understand this, I came here while trying to understand the test of InitializePropertyTest. I am not familiar with this concept yet
 public interface SettablePropertyImplementation<I, T> extends PropertyImplementation<I, T> {
 
 	public void set(T value) throws ModelDefinitionException;

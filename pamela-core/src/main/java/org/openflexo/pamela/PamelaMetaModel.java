@@ -240,6 +240,7 @@ public class PamelaMetaModel {
 	 * @return
 	 * @throws ModelDefinitionException
 	 */
+	//TODO idf I might look into it this might help me resolve my bug about deserialization
 	public <I> ModelPropertyXMLTag<I> getPropertyForXMLTag(ModelEntity<I> entity, PamelaModelFactory pamelaModelFactory, String xmlTag)
 			throws ModelDefinitionException {
 

@@ -37,6 +37,7 @@
  * 
  */
 
+//TODO regroup these enum in a subpackage
 package org.openflexo.pamela.factory;
 
 public enum DeserializationPolicy {

@@ -66,6 +66,7 @@ public class AuthenticatorPatternFactory extends AbstractPatternFactory<Authenti
 		super(pamelaMetaModel);
 	}
 
+	//TODO idf why override
 	@Override
 	public void discoverEntity(ModelEntity<?> entity) {
 		for (Annotation a : entity.getImplementedInterface().getAnnotations()) {

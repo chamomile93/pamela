@@ -54,8 +54,10 @@ import org.openflexo.pamela.patterns.annotations.Requires;
  * <ul>
  * <li>Maintaining state variables of the pattern instance</li>
  * <li>Enforcing invariants of the {@link Authenticator} annotated class.</li>
- * <li>Enforcing preconditions of the {@link Authenticator} annotated class.</li>
- * <li>Enforcing postconditions of the {@link Authenticator} annotated class.</li>
+ * <li>Enforcing preconditions of the {@link Authenticator} annotated
+ * class.</li>
+ * <li>Enforcing postconditions of the {@link Authenticator} annotated
+ * class.</li>
  * </ul>
  *
  * @author Caine Silva, Sylvain Guerin

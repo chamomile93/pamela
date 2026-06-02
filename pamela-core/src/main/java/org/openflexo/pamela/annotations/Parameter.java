@@ -56,6 +56,7 @@ import org.openflexo.pamela.model.ModelProperty;
  * @author sylvain
  *
  */
+//TODO I am not sure why I should add this for serialization
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = ElementType.PARAMETER)
 public @interface Parameter {

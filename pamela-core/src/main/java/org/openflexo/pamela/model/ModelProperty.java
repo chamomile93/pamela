@@ -75,18 +75,21 @@ import org.openflexo.pamela.model.StringConverterLibrary.Converter;
 import org.openflexo.toolbox.StringUtils;
 
 /**
- * A {@link ModelProperty} represents a property attached to a ModelEntity in PAMELA meta-model<br>
+ * A {@link ModelProperty} represents a property attached to a ModelEntity in
+ * PAMELA meta-model<br>
  * 
  * A {@link ModelProperty} has a name, a type and a cardinality<br>
  * 
- * A {@link ModelProperty} is reified in Java using a set of methods (at least a {@link Getter}) and (possibly) a {@link Setter} or a
- * {@link Adder} and a {@link Remover} (depending on the cardinality of the property)
+ * A {@link ModelProperty} is reified in Java using a set of methods (at least a
+ * {@link Getter}) and (possibly) a {@link Setter} or a
+ * {@link Adder} and a {@link Remover} (depending on the cardinality of the
+ * property)
  * 
  * @author sylvain
  *
- * @param <I>
- *            java type of related entity
+ * @param <I> java type of related entity
  */
+//TODO where is the "name" defined here ? does it refer to the "property" name, e.g. the value "ABC" given to "@Getter(ABC)" ?
 public class ModelProperty<I> {
 
 	/* Model property identification */
@@ -119,18 +122,18 @@ public class ModelProperty<I> {
 	private final Method reindexerMethod;
 	private final Method updaterMethod;
 
+	private Class<?> type;
 	private Cardinality cardinality;
 
 	private ModelProperty<?> inverseProperty;
 	private boolean isDerivedRelativeToInverseProperty = false;
 
 	/* Computed values of the model property */
-	private Class<?> type;
 	private String xmlTag;
 
 	protected static <I> ModelProperty<I> getModelProperty(String propertyIdentifier, ModelEntity<I> modelEntity)
 			throws ModelDefinitionException {
-			//TODO idf what's going on
+		// TODO idf what's going on
 		PropertyImplementation propertyImplementation = null;
 		Getter getter = null;
 		Setter setter = null;
@@ -156,11 +159,15 @@ public class ModelProperty<I> {
 		Class<I> implementedInterface = modelEntity.getImplementedInterface();
 
 		for (Method m : implementedInterface.getDeclaredMethods()) {
-			/* Annotations has changed in Java 8: see http://bugs.java.com/view_bug.do?bug_id=6695379
-			 * Now annotations are copied to bridge methods (see https://docs.oracle.com/javase/tutorial/java/generics/bridgeMethods.html 
+			/*
+			 * Annotations has changed in Java 8: see
+			 * http://bugs.java.com/view_bug.do?bug_id=6695379
+			 * Now annotations are copied to bridge methods (see
+			 * https://docs.oracle.com/javase/tutorial/java/generics/bridgeMethods.html
 			 * or https://javax0.wordpress.com/2014/02/26/syntethic-and-bridge-methods).
 			 * We need to add a test if the method is a bridge (it reuses the volatile kind)
-			 * Notice that the eclipse compiler does not follow the annotation copy to bridge method for the moment (27/7/2016)
+			 * Notice that the eclipse compiler does not follow the annotation copy to
+			 * bridge method for the moment (27/7/2016)
 			 */
 			if (!Modifier.isVolatile(m.getModifiers())) {
 				Getter aGetter = m.getAnnotation(Getter.class);
@@ -177,7 +184,8 @@ public class ModelProperty<I> {
 						aRemover = m1.getAnnotation(Remover.class);
 						aReindexer = m1.getAnnotation(Reindexer.class);
 						anUpdater = m1.getAnnotation(Updater.class);
-						if (aGetter != null || aSetter != null || anAdder != null || aRemover != null || aReindexer != null
+						if (aGetter != null || aSetter != null || anAdder != null || aRemover != null
+								|| aReindexer != null
 								|| anUpdater != null) {
 							break;
 						}
@@ -187,8 +195,7 @@ public class ModelProperty<I> {
 					if (getter != null) {
 						throw new ModelDefinitionException(
 								"Duplicate getter '" + propertyIdentifier + "' defined for " + implementedInterface);
-					}
-					else {
+					} else {
 						getter = aGetter;
 						getterMethod = m;
 						propertyImplementation = m.getAnnotation(PropertyImplementation.class);
@@ -198,6 +205,12 @@ public class ModelProperty<I> {
 						cloningStrategy = m.getAnnotation(CloningStrategy.class);
 						embedded = m.getAnnotation(Embedded.class);
 						initialize = m.getAnnotation(Initialize.class);
+						// TODO this seems to be the only instruction that assign a value to initialize
+						// when instantiating a ModelProperty. I don't see related usages with
+						// getPropertyImplementation in ProxyMethodHandler. I might need to comeback and
+						// understand this more. I am motivated by the fact that the value of the key
+						// "contained" is still "null" although the reference to this object exists and
+						// is initialized
 						complexEmbedded = m.getAnnotation(ComplexEmbedded.class);
 					}
 				}
@@ -205,8 +218,7 @@ public class ModelProperty<I> {
 					if (setter != null) {
 						throw new ModelDefinitionException(
 								"Duplicate setter '" + propertyIdentifier + "' defined for " + implementedInterface);
-					}
-					else {
+					} else {
 						setter = aSetter;
 						setterMethod = m;
 						setPastingPoint = m.getAnnotation(PastingPoint.class);
@@ -216,8 +228,7 @@ public class ModelProperty<I> {
 					if (adder != null) {
 						throw new ModelDefinitionException(
 								"Duplicate adder '" + propertyIdentifier + "' defined for " + implementedInterface);
-					}
-					else {
+					} else {
 						adder = anAdder;
 						adderMethod = m;
 						addPastingPoint = m.getAnnotation(PastingPoint.class);
@@ -227,8 +238,7 @@ public class ModelProperty<I> {
 					if (remover != null) {
 						throw new ModelDefinitionException(
 								"Duplicate remover '" + propertyIdentifier + "' defined for " + implementedInterface);
-					}
-					else {
+					} else {
 						remover = aRemover;
 						removerMethod = m;
 					}
@@ -237,8 +247,7 @@ public class ModelProperty<I> {
 					if (reindexer != null) {
 						throw new ModelDefinitionException(
 								"Duplicate reindexer '" + propertyIdentifier + "' defined for " + implementedInterface);
-					}
-					else {
+					} else {
 						reindexer = aReindexer;
 						reindexerMethod = m;
 					}
@@ -247,24 +256,31 @@ public class ModelProperty<I> {
 					if (updater != null) {
 						throw new ModelDefinitionException(
 								"Duplicate updater '" + propertyIdentifier + "' defined for " + implementedInterface);
-					}
-					else {
+					} else {
 						updater = anUpdater;
 						updaterMethod = m;
 					}
 				}
 			}
 		}
-		return new ModelProperty<>(modelEntity, propertyIdentifier, propertyImplementation, getter, setter, adder, remover, reindexer,
-				updater, xmlAttribute, xmlElement, returnedValue, embedded, initialize, complexEmbedded, cloningStrategy, setPastingPoint,
-				addPastingPoint, getterMethod, setterMethod, adderMethod, removerMethod, reindexerMethod, updaterMethod);
+		return new ModelProperty<>(modelEntity, propertyIdentifier, propertyImplementation, getter, setter, adder,
+				remover, reindexer,
+				updater, xmlAttribute, xmlElement, returnedValue, embedded, initialize, complexEmbedded,
+				cloningStrategy, setPastingPoint,
+				addPastingPoint, getterMethod, setterMethod, adderMethod, removerMethod, reindexerMethod,
+				updaterMethod);
 	}
 
-	protected ModelProperty(ModelEntity<I> modelEntity, String propertyIdentifier, PropertyImplementation propertyImplementation,
-			Getter getter, Setter setter, Adder adder, Remover remover, Reindexer reindexer, Updater updater, XMLAttribute xmlAttribute,
-			XMLElement xmlElement, ReturnedValue returnedValue, Embedded embedded, Initialize initialize, ComplexEmbedded complexEmbedded,
-			CloningStrategy cloningStrategy, PastingPoint setPastingPoint, PastingPoint addPastingPoint, Method getterMethod,
-			Method setterMethod, Method adderMethod, Method removerMethod, Method reindexerMethod, Method updaterMethod) {
+	protected ModelProperty(ModelEntity<I> modelEntity, String propertyIdentifier,
+			PropertyImplementation propertyImplementation,
+			Getter getter, Setter setter, Adder adder, Remover remover, Reindexer reindexer, Updater updater,
+			XMLAttribute xmlAttribute,
+			XMLElement xmlElement, ReturnedValue returnedValue, Embedded embedded, Initialize initialize,
+			ComplexEmbedded complexEmbedded,
+			CloningStrategy cloningStrategy, PastingPoint setPastingPoint, PastingPoint addPastingPoint,
+			Method getterMethod,
+			Method setterMethod, Method adderMethod, Method removerMethod, Method reindexerMethod,
+			Method updaterMethod) {
 		this.modelEntity = modelEntity;
 		this.propertyIdentifier = propertyIdentifier;
 		this.propertyImplementation = propertyImplementation;
@@ -308,7 +324,8 @@ public class ModelProperty<I> {
 					type = getterMethod.getReturnType();
 					break;
 				case LIST:
-					type = TypeUtils.getBaseClass(((ParameterizedType) getterMethod.getGenericReturnType()).getActualTypeArguments()[0]);
+					type = TypeUtils.getBaseClass(
+							((ParameterizedType) getterMethod.getGenericReturnType()).getActualTypeArguments()[0]);
 					break;
 				default:
 					break;
@@ -323,11 +340,13 @@ public class ModelProperty<I> {
 		if (getXMLAttribute() != null && getXMLAttribute().xmlTag().equals(PamelaConstants.CLASS_ATTRIBUTE)
 				&& getXMLAttribute().namespace().equals(PamelaConstants.NS)) {
 			throw new ModelDefinitionException(
-					"Invalid property identifier '" + PamelaConstants.CLASS_ATTRIBUTE + "' with namespace " + PamelaConstants.NS + "!");
+					"Invalid property identifier '" + PamelaConstants.CLASS_ATTRIBUTE + "' with namespace "
+							+ PamelaConstants.NS + "!");
 		}
 		if (getGetter() == null) {
 			throw new ModelDefinitionException(
-					"No getter defined for " + propertyIdentifier + ", interface " + modelEntity.getImplementedInterface());
+					"No getter defined for " + propertyIdentifier + ", interface "
+							+ modelEntity.getImplementedInterface());
 		}
 		if (type.isPrimitive() && getter.defaultValue().equals(Getter.UNDEFINED)) {
 			throw new ModelDefinitionException("No default value defined for primitive property " + this);
@@ -338,15 +357,17 @@ public class ModelProperty<I> {
 					Converter<?> converter = StringConverterLibrary.getInstance().getConverter(getType());
 					if (converter == null) {
 						throw new ModelDefinitionException(
-								"No converter for type '" + getType() + "'. Cannot convert default value " + getter.defaultValue());
-					}
-					else {
+								"No converter for type '" + getType() + "'. Cannot convert default value "
+										+ getter.defaultValue());
+					} else {
 						try {
 							defaultValue = converter.convertFromString(getter.defaultValue(), null);
 						} catch (InvalidDataException e) {
 							e.printStackTrace();
 							throw new ModelDefinitionException(
-									"String value '" + getter.defaultValue() + "' cannot be converted to a " + getType().getName(), e);
+									"String value '" + getter.defaultValue() + "' cannot be converted to a "
+											+ getType().getName(),
+									e);
 						}
 					}
 				}
@@ -354,9 +375,10 @@ public class ModelProperty<I> {
 		}
 
 		if (isSerializable() && ignoreType()) {
-			throw new ModelDefinitionException("Inconsistent property '" + propertyIdentifier + " for " + getModelEntity()
-					+ "'. It cannot be serializable (annotation XMLAttribute or XMLElement) and ignored. "
-					+ "If it is string convertable, mark it with the attribute 'stringConvertable'.");
+			throw new ModelDefinitionException(
+					"Inconsistent property '" + propertyIdentifier + " for " + getModelEntity()
+							+ "'. It cannot be serializable (annotation XMLAttribute or XMLElement) and ignored. "
+							+ "If it is string convertable, mark it with the attribute 'stringConvertable'.");
 		}
 
 		if (embedded != null && complexEmbedded != null) {
@@ -367,41 +389,52 @@ public class ModelProperty<I> {
 		if (getCardinality() == Cardinality.LIST) {
 			if (getAdder() == null) {
 				throw new ModelDefinitionException(
-						"No adder defined for " + propertyIdentifier + ", interface " + modelEntity.getImplementedInterface());
+						"No adder defined for " + propertyIdentifier + ", interface "
+								+ modelEntity.getImplementedInterface());
 			}
 			if (getRemover() == null) {
 				throw new ModelDefinitionException(
-						"No remover defined for " + propertyIdentifier + ", interface " + modelEntity.getImplementedInterface());
+						"No remover defined for " + propertyIdentifier + ", interface "
+								+ modelEntity.getImplementedInterface());
 			}
 		}
 
 		if (getGetterMethod() != null && getGetterMethod().getParameterTypes().length > 0) {
-			throw new ModelDefinitionException("Invalid getter method for property '" + propertyIdentifier + "': method "
-					+ getGetterMethod().toString() + " must be without parameters");
+			throw new ModelDefinitionException(
+					"Invalid getter method for property '" + propertyIdentifier + "': method "
+							+ getGetterMethod().toString() + " must be without parameters");
 		}
 
 		if (getSetterMethod() != null) {
 			if (getSetterMethod().getParameterTypes().length != 1) {
-				throw new ModelDefinitionException("Invalid setter method for property '" + propertyIdentifier + "': method "
-						+ getSetterMethod().toString() + " must have exactly 1 parameter");
+				throw new ModelDefinitionException(
+						"Invalid setter method for property '" + propertyIdentifier + "': method "
+								+ getSetterMethod().toString() + " must have exactly 1 parameter");
 			}
 
-			if (!TypeUtils.isTypeAssignableFrom(getGetterMethod().getReturnType(), getSetterMethod().getParameterTypes()[0])
-					&& !TypeUtils.isTypeAssignableFrom(getSetterMethod().getParameterTypes()[0], getGetterMethod().getReturnType())) {
+			if (!TypeUtils.isTypeAssignableFrom(getGetterMethod().getReturnType(),
+					getSetterMethod().getParameterTypes()[0])
+					&& !TypeUtils.isTypeAssignableFrom(getSetterMethod().getParameterTypes()[0],
+							getGetterMethod().getReturnType())) {
+				// TODO I am not sure to follow this condition, could I break it down ?
 				throw new ModelDefinitionException(
-						"Invalid setter method for property '" + propertyIdentifier + "': method " + getSetterMethod().toString()
-								+ " parameter must be assignable from or to " + getGetterMethod().getReturnType().getName());
+						"Invalid setter method for property '" + propertyIdentifier + "': method "
+								+ getSetterMethod().toString()
+								+ " parameter must be assignable from or to "
+								+ getGetterMethod().getReturnType().getName());
 			}
 		}
 
 		if (getAdderMethod() != null) {
 			if (getCardinality() == Cardinality.LIST) {
 				if (getAdderMethod().getParameterTypes().length != 1) {
-					throw new ModelDefinitionException("Invalid adder method for property '" + propertyIdentifier + "': method "
-							+ getAdderMethod().toString() + " must have exactly 1 parameter");
+					throw new ModelDefinitionException(
+							"Invalid adder method for property '" + propertyIdentifier + "': method "
+									+ getAdderMethod().toString() + " must have exactly 1 parameter");
 				}
 				if (!TypeUtils.isTypeAssignableFrom(type, getAdderMethod().getParameterTypes()[0])) {
-					throw new ModelDefinitionException("Invalid adder method for property '" + propertyIdentifier + "': method "
+					throw new ModelDefinitionException("Invalid adder method for property '" + propertyIdentifier
+							+ "': method "
 							+ getAdderMethod().toString() + " parameter must be assignable to " + type.getName());
 				}
 			}
@@ -410,11 +443,13 @@ public class ModelProperty<I> {
 		if (getRemoverMethod() != null) {
 			if (getCardinality() == Cardinality.LIST) {
 				if (getRemoverMethod().getParameterTypes().length != 1) {
-					throw new ModelDefinitionException("Invalid remover method for property '" + propertyIdentifier + "': method "
-							+ getRemoverMethod().toString() + " must have exactly 1 parameter");
+					throw new ModelDefinitionException(
+							"Invalid remover method for property '" + propertyIdentifier + "': method "
+									+ getRemoverMethod().toString() + " must have exactly 1 parameter");
 				}
 				if (!TypeUtils.isTypeAssignableFrom(type, getRemoverMethod().getParameterTypes()[0])) {
-					throw new ModelDefinitionException("Invalid remover method for property '" + propertyIdentifier + "': method "
+					throw new ModelDefinitionException("Invalid remover method for property '" + propertyIdentifier
+							+ "': method "
 							+ getRemoverMethod().toString() + " parameter must be assignable to " + type.getName());
 				}
 			}
@@ -434,8 +469,7 @@ public class ModelProperty<I> {
 							isDerivedRelativeToInverseProperty = true;
 							inverseProperty.isDerivedRelativeToInverseProperty = false;
 						}
-					}
-					else { // This property has multiple cardinality
+					} else { // This property has multiple cardinality
 						if (inverseProperty.getCardinality() == Cardinality.SINGLE) {
 							// In this case, property with single cardinality is considered as derived
 							isDerivedRelativeToInverseProperty = false;
@@ -443,35 +477,37 @@ public class ModelProperty<I> {
 						}
 					}
 
-					if (getCardinality() == Cardinality.SINGLE && inverseProperty.getCardinality() == Cardinality.SINGLE) {
+					if (getCardinality() == Cardinality.SINGLE
+							&& inverseProperty.getCardinality() == Cardinality.SINGLE) {
 						if (getGetter().isDerived() != inverseProperty.getGetter().isDerived()) {
 							// One property is explicitely declared as derived
 							if (inverseProperty.getGetter().isDerived()) {
 								isDerivedRelativeToInverseProperty = false;
 								inverseProperty.isDerivedRelativeToInverseProperty = true;
-							}
-							else {
+							} else {
 								isDerivedRelativeToInverseProperty = true;
 								inverseProperty.isDerivedRelativeToInverseProperty = false;
 							}
-						}
-						else {
+						} else {
 							// Both properties are inverse
 							// We choose arbitrary which one is derived
-							if (Collator.getInstance().compare(getPropertyIdentifier(), inverseProperty.getPropertyIdentifier()) < 0) {
+							if (Collator.getInstance().compare(getPropertyIdentifier(),
+									inverseProperty.getPropertyIdentifier()) < 0) {
 								isDerivedRelativeToInverseProperty = false;
 								inverseProperty.isDerivedRelativeToInverseProperty = true;
-							}
-							else {
+							} else {
 								isDerivedRelativeToInverseProperty = true;
 								inverseProperty.isDerivedRelativeToInverseProperty = false;
 							}
 						}
 					}
-					// System.out.println("In entity " + getModelEntity() + " property " + this + " inverse=" + inverseProperty);
-					// System.out.println("Property: " + getPropertyIdentifier() + " isDerivedRelativeToInverseProperty="
+					// System.out.println("In entity " + getModelEntity() + " property " + this + "
+					// inverse=" + inverseProperty);
+					// System.out.println("Property: " + getPropertyIdentifier() + "
+					// isDerivedRelativeToInverseProperty="
 					// + isDerivedRelativeToInverseProperty);
-					// System.out.println("Property: " + inverseProperty.getPropertyIdentifier() + " isDerivedRelativeToInverseProperty="
+					// System.out.println("Property: " + inverseProperty.getPropertyIdentifier() + "
+					// isDerivedRelativeToInverseProperty="
 					// + inverseProperty.isDerivedRelativeToInverseProperty);
 				}
 			}
@@ -479,25 +515,31 @@ public class ModelProperty<I> {
 	}
 
 	/**
-	 * This method checks that <code>this</code> property does not contradicts <code>property</code>. In case it does, the method verifies
-	 * that the optional <code>rulingProperty</code> can rule out the contradiction. If there is a contradiction, then the reason is
+	 * This method checks that <code>this</code> property does not contradicts
+	 * <code>property</code>. In case it does, the method verifies
+	 * that the optional <code>rulingProperty</code> can rule out the contradiction.
+	 * If there is a contradiction, then the reason is
 	 * returned, else it returns <code>null</code>.
 	 * 
 	 * @param property
-	 *            the property against which to check for contradictions
+	 *                       the property against which to check for contradictions
 	 * @param rulingProperty
-	 *            the property that needs to rule out any contradiction. Can be <code>null</code> or invalid.
-	 * @return the reason of the contradiction, <code>null</code> in case there are no contradictions.
+	 *                       the property that needs to rule out any contradiction.
+	 *                       Can be <code>null</code> or invalid.
+	 * @return the reason of the contradiction, <code>null</code> in case there are
+	 *         no contradictions.
 	 */
 	public String contradicts(ModelProperty<?> property, ModelProperty<?> rulingProperty) {
 		// Model options
 		if (!propertyIdentifier.equals(property.getPropertyIdentifier())) {
-			return "Property identifier '" + propertyIdentifier + "' is not equal to '" + property.getPropertyIdentifier() + "'";
+			return "Property identifier '" + propertyIdentifier + "' is not equal to '"
+					+ property.getPropertyIdentifier() + "'";
 		}
 		if (!getType().equals(property.getType()) && !getType().isAssignableFrom(property.getType())
 				&& !property.getType().isAssignableFrom(getType())) {
 			// Types are incompatible and this will therefore never work.
-			return "Incompatible return type: " + getType().getName() + " is not compatible with " + property.getType().getName();
+			return "Incompatible return type: " + getType().getName() + " is not compatible with "
+					+ property.getType().getName();
 		}
 		if (getCardinality() != property.getCardinality()) {
 			if (rulingProperty == null || rulingProperty.getCardinality() == null) {
@@ -508,21 +550,25 @@ public class ModelProperty<I> {
 				&& !getGetter().inverse().equals(property.getGetter().inverse())) {
 			if (rulingProperty == null || rulingProperty.getGetter() == null
 					|| rulingProperty.getGetter().inverse().equals(Getter.UNDEFINED)) {
-				return "Inverse property '" + getGetter().inverse() + "' is not equal to '" + property.getGetter().inverse() + "'";
+				return "Inverse property '" + getGetter().inverse() + "' is not equal to '"
+						+ property.getGetter().inverse() + "'";
 			}
 		}
-		if (!getGetter().defaultValue().equals(Getter.UNDEFINED) && !property.getGetter().defaultValue().equals(Getter.UNDEFINED)
+		if (!getGetter().defaultValue().equals(Getter.UNDEFINED)
+				&& !property.getGetter().defaultValue().equals(Getter.UNDEFINED)
 				&& !getGetter().defaultValue().equals(property.getGetter().defaultValue())) {
 			if (rulingProperty == null || rulingProperty.getGetter() == null
 					|| rulingProperty.getGetter().defaultValue().equals(Getter.UNDEFINED)) {
-				return "Default value '" + getGetter().defaultValue() + "' is not equal to '" + property.getGetter().defaultValue() + "'";
+				return "Default value '" + getGetter().defaultValue() + "' is not equal to '"
+						+ property.getGetter().defaultValue() + "'";
 			}
 		}
 
 		// TODO: Fix incompatible get/set etc...
 		if (!getGetterMethod().getName().equals(property.getGetterMethod().getName())) {
 			if (rulingProperty == null || rulingProperty.getGetterMethod() == null) {
-				return "Incompatible getter method " + getGetterMethod().getName() + " " + property.getGetterMethod().getName();
+				return "Incompatible getter method " + getGetterMethod().getName() + " "
+						+ property.getGetterMethod().getName();
 			}
 		}
 
@@ -530,7 +576,8 @@ public class ModelProperty<I> {
 			if (property.getReturnedValue() != null) {
 				if (!getReturnedValue().value().equals(property.getReturnedValue().value())) {
 					if (rulingProperty == null) {
-						return "Returned value '" + getReturnedValue().value() + "' is not equal to '" + property.getReturnedValue().value()
+						return "Returned value '" + getReturnedValue().value() + "' is not equal to '"
+								+ property.getReturnedValue().value()
 								+ "'";
 					}
 				}
@@ -540,7 +587,8 @@ public class ModelProperty<I> {
 			if (property.cloningStrategy != null) {
 				if (property.cloningStrategy.value() != property.cloningStrategy.value()) {
 					if (rulingProperty == null || rulingProperty.cloningStrategy == null) {
-						return "Incompatible cloning strategy: " + cloningStrategy + " is not compatible with " + property.cloningStrategy;
+						return "Incompatible cloning strategy: " + cloningStrategy + " is not compatible with "
+								+ property.cloningStrategy;
 					}
 				}
 			}
@@ -552,24 +600,26 @@ public class ModelProperty<I> {
 		if (getEmbedded() != null) {
 			if (property.getEmbedded() != null) {
 				if (!Arrays.equals(getEmbedded().closureConditions(), property.getEmbedded().closureConditions())) {
-					if (rulingProperty == null || rulingProperty.getEmbedded() == null && rulingProperty.getComplexEmbedded() == null) {
+					if (rulingProperty == null
+							|| rulingProperty.getEmbedded() == null && rulingProperty.getComplexEmbedded() == null) {
 						return "Embedded closure conditions are not equal";
 					}
 				}
 				if (!Arrays.equals(getEmbedded().deletionConditions(), property.getEmbedded().deletionConditions())) {
-					if (rulingProperty == null || rulingProperty.getEmbedded() == null && rulingProperty.getComplexEmbedded() == null) {
+					if (rulingProperty == null
+							|| rulingProperty.getEmbedded() == null && rulingProperty.getComplexEmbedded() == null) {
 						return "Embedded deletion conditions are not equal";
 					}
 				}
-			}
-			else if (property.getComplexEmbedded() != null) {
-				if (rulingProperty == null || rulingProperty.getEmbedded() == null && rulingProperty.getComplexEmbedded() == null) {
-					return "Cannot define both " + Embedded.class.getSimpleName() + " and " + ComplexEmbedded.class.getSimpleName()
+			} else if (property.getComplexEmbedded() != null) {
+				if (rulingProperty == null
+						|| rulingProperty.getEmbedded() == null && rulingProperty.getComplexEmbedded() == null) {
+					return "Cannot define both " + Embedded.class.getSimpleName() + " and "
+							+ ComplexEmbedded.class.getSimpleName()
 							+ " on the same property.";
 				}
 			}
-		}
-		else if (getComplexEmbedded() != null) {
+		} else if (getComplexEmbedded() != null) {
 			if (property.getComplexEmbedded() != null) {
 				boolean ok = true;
 				List<ClosureCondition> ccList = Arrays.asList(property.getComplexEmbedded().closureConditions());
@@ -589,7 +639,8 @@ public class ModelProperty<I> {
 				}
 				ok &= ccList.isEmpty();
 				if (!ok) {
-					if (rulingProperty == null || rulingProperty.getEmbedded() == null && rulingProperty.getComplexEmbedded() == null) {
+					if (rulingProperty == null
+							|| rulingProperty.getEmbedded() == null && rulingProperty.getComplexEmbedded() == null) {
 						return "Closure conditions are not equal";
 					}
 				}
@@ -610,14 +661,16 @@ public class ModelProperty<I> {
 				}
 				ok &= dcList.isEmpty();
 				if (!ok) {
-					if (rulingProperty == null || rulingProperty.getEmbedded() == null && rulingProperty.getComplexEmbedded() == null) {
+					if (rulingProperty == null
+							|| rulingProperty.getEmbedded() == null && rulingProperty.getComplexEmbedded() == null) {
 						return "Deletion conditions are not equal";
 					}
 				}
-			}
-			else if (property.getEmbedded() != null) {
-				if (rulingProperty == null || rulingProperty.getEmbedded() == null && rulingProperty.getComplexEmbedded() == null) {
-					return "Cannot define both " + ComplexEmbedded.class.getSimpleName() + " and " + Embedded.class.getSimpleName()
+			} else if (property.getEmbedded() != null) {
+				if (rulingProperty == null
+						|| rulingProperty.getEmbedded() == null && rulingProperty.getComplexEmbedded() == null) {
+					return "Cannot define both " + ComplexEmbedded.class.getSimpleName() + " and "
+							+ Embedded.class.getSimpleName()
 							+ " on the same property.";
 				}
 			}
@@ -629,46 +682,53 @@ public class ModelProperty<I> {
 				if (!getXMLAttribute().xmlTag().equals(XMLAttribute.DEFAULT_XML_TAG)
 						&& !property.getXMLAttribute().xmlTag().equals(XMLAttribute.DEFAULT_XML_TAG)
 						&& !getXMLAttribute().xmlTag().equals(property.getXMLAttribute().xmlTag())) {
-					if (rulingProperty == null || rulingProperty.getXMLAttribute() != null && rulingProperty.getXMLElement() != null) {
-						return "XML tag '" + getXMLAttribute().xmlTag() + "' is not equal to '" + property.getXMLAttribute().xmlTag() + "'";
+					if (rulingProperty == null
+							|| rulingProperty.getXMLAttribute() != null && rulingProperty.getXMLElement() != null) {
+						return "XML tag '" + getXMLAttribute().xmlTag() + "' is not equal to '"
+								+ property.getXMLAttribute().xmlTag() + "'";
 					}
 				}
-			}
-			else if (property.getXMLElement() != null) {
-				if (rulingProperty == null || rulingProperty.getXMLAttribute() != null && rulingProperty.getXMLElement() != null) {
+			} else if (property.getXMLElement() != null) {
+				if (rulingProperty == null
+						|| rulingProperty.getXMLAttribute() != null && rulingProperty.getXMLElement() != null) {
 					return "Property '" + propertyIdentifier + "' is declared as an XMLAttribute on " + getModelEntity()
 							+ " but as an XMLElement on " + property.getModelEntity();
 				}
 			}
-		}
-		else if (getXMLElement() != null) {
+		} else if (getXMLElement() != null) {
 			if (property.getXMLElement() != null) {
 				if (!getXMLElement().xmlTag().equals(XMLElement.DEFAULT_XML_TAG)
 						&& !property.getXMLElement().xmlTag().equals(XMLElement.DEFAULT_XML_TAG)
 						&& !getXMLElement().xmlTag().equals(property.getXMLElement().xmlTag())) {
-					if (rulingProperty == null || rulingProperty.getXMLAttribute() != null && rulingProperty.getXMLElement() != null) {
-						return "XML tag '" + getXMLElement().xmlTag() + "' is not equal to '" + property.getXMLElement().xmlTag() + "'";
+					if (rulingProperty == null
+							|| rulingProperty.getXMLAttribute() != null && rulingProperty.getXMLElement() != null) {
+						return "XML tag '" + getXMLElement().xmlTag() + "' is not equal to '"
+								+ property.getXMLElement().xmlTag() + "'";
 					}
 				}
 				if (!getXMLElement().context().equals(XMLElement.NO_CONTEXT)
 						&& !property.getXMLElement().context().equals(XMLElement.NO_CONTEXT)
 						&& !getXMLElement().context().equals(property.getXMLElement().context())) {
-					if (rulingProperty == null || rulingProperty.getXMLAttribute() != null && rulingProperty.getXMLElement() != null) {
-						return "Context '" + getXMLElement().context() + "' is not equal to '" + property.getXMLElement().context()
+					if (rulingProperty == null
+							|| rulingProperty.getXMLAttribute() != null && rulingProperty.getXMLElement() != null) {
+						return "Context '" + getXMLElement().context() + "' is not equal to '"
+								+ property.getXMLElement().context()
 								+ "' for property '" + propertyIdentifier + "'";
 					}
 				}
 				if (!getXMLElement().namespace().equals(XMLElement.NO_NAME_SPACE)
 						&& !property.getXMLElement().namespace().equals(XMLElement.NO_NAME_SPACE)
 						&& !getXMLElement().namespace().equals(property.getXMLElement().namespace())) {
-					if (rulingProperty == null || rulingProperty.getXMLAttribute() != null && rulingProperty.getXMLElement() != null) {
-						return "Namespace '" + getXMLElement().namespace() + "' is not equal to '" + property.getXMLElement().namespace();
+					if (rulingProperty == null
+							|| rulingProperty.getXMLAttribute() != null && rulingProperty.getXMLElement() != null) {
+						return "Namespace '" + getXMLElement().namespace() + "' is not equal to '"
+								+ property.getXMLElement().namespace();
 
 					}
 				}
-			}
-			else if (property.getXMLAttribute() != null) {
-				if (rulingProperty == null || rulingProperty.getXMLAttribute() != null && rulingProperty.getXMLElement() != null) {
+			} else if (property.getXMLAttribute() != null) {
+				if (rulingProperty == null
+						|| rulingProperty.getXMLAttribute() != null && rulingProperty.getXMLElement() != null) {
 					return "Property '" + propertyIdentifier + "' is declared as an XMLElement on " + getModelEntity()
 							+ " but as an XMLAttribute on " + property.getModelEntity();
 				}
@@ -678,7 +738,8 @@ public class ModelProperty<I> {
 	}
 
 	/**
-	 * Merges <code>this</code> {@link ModelProperty} with the given <code>property</code>. The <code>rulingProperty</code> takes precedence
+	 * Merges <code>this</code> {@link ModelProperty} with the given
+	 * <code>property</code>. The <code>rulingProperty</code> takes precedence
 	 * whenever it declares any annotation.
 	 * 
 	 * @param property
@@ -715,8 +776,7 @@ public class ModelProperty<I> {
 		Method updaterMethod = null;
 		if (rulingProperty != null && rulingProperty.getGetter() != null) {
 			getter = rulingProperty.getGetter();
-		}
-		else {
+		} else {
 			Cardinality cardinality = null;
 			String inverse = null;
 			String defaultValue = null;
@@ -728,20 +788,17 @@ public class ModelProperty<I> {
 
 			if (getGetter() != null) {
 				cardinality = getGetter().cardinality();
-			}
-			else {
+			} else {
 				cardinality = property.getGetter().cardinality();
 			}
 			if (getGetter() == null || getGetter().inverse().equals(Getter.UNDEFINED)) {
 				inverse = property.getGetter().inverse();
-			}
-			else {
+			} else {
 				inverse = getGetter().inverse();
 			}
 			if (getGetter() == null || getGetter().defaultValue().equals(Getter.UNDEFINED)) {
 				defaultValue = property.getGetter().defaultValue();
-			}
-			else {
+			} else {
 				defaultValue = getGetter().defaultValue();
 			}
 			if (getGetter() == null) {
@@ -750,208 +807,175 @@ public class ModelProperty<I> {
 				allowsMultipleOccurences = property.getGetter().allowsMultipleOccurences();
 				isDerived = property.getGetter().isDerived();
 				ignoreForEquality = property.getGetter().ignoreForEquality();
-			}
-			else {
+			} else {
 				stringConvertable = getGetter().isStringConvertable();
 				ignoreType = getGetter().ignoreType();
 				allowsMultipleOccurences = getGetter().allowsMultipleOccurences();
 				isDerived = getGetter().isDerived();
 				ignoreForEquality = getGetter().ignoreForEquality();
 			}
-			getter = new Getter.GetterImpl(propertyIdentifier, cardinality, inverse, defaultValue, stringConvertable, ignoreType,
+			getter = new Getter.GetterImpl(propertyIdentifier, cardinality, inverse, defaultValue, stringConvertable,
+					ignoreType,
 					allowsMultipleOccurences, isDerived, ignoreForEquality);
 		}
 		if (rulingProperty != null && rulingProperty.getSetter() != null) {
 			setter = rulingProperty.getSetter();
-		}
-		else {
+		} else {
 			if (getSetter() != null) {
 				setter = getSetter();
-			}
-			else if (property.getSetter() != null) {
+			} else if (property.getSetter() != null) {
 				setter = property.getSetter();
 			}
 		}
 		if (rulingProperty != null && rulingProperty.getAdder() != null) {
 			adder = rulingProperty.getAdder();
-		}
-		else {
+		} else {
 			if (getAdder() != null) {
 				adder = getAdder();
-			}
-			else if (property.getAdder() != null) {
+			} else if (property.getAdder() != null) {
 				adder = property.getAdder();
 			}
 		}
 		if (rulingProperty != null && rulingProperty.getRemover() != null) {
 			remover = rulingProperty.getRemover();
-		}
-		else {
+		} else {
 			if (getRemover() != null) {
 				remover = getRemover();
-			}
-			else if (property.getRemover() != null) {
+			} else if (property.getRemover() != null) {
 				remover = property.getRemover();
 			}
 		}
 		if (rulingProperty != null && rulingProperty.getReindexer() != null) {
 			reindexer = rulingProperty.getReindexer();
-		}
-		else {
+		} else {
 			if (getReindexer() != null) {
 				reindexer = getReindexer();
-			}
-			else if (property.getReindexer() != null) {
+			} else if (property.getReindexer() != null) {
 				reindexer = property.getReindexer();
 			}
 		}
 
 		if (rulingProperty != null && rulingProperty.getUpdater() != null) {
 			updater = rulingProperty.getUpdater();
-		}
-		else {
+		} else {
 			if (getUpdater() != null) {
 				updater = getUpdater();
-			}
-			else if (property.getUpdater() != null) {
+			} else if (property.getUpdater() != null) {
 				updater = property.getUpdater();
 			}
 		}
 
-		if (rulingProperty != null && (rulingProperty.getEmbedded() != null || rulingProperty.getComplexEmbedded() != null)) {
+		if (rulingProperty != null
+				&& (rulingProperty.getEmbedded() != null || rulingProperty.getComplexEmbedded() != null)) {
 			embedded = rulingProperty.getEmbedded();
 			complexEmbedded = rulingProperty.getComplexEmbedded();
-		}
-		else if (getEmbedded() != null) {
+		} else if (getEmbedded() != null) {
 			embedded = getEmbedded();
-		}
-		else if (getComplexEmbedded() != null) {
+		} else if (getComplexEmbedded() != null) {
 			complexEmbedded = getComplexEmbedded();
-		}
-		else if (property.getEmbedded() != null) {
+		} else if (property.getEmbedded() != null) {
 			embedded = property.getEmbedded();
-		}
-		else if (property.getComplexEmbedded() != null) {
+		} else if (property.getComplexEmbedded() != null) {
 			complexEmbedded = property.getComplexEmbedded();
 		}
 
 		if (rulingProperty != null && rulingProperty.getReturnedValue() != null) {
 			returnedValue = rulingProperty.getReturnedValue();
-		}
-		else if (getReturnedValue() != null) {
+		} else if (getReturnedValue() != null) {
 			returnedValue = getReturnedValue();
-		}
-		else if (property.getReturnedValue() != null) {
+		} else if (property.getReturnedValue() != null) {
 			returnedValue = property.getReturnedValue();
 		}
 
 		if (rulingProperty != null && rulingProperty.cloningStrategy != null) {
 			cloningStrategy = rulingProperty.cloningStrategy;
-		}
-		else if (this.cloningStrategy != null) {
+		} else if (this.cloningStrategy != null) {
 			cloningStrategy = this.cloningStrategy;
-		}
-		else if (property.cloningStrategy != null) {
+		} else if (property.cloningStrategy != null) {
 			cloningStrategy = property.cloningStrategy;
 		}
 
 		if (rulingProperty != null && rulingProperty.propertyImplementation != null) {
 			propertyImplementation = rulingProperty.propertyImplementation;
-		}
-		else if (this.propertyImplementation != null) {
+		} else if (this.propertyImplementation != null) {
 			propertyImplementation = this.propertyImplementation;
-		}
-		else if (property.propertyImplementation != null) {
+		} else if (property.propertyImplementation != null) {
 			propertyImplementation = property.propertyImplementation;
 		}
 
 		if (rulingProperty != null && rulingProperty.getGetterMethod() != null) {
 			getterMethod = rulingProperty.getGetterMethod();
-		}
-		else {
+		} else {
 			if (getGetterMethod() != null) {
 				getterMethod = getGetterMethod();
-			}
-			else {
+			} else {
 				getterMethod = property.getGetterMethod();
 			}
 		}
 
 		if (rulingProperty != null && rulingProperty.getSetterMethod() != null) {
 			setterMethod = rulingProperty.getSetterMethod();
-		}
-		else {
+		} else {
 			if (getSetterMethod() != null) {
 				setterMethod = getSetterMethod();
-			}
-			else {
+			} else {
 				setterMethod = property.getSetterMethod();
 			}
 		}
 
 		if (rulingProperty != null && rulingProperty.getAdderMethod() != null) {
 			adderMethod = rulingProperty.getAdderMethod();
-		}
-		else {
+		} else {
 			if (getAdderMethod() != null) {
 				adderMethod = getAdderMethod();
-			}
-			else {
+			} else {
 				adderMethod = property.getAdderMethod();
 			}
 		}
 
 		if (rulingProperty != null && rulingProperty.getRemoverMethod() != null) {
 			removerMethod = rulingProperty.getRemoverMethod();
-		}
-		else {
+		} else {
 			if (getRemoverMethod() != null) {
 				removerMethod = getRemoverMethod();
-			}
-			else {
+			} else {
 				removerMethod = property.getRemoverMethod();
 			}
 		}
 
 		if (rulingProperty != null && rulingProperty.getReindexerMethod() != null) {
 			reindexerMethod = rulingProperty.getReindexerMethod();
-		}
-		else {
+		} else {
 			if (getReindexerMethod() != null) {
 				reindexerMethod = getReindexerMethod();
-			}
-			else {
+			} else {
 				reindexerMethod = property.getReindexerMethod();
 			}
 		}
 
 		if (rulingProperty != null && rulingProperty.getUpdaterMethod() != null) {
 			updaterMethod = rulingProperty.getUpdaterMethod();
-		}
-		else {
+		} else {
 			if (getUpdaterMethod() != null) {
 				updaterMethod = getUpdaterMethod();
-			}
-			else {
+			} else {
 				updaterMethod = property.getUpdaterMethod();
 			}
 		}
 
-		if (rulingProperty != null && (rulingProperty.getXMLAttribute() != null || rulingProperty.getXMLElement() != null)) {
+		if (rulingProperty != null
+				&& (rulingProperty.getXMLAttribute() != null || rulingProperty.getXMLElement() != null)) {
 			xmlAttribute = rulingProperty.getXMLAttribute();
 			xmlElement = rulingProperty.getXMLElement();
-		}
-		else if (getXMLAttribute() != null || property.getXMLAttribute() != null) {
-			//TODO idf and this might concerns my current work on serialization
+		} else if (getXMLAttribute() != null || property.getXMLAttribute() != null) {
+			// TODO idf and this might concerns my current work on serialization
 			if (getXMLAttribute() != null && !getXMLAttribute().xmlTag().equals(XMLAttribute.DEFAULT_XML_TAG)) {
 				xmlAttribute = getXMLAttribute();
-			}
-			else {
+			} else {
 				xmlAttribute = property.getXMLAttribute();
 			}
-		}
-		else if (getXMLElement() != null || property.getXMLElement() != null) {
-			//TODO idf idem
+		} else if (getXMLElement() != null || property.getXMLElement() != null) {
+			// TODO idf idem
 			String xmlTag = XMLElement.DEFAULT_XML_TAG;
 			String context = XMLElement.NO_CONTEXT;
 			String namespace = XMLElement.NO_NAME_SPACE;
@@ -961,37 +985,31 @@ public class ModelProperty<I> {
 				if (property.getXMLElement() != null) {
 					if (!getXMLElement().xmlTag().equals(XMLElement.DEFAULT_XML_TAG)) {
 						xmlTag = getXMLElement().xmlTag();
-					}
-					else {
+					} else {
 						xmlTag = property.getXMLElement().xmlTag();
 					}
 					if (!getXMLElement().context().equals(XMLElement.NO_CONTEXT)) {
 						context = getXMLElement().context();
-					}
-					else {
+					} else {
 						context = property.getXMLElement().context();
 					}
 					if (!getXMLElement().namespace().equals(XMLElement.NO_NAME_SPACE)) {
 						namespace = getXMLElement().namespace();
-					}
-					else {
+					} else {
 						namespace = property.getXMLElement().namespace();
 					}
 					if (!getXMLElement().idFactory().equals(XMLElement.NO_ID_FACTORY)) {
 						idFactory = getXMLElement().idFactory();
-					}
-					else {
+					} else {
 						idFactory = property.getXMLElement().idFactory();
 					}
 					primary |= getXMLElement().primary();
 					primary |= property.getXMLElement().primary();
 					xmlElement = new XMLElement.XMLElementImpl(xmlTag, context, namespace, primary, idFactory);
-				}
-				else {
+				} else {
 					xmlElement = getXMLElement();
 				}
-			}
-			else {
+			} else {
 				xmlElement = property.getXMLElement();
 			}
 		}
@@ -1006,9 +1024,12 @@ public class ModelProperty<I> {
 			setPastingPoint = rulingProperty.getSetPastingPoint();
 		}
 
-		return new ModelProperty<>(getModelEntity(), getPropertyIdentifier(), propertyImplementation, getter, setter, adder, remover,
-				reindexer, updater, xmlAttribute, xmlElement, returnedValue, embedded, initialize, complexEmbedded, cloningStrategy,
-				setPastingPoint, addPastingPoint, getterMethod, setterMethod, adderMethod, removerMethod, reindexerMethod, updaterMethod);
+		return new ModelProperty<>(getModelEntity(), getPropertyIdentifier(), propertyImplementation, getter, setter,
+				adder, remover,
+				reindexer, updater, xmlAttribute, xmlElement, returnedValue, embedded, initialize, complexEmbedded,
+				cloningStrategy,
+				setPastingPoint, addPastingPoint, getterMethod, setterMethod, adderMethod, removerMethod,
+				reindexerMethod, updaterMethod);
 	}
 
 	final public ModelEntity<I> getModelEntity() {
@@ -1052,7 +1073,7 @@ public class ModelProperty<I> {
 	}
 
 	public XMLAttribute getXMLAttribute() {
-		//TODO this is fetch from the XMLSerializer class at some point
+		// TODO this is fetch from the XMLSerializer class at some point
 		return xmlAttribute;
 	}
 
@@ -1063,8 +1084,7 @@ public class ModelProperty<I> {
 	public String getXMLContext() {
 		if (xmlElement != null) {
 			return xmlElement.context();
-		}
-		else {
+		} else {
 			return "";
 		}
 	}
@@ -1108,11 +1128,9 @@ public class ModelProperty<I> {
 	public Object getDefaultValue(PamelaModelFactory factory) throws InvalidDataException {
 		if (defaultValue != null) {
 			return defaultValue;
-		}
-		else if (!getGetter().defaultValue().equals(Getter.UNDEFINED)) {
+		} else if (!getGetter().defaultValue().equals(Getter.UNDEFINED)) {
 			return factory.getStringEncoder().fromString(getType(), getGetter().defaultValue());
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
@@ -1163,15 +1181,17 @@ public class ModelProperty<I> {
 		return inverseProperty;
 	}
 
-	public <T> ModelProperty<? super T> getInverseProperty(ModelEntity<T> oppositeEntity) throws ModelDefinitionException {
+	public <T> ModelProperty<? super T> getInverseProperty(ModelEntity<T> oppositeEntity)
+			throws ModelDefinitionException {
 		if (hasExplicitInverseProperty()) {
 			if (oppositeEntity == null) {
 				throw new ModelDefinitionException(getModelEntity() + ": Cannot find opposite entity " + getType());
 			}
 			ModelProperty<? super T> inverseProperty = oppositeEntity.getModelProperty(getGetter().inverse());
 			if (inverseProperty == null) {
-				throw new ModelDefinitionException(getModelEntity() + ": Cannot find inverse property " + getGetter().inverse() + " for "
-						+ oppositeEntity.getImplementedInterface().getSimpleName());
+				throw new ModelDefinitionException(
+						getModelEntity() + ": Cannot find inverse property " + getGetter().inverse() + " for "
+								+ oppositeEntity.getImplementedInterface().getSimpleName());
 			}
 			return inverseProperty;
 		}
@@ -1185,7 +1205,8 @@ public class ModelProperty<I> {
 
 	public ModelEntity<?> getAccessedEntity() {
 		return ModelEntityLibrary.getModelEntityFromImplementingInterface(getType());
-		//TODO idf first time I see this, does it concerns my current work on the test case serialization tests ?
+		// TODO idf first time I see this, does it concerns my current work on the test
+		// case serialization tests ?
 	}
 
 	public ReturnedValue getReturnedValue() {
@@ -1233,24 +1254,25 @@ public class ModelProperty<I> {
 	}
 
 	public boolean isRelevantForEqualityComputation() {
-		/*if (!isDerived() && (getXMLAttribute() == null || getXMLAttribute().ignoreForEquality())) {
-			return false;
-		}
-		return isSerializable();*/
+		/*
+		 * if (!isDerived() && (getXMLAttribute() == null ||
+		 * getXMLAttribute().ignoreForEquality())) {
+		 * return false;
+		 * }
+		 * return isSerializable();
+		 */
 
-		return /*getEmbedded() != null ||*/ !isDerived() && !ignoreForEquality();
+		return /* getEmbedded() != null || */ !isDerived() && !ignoreForEquality();
 	}
 
 	public StrategyType getCloningStrategy() {
 		if (cloningStrategy == null) {
 			if (ModelEntityLibrary.has(getType())) {
 				return StrategyType.REFERENCE;
-			}
-			else {
+			} else {
 				return StrategyType.CLONE;
 			}
-		}
-		else {
+		} else {
 			return cloningStrategy.value();
 		}
 	}

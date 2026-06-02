@@ -42,9 +42,10 @@ import org.openflexo.pamela.factory.PamelaModelFactory;
 
 public abstract class MyContainerImpl implements MyContainer {
 
-	private MyContents lecontenu = null;
+	private MyContents myContentEntity = null;
 	private PamelaModelFactory factory = null;
-	//TODO idf what's the purpose of this field ?
+
+	// TODO idf what's the purpose of this field ?
 	private String contentURI = null;
 
 	public void setFactory(PamelaModelFactory fact) {
@@ -53,37 +54,37 @@ public abstract class MyContainerImpl implements MyContainer {
 
 	@Override
 	public String getContentURI() {
-		if (lecontenu != null) {
-			contentURI = new String("Content://" + lecontenu.toString());
+		if (myContentEntity != null) {
+			contentURI = new String("Content://" + myContentEntity.toString());
 			// If you uncomment this => infinite loop
-			// setContentURI("Content://" + lecontenu.toString());
+			// setContentURI("Content://" + myContentEntity.toString());
 		}
 		return contentURI;
 	}
 
 	@Override
 	public void setContentURI(String anURI) {
-		System.out.println("JE positionne l'URI " + anURI);
+		System.out.println("setContentURI=" + anURI);
 		contentURI = anURI;
 	}
 
 	@Override
 	public String getContents() {
-		if (lecontenu != null) {
-			System.out.println("Getting something + " + lecontenu.getValue());
-			return lecontenu.getValue();
-		}
-		else if (contentURI != null) {
+		if (myContentEntity != null) {
+			System.out.println("getContents=" + myContentEntity.getValue());
+			return myContentEntity.getValue();
+		} else if (contentURI != null) {
 
-			String anURi = getContentURI();
-			System.out.println("Getting from URI: " + anURi);
+			String contentURI = getContentURI();
+			System.out.println("getContentURI=" + contentURI);
 			// If you uncomment this => infinite loop!
 			// setContents(anURi.substring(10));
-			lecontenu = MyContentsImpl.fromString(factory, anURi.substring(10));
-			return lecontenu.getValue();
-		}
-		else {
-			System.out.println("Getting Nothing ");
+			myContentEntity = MyContentsImpl.getMyContentEntityFromString(factory, contentURI.substring(10));
+			// substring 10 strips the "Content://" prefix (length 10) from the stored URI
+			// so you get the actual content string.
+			return myContentEntity.getValue();
+		} else {
+			System.out.println("getContents=null");
 			return null;
 		}
 	}
@@ -91,13 +92,16 @@ public abstract class MyContainerImpl implements MyContainer {
 	@Override
 	public void setContents(String someContents) {
 		if (getContents() == null) {
-			System.out.println("Setting something (creation): " + someContents);
-			lecontenu = MyContentsImpl.fromString(factory, someContents);
+			System.out.println("setContents=" + someContents);
+			// TODO le test ne devient pas trivial en faisant ça ?
+			// TODO est-ce que c'est nécéssaire ?
+			// myContentEntity = MyContentsImpl.getMyContentEntityFromString(factory, someContents);
+			myContentEntity = factory.newInstance(MyContents.class);
+			myContentEntity.setValue(someContents);
+		} else {
+			System.out.println("setContents=" + someContents);
+			myContentEntity.setValue(someContents);
 		}
-		else {
-			System.out.println("Setting something : " + someContents);
-			lecontenu.setValue(someContents);
-		}
-		setContentURI("Content://" + lecontenu.getValue());
+		setContentURI("Content://" + myContentEntity.getValue());
 	}
 }

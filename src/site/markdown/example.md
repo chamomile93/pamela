@@ -8,13 +8,48 @@ sidebar_position: 5
 
 ## A very basic model with two entities
 
-The following code listing represents a very basic model with two entities *Book* and *Library*.
+The following code listing represents a very basic model with two entities :
+- *Book*
+  -
+```java
+@ModelEntity
+interface Book extends AccessibleProxyObject
+```
+- *Library* :
+  -
+```java
+@ModelEntity
+interface Library extends AccessibleProxyObject
+```
 
-Entity *Book* defines two read-write single properties *title* and *ISBN* with single cardinality and with `String` type. Entity *Book* also define a constructor with initial *title* value. Entity *Library* defines a read-write multiple properties *books* referencing *Book* instances.
+Entity *Book* defines two read-write single properties with single cardinality of `String` type :
+- *title* :
+  -
+```java
+@Getter("title")
+String getTitle();
 
-Note that this code is sufficient to execute the model, while no line of code is required (only java interface and API methods are declared here).
+@Setter("title")
+void setTitle(String aTitle);
+```
+- *ISBN* :
+  -
+```java
+@Getter("ISBN")
+String getISBN();
 
-`AccessibleProxyObject` is not mandatory here, but recommanded. This is the interface that PAMELA objects should extend in order to benefit from their default implementation handled by the PAMELA interpreter.
+@Setter("ISBN")
+void setISBN(String value);
+```
+
+Entity *Book* also define a constructor with initial *title* value :
+
+```java
+@Initializer
+Book init(@Parameter("title")String aTitle);
+```
+
+The full code example of a Book modeled with PAMELA could be as follows :
 
 ```java
 @ModelEntity
@@ -35,7 +70,18 @@ interface Book extends AccessibleProxyObject {
   @Setter("ISBN")
   void setISBN(String value);
 }
+```
 
+Entity *Library* defines a read-write multiple properties *books* referencing *Book* instances.
+
+<!-- TODO idf if it mentions set of 5 methods : getBooks, addToBooks, removeFromBooks, moveBookToIndex, getBook , or any partition of it ? -->
+
+Note that this code is sufficient to execute the model, while no line of code is required (only java interface and API methods are declared here).
+
+`AccessibleProxyObject` is not mandatory here, but recommanded. This is the interface that PAMELA objects should extend in order to benefit from their default implementation handled by the PAMELA interpreter.
+
+
+```java
 @ModelEntity
 interface Library extends AccessibleProxyObject {
 
@@ -75,7 +121,25 @@ myLibrary.addToBooks(myFirstBook);
 myLibrary.addToBooks(anOtherBook);
 ```
 
-The first line of code instantiates a `ModelContext` (the PAMELA model at runtime) by introspecting and computing the closure of concepts graph obtained while starting from `Library` entity and following `parentEntities` and `properties` relationships. This call builds a *PAMELAModel*, while dynamically following links reflected by compiled byte-code. A factory `ModelFactory` is then instantiated using that `ModelContext`, allowing to instantiate *Library* and *Book* instances.
+<!-- TODO fix `ModelContext` does not exists anymore in this version, perhaps it's
+  - `PamelaMetaModel` and for
+  - `ModelContextLibrary` is `PamelaMetaModelLibrary` ?
+-->
+
+The first line of code instantiates a `ModelContext` (the PAMELA model at runtime) by introspecting and computing the closure of concepts graph obtained while starting from `Library` entity and following `parentEntities` and `properties` relationships.
+
+<!-- TODO fix the name of `ModelContext` with `PamelaMetaModel` ? -->
+<!-- TODO fix the name of `parentEntities` with ? -->
+<!-- TODO add an excerpt of the code -->
+
+This call builds a *PAMELAModel*, while dynamically following links reflected by compiled byte-code.
+
+<!-- TODO fix the name of `PAMELAModel` -->
+
+A factory `ModelFactory` is then instantiated using that `ModelContext`, allowing to instantiate *Library* and *Book* instances.
+
+<!-- TODO fix the name of `ModelContext` with `PamelaMetaModel` ? -->
+<!-- TODO fix the name of `ModelFactory` with `PamelaModelFactory` ? -->
 
 ## Handling custom code
 
@@ -83,7 +147,43 @@ A major challenge to be addressed by MDE (Model-Driven Engineering) approaches i
 
 The PAMELA framework provides an elegant way to do it, while using common extension points such as inheritance, as offered by Java language. Custom implementations should be declared in Java classes, either as a unique implementation (use of `@ImplementationClass`) or with partial implementations (use of multiple  `@Implementation`, see [multiple inheritance and traits programming](./pamela-core/4-multiple_inheritance.md)).
 
-The following example shows how to integrate custom code to the *Book* entity described above. The partial custom implementation is provided by an abstract class, declared in an annotation of its model entity. Custom implementations are defined using usual Java implementation/overrides scheme. Here we define a custom implementation of the `read()` method, which has no annotation (and thus is not processed by the PAMELA framework), and also we customize the getter for *title*, returning a default value when no value is defined for that property. Note that this implementation references default interpreted implementation (call to `performSuperGetter(String)` method).
+<!-- TODO maybe "traits" refers to the `@Implementation` , maybe I look into it another time -->
+
+The following example shows how to integrate custom code to the *Book* entity described above.
+The partial custom implementation is provided by an abstract class, declared in an annotation of its model entity.
+
+```java
+// Provides a partial implementation for Book
+public static abstract class BookImpl implements Book
+```
+
+Custom implementations are defined using usual Java implementation/overrides scheme.
+Here we define a custom implementation of the `read()` method, which has no annotation (and thus is not processed by the PAMELA framework).
+
+```java
+  @Override
+    public void read() {
+      // do the job
+    }
+```
+
+Also we customize the getter for *title*, returning a default value when no value is defined for that property.
+
+```java
+@Override
+  public String getTitle() {
+    String title = performSuperGetter("title");
+    if (title == null) {
+      return "This book has no title";
+    }
+    return title;
+  }
+```
+
+Note that this implementation references default interpreted implementation (call to `performSuperGetter(String)` method).
+
+<!-- TODO idf the last paragraph mention the "default interpreted implementation" I've seen something about `performSuperGetter` in `public class IProxyMethodHandler` and `public interface AccessibleProxyObject extends HasPropertyChangeSupport, KeyValueCoding` -->
+<!-- TODO idf how this is relevant yet -->
 
 ```java
 @ModelEntity
@@ -118,22 +218,25 @@ Notice that the name of a property being a string is fragile, any typo or change
 
 As said previously, PAMELA framework supports multiple inheritance. In this context, it is possible to provide multiple implementation classes for a given *ModelEntity*. To do so, we use abstract inner classes tagged with `@Implementation`, and the composition is made at run-time (see [multiple inheritance and traits programming](./pamela-core/4-multiple_inheritance.md)).
 
+<!-- TODO illustrate example -->
+
 ## Download examples
 
 For each example, we can do :
 
-```
+```sh
 gradle test
 ```
 
 and
 
-```
+```sh
 gradle run
 ```
 
 Here are the different versions:
 
+<!-- TODO fix update these code examples, they are not working anymore -->
 1. [v1.zip](/examples/v1.zip) : minimal example
 2. [v2.zip](/examples/v2.zip) : adding behaviour
 3. [v3.zip](/examples/v3.zip) : behaviour modifications (AccessibleProxyObject)

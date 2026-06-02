@@ -39,6 +39,7 @@
 
 package org.openflexo.pamela.factory;
 
+//TODO regroup this enum
 public enum EmbeddingType {
 	CLOSURE, DELETION;
 }

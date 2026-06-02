@@ -49,10 +49,11 @@ import java.lang.annotation.Target;
 import org.openflexo.pamela.model.ModelProperty;
 
 /**
- * Indicates that related {@link ModelEntity} or {@link ModelProperty} should be serialized as a XML element in the context of XML
- * serialization<br>
+ * Indicates that related {@link ModelEntity} or {@link ModelProperty} should be
+ * serialized as a XML element in the context of XML serialization<br>
  * 
- * This annotation should be placed either on a {@link ModelEntity} or on the method where getter is declared
+ * This annotation should be placed either on a {@link ModelEntity} or on the
+ * method where getter is declared
  * 
  * @author sylvain
  *
@@ -74,21 +75,24 @@ public @interface XMLElement {
 	String xmlTag() default DEFAULT_XML_TAG;
 
 	/**
-	 * Comma separated deprecated XML tags (used to deserialize only, with the aim of migrating data from old format)
+	 * Comma separated deprecated XML tags (used to deserialize only, with the aim
+	 * of migrating data from old format)
 	 * 
 	 * @return
 	 */
 	String deprecatedXMLTags() default DEFAULT_XML_TAG;
 
 	/**
-	 * String context to be appended at the beginning of XML tag of element to deserialize for this property
+	 * String context to be appended at the beginning of XML tag of element to
+	 * deserialize for this property
 	 * 
 	 * @return
 	 */
 	String context() default NO_CONTEXT;
 
 	/**
-	 * String context to be appended at the beginning of XML tag of element to deserialize for this property (used to deserialize only, with
+	 * String context to be appended at the beginning of XML tag of element to
+	 * deserialize for this property (used to deserialize only, with
 	 * the aim of migrating data from old format)
 	 * 
 	 * @return
@@ -113,7 +117,8 @@ public @interface XMLElement {
 		private String idFactory;
 
 		public XMLElementImpl(String xmlTag, String context, String namespace, boolean primary, String idFactory) {
-			//TODO this is used while creating a ModelEntity from a class annotated with @XMLElement
+			// TODO this is used while creating a ModelEntity from a class annotated with
+			// @XMLElement
 			this.xmlTag = xmlTag;
 			this.context = context;
 			this.namespace = namespace;

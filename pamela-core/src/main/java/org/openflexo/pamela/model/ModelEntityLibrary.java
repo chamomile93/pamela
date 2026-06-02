@@ -71,7 +71,6 @@ public class ModelEntityLibrary {
 				aNewEntity.mergeProperties();
 				//TODO idf
 			}
-			newEntities.clear();
 			//TODO idf
 		}
 		return modelEntity;
@@ -99,6 +98,7 @@ public class ModelEntityLibrary {
 				//TODO idf why we need to retain this field, and ok this is why we can iterate on newEntities,
 			}
 		}
+		//TODO we potentially return an empty ModelEntity
 		return modelEntity;
 	}
 
@@ -122,6 +122,6 @@ public class ModelEntityLibrary {
 	 */
 	public static void clear() {
 		entities.clear();
-		newEntities.clear(); //TODO watchout this has been added by copilot while debugging an exception raised by SerializationTests.
+		newEntities.clear(); //TODO watchout this has been added while debugging an exception raised by SerializationTests.
 	}
 }

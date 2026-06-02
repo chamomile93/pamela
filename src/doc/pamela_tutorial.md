@@ -84,7 +84,7 @@ Le flag `isDerived` indique à Pamela que l'attribut peut être déduit d'autres
 
 # Sérialisation et désérialisation XML
 
-Il est possible de sérialiser un modèle afin de générer un fichier XML décrivant ledit modèle. Pour qu'un modèle soit sérialisable, il faut ajouter l'annotation `@XMLElement` à l'interface du modèle ainsi qu'à chaque attribut que l'on souhaite modéliser. Exemple :
+Il est possible de sérialiser un modèle afin de générer un fichier XML décrivant ledit modèle. Pour qu'un modèle soit sérialisable, il faut ajouter l'annotation `@XMLElement` à l'interface du modèle ainsi que `XMLAttribute` 'à chaque attribut que l'on souhaite modéliser. Exemple :
 
 ```
 @XMLElement
@@ -121,8 +121,10 @@ Ensuite, pour effectuer la sérialisation, il suffit de faire ceci :
 projectFactory.serialize(projectModel, fos, SerializationPolicy.EXTENSIVE, true);
 ```
 
-où `projectModel` est une instance du modèle à sérialiser, et `fos` est un FileOutputStream. Par exemple :
-
+où :
+- `projectFactory` est une instance d'une `PamelaModelFactory` de `ClassModel`;
+- `projectModel` est une instance du modèle à sérialiser, ici `ClassModel`;
+- `fos` est un FileOutputStream, par exemple :
 ```
 File xmlFile = new File(xmlPath);
 xmlFile.createNewFile();
@@ -137,12 +139,14 @@ FileInputStream fis = new FileInputStream(xmlFile);
 ProjectModel projectModel = (ProjectModel) projectFactory.deserialize(fis, DeserializationPolicy.RESTRICTIVE);
 ```
 
+La sérialization d'un type non primitif doit être sérializable par Pamela, i.e. employé les `@XMLElement` et `@XMLAttribute`.
+
 # updateWith method
 
 Pamela contient une méthode nommée `updateWith` qui permet de mettre à jour un modèle A à partir d'un modèle B.
 Suite à cette opération, les informations stockées dans le modèle A seront identiques à celles du modèle B, mais contrairement à un simple `ClassModel modelA = modelB;`, les pointers, références, etc. du modèle A ne seront pas affectés.
 
-//TODO idf
+<!-- // TODO idf -->
 
 Exemple d'utilisation :
 

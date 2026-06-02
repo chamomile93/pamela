@@ -37,6 +37,12 @@ public class DefaultMultiplePropertyImplementation<I, T> extends AbstractPropert
 	}
 
 	@Override
+	protected Object getDebugValue() {
+		//TODO this was added by copilot after a suggestion during a debug session
+		return internalValues;
+	}
+
+	@Override
 	public List<T> get() throws ModelDefinitionException {
 		if (getProperty().getGetter() == null) {
 			throw new ModelExecutionException("Getter is not defined for property " + getProperty());

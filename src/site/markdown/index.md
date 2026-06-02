@@ -6,11 +6,20 @@ sidebar_position: 1
 
 PAMELA is an annotation-based Java Modelling framework. PAMELA provides a smooth integration between model and code, and enable Java developers to handle software development both at conceptual level and at source-code level, without code transformation and/or generation, thus avoiding round-tripping issues.
 
-Exposed metamodel provides meta-programming support, multiple inheritance and traits programming, contract programming, aspect programming and run-time weaving. This framework also offers operational features derived from  model-level edition such as notification management, validation, persistence, comparison and object graph computation.
+Exposed metamodel provides meta-programming support, multiple inheritance and traits programming, contract programming, aspect programming and run-time weaving.
+
+<!-- TODO idf :
+- traits programming
+- aspect programming
+-->
+
+This framework also offers operational features derived from  model-level edition such as notification management, validation, persistence, comparison and object graph computation.
+
+<!-- TODO idf "operational features" and "object graph computation" -->
 
 PAMELA approach has been tested and validated on some java-based industrial projects, making it a credible and reliable alternative in the context of Model-Driven Engineering.
 
-# Highlights
+## Highlights
 
 - Continuous modeling process
 - Strong coupling between model and code with smooth integration
@@ -21,7 +30,7 @@ PAMELA approach has been tested and validated on some java-based industrial proj
 - Contract programming with assertions checking at runtime
 - Dynamic code weaving at runtime (aspect programming without compilation)
 
-# Overview
+## Overview
 
 - [Motivations](./motivations.md)
 - [Approach overview](./overview.md)
@@ -29,7 +38,7 @@ PAMELA approach has been tested and validated on some java-based industrial proj
 - [Common annotations](./annotations.md)
 - [Behind the scene](./behind_the_scene.md)
 
-# Features
+## Features
 
 - [Model at runtime computation, model fragmentation management](./pamela-core/1-model_at_runtime.md)
 - [Life-cycle management](./pamela-core/2-life_cycle_management.md)
@@ -47,13 +56,14 @@ PAMELA approach has been tested and validated on some java-based industrial proj
 - [Contract programming, JML](./pamela-core/14-jml.md)
 - [Design patterns, aspect programming](./pamela-core/15-design_patterns.md)
 
-# Getting started
+## Getting started
 
 Want to start with Pamela ? Read our ["Getting started" guide](./getting_started.md)
 
-# Contents of this package
+## Contents of this package
 
 PAMELA project contains two separate components (defined here as modules):
 
 - [Pamela-core component](./pamela-core/index.md), which contains the Pamela core library
+<!-- TODO idf, it's more or less the same file -->
 - [Pamela-SecurityPatterns component](./pamela-security-patterns/index.md), which is a library of security-oriented patterns

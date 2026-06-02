@@ -17,7 +17,7 @@ import org.openflexo.pamela.test.AbstractPAMELATest;
  */
 public class PamelaCoreTests2 extends AbstractPAMELATest {
 
-	private PamelaModelFactory factory;
+	private PamelaModelFactory pamelaFactory;
 	private PamelaMetaModel pamelaMetaModel;
 
 	@BeforeClass
@@ -32,8 +32,8 @@ public class PamelaCoreTests2 extends AbstractPAMELATest {
 	@Override
 	@Before
 	public void setUp() throws Exception {
-		pamelaMetaModel = new PamelaMetaModel(PAMFlexoResource.class);
-		factory = new PamelaModelFactory(pamelaMetaModel);
+		pamelaMetaModel = new PamelaMetaModel(PamelaFlexoResource.class);
+		pamelaFactory = new PamelaModelFactory(pamelaMetaModel);
 	}
 
 	@Override
@@ -43,9 +43,9 @@ public class PamelaCoreTests2 extends AbstractPAMELATest {
 
 	@Test
 	public void testResources() throws Exception {
-		PAMFlexoResource<?> container = factory.newInstance(PAMFlexoResource.class);
-		PAMFlexoResource<?> content1 = factory.newInstance(PAMFlexoResource.class);
-		PAMFlexoResource<?> content2 = factory.newInstance(PAMFlexoResource.class);
+		PamelaFlexoResource<?> container = pamelaFactory.newInstance(PamelaFlexoResource.class);
+		PamelaFlexoResource<?> content1 = pamelaFactory.newInstance(PamelaFlexoResource.class);
+		PamelaFlexoResource<?> content2 = pamelaFactory.newInstance(PamelaFlexoResource.class);
 		container.addToContents(content1);
 		content2.setContainer(container);
 		assertEquals(container, content1.getContainer());

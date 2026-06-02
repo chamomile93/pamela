@@ -99,14 +99,12 @@ import org.openflexo.toolbox.HasPropertyChangeSupport;
  * annotated with a
  * {@link org.openflexo.pamela.annotations.ModelEntity} annotation
  *
- * //TODO idf why use the term "reified" here, to me to reify is a synonym of
- * "hypotheses" , it's also a way to "link" things between concept
- *
  * @author guillaume, sylvain
  *
  * @param <I>
  *            java type addressed by this entity
  */
+//TODO idf, not sure why use the term "reified" here, to me to reify is a synonym of "hypotheses" , it's also a way to "link" things between concept
 public class ModelEntity<I> {
 
 	/**
@@ -227,7 +225,8 @@ public class ModelEntity<I> {
 		for (Class<?> i : implementedInterface.getInterfaces()) {
 			if (i.isAnnotationPresent(org.openflexo.pamela.annotations.ModelEntity.class)) {
 				if (superImplementedInterfaces == null) {
-					//TODO idf c'est l'initialization how could it be otherwise than null ? is this class created another way ?
+					// TODO idf c'est l'initialization how could it be otherwise than null ? is this
+					// class created another way ?
 					superImplementedInterfaces = new ArrayList<>();
 				}
 				superImplementedInterfaces.add((Class<? super I>) i);
@@ -235,7 +234,7 @@ public class ModelEntity<I> {
 		}
 		for (Field field : getImplementedInterface().getDeclaredFields()) {
 			StringConverter converter = field.getAnnotation(StringConverter.class);
-			//TODO idf why use a converter here
+			// TODO idf why use a converter here
 			if (converter != null) {
 				try {
 					StringConverterLibrary.getInstance().addConverter((Converter<?>) field.get(null));
@@ -259,8 +258,9 @@ public class ModelEntity<I> {
 		// We do not resolve inherited properties either.
 		for (Method m : getImplementedInterface().getDeclaredMethods()) {
 			String propertyIdentifier = getPropertyIdentifier(m);
-			//TODO idf the below legacy comment
-			// // Sylvain: i commented following condition, as if a Pamela method overrides an
+			// TODO idf the below legacy comment
+			// // Sylvain: i commented following condition, as if a Pamela method overrides
+			// an
 			// interface where parent method
 			// was not annotated, property was ignored. But i dont't understand the reason
 			// of this condition
@@ -280,14 +280,14 @@ public class ModelEntity<I> {
 				ModelProperty<I> property = ModelProperty.getModelProperty(propertyIdentifier, this);
 				declaredModelProperties.put(propertyIdentifier, property);
 			}
-			//TODO idf if this might be of interest in my testing SerializationTest
+			// TODO idf if this might be of interest in my testing SerializationTest
 			org.openflexo.pamela.annotations.Initializer initializer = m
 					.getAnnotation(org.openflexo.pamela.annotations.Initializer.class);
 			if (initializer != null) {
 				initializers.put(m, new ModelInitializer(initializer, m));
 			}
 
-			//TODO idf if this might be of interest in my testing SerializationTest
+			// TODO idf if this might be of interest in my testing SerializationTest
 			org.openflexo.pamela.annotations.DeserializationFinalizer deserializationFinalizer = m
 					.getAnnotation(org.openflexo.pamela.annotations.DeserializationFinalizer.class);
 			if (deserializationFinalizer != null) {
@@ -299,7 +299,7 @@ public class ModelEntity<I> {
 				}
 			}
 
-			//TODO idf if this might be of interest in my testing SerializationTest
+			// TODO idf if this might be of interest in my testing SerializationTest
 			org.openflexo.pamela.annotations.DeserializationInitializer deserializationInitializer = m
 					.getAnnotation(org.openflexo.pamela.annotations.DeserializationInitializer.class);
 			if (deserializationInitializer != null) {
@@ -311,20 +311,23 @@ public class ModelEntity<I> {
 				}
 			}
 
-			//TODO idf if this might be of interest in my testing SerializationTest and later
+			// TODO idf if this might be of interest in my testing SerializationTest and
+			// later
+			// TODO maybe look into this
 			// // Register JML annotations if class is implementing SpecifiableProxyObject
 			if (SpecifiableProxyObject.class.isAssignableFrom(getImplementedInterface())) {
 				registerJMLAnnotations(m);
 			}
 		}
 
+		//TODO maybe look into this, how does it differ from above ?
 		// Register JML annotations if class is implementing SpecifiableProxyObject
 		if (SpecifiableProxyObject.class.isAssignableFrom(getImplementedInterface())) {
 			registerJMLAnnotations();
 		}
 
 		// Init delegate implementations
-		//TODO idf if this might be of interest in my testing SerializationTest
+		// TODO idf if this might be of interest in my testing SerializationTest
 		delegateImplementations = new HashMap<>();
 
 		for (Class<?> c : getImplementedInterface().getDeclaredClasses()) {
@@ -370,8 +373,8 @@ public class ModelEntity<I> {
 		}
 
 	}
-	
-	//TODO idf why, is this related to my testing case
+
+	// TODO idf why, is this related to my testing case
 	public void finalizeImport() throws ModelDefinitionException {
 		for (ModelProperty<? super I> property : properties.values()) {
 			property.finalizeImport();
@@ -418,7 +421,8 @@ public class ModelEntity<I> {
 			if (property.getType() != null && !StringConverterLibrary.getInstance().hasConverter(property.getType())
 					&& !property.getType().isEnum() && !property.isStringConvertable() && !property.ignoreType()) {
 				try {
-					embeddedEntities.add(ModelEntityLibrary.createOrGetModelEntityFromImplementingInterface(property.getType(), true));
+					embeddedEntities.add(ModelEntityLibrary
+							.createOrGetModelEntityFromImplementingInterface(property.getType(), true));
 				} catch (ModelDefinitionException e) {
 					throw new ModelDefinitionException(
 							"Could not retrieve model entity for property " + property + " and entity " + this,
@@ -431,7 +435,8 @@ public class ModelEntity<I> {
 		Imports imports = implementedInterface.getAnnotation(Imports.class);
 		if (imports != null) {
 			for (Import imp : imports.value()) {
-				embeddedEntities.add(ModelEntityLibrary.createOrGetModelEntityFromImplementingInterface(imp.value(), true));
+				embeddedEntities
+						.add(ModelEntityLibrary.createOrGetModelEntityFromImplementingInterface(imp.value(), true));
 			}
 		}
 
@@ -623,7 +628,8 @@ public class ModelEntity<I> {
 		if (directSuperEntities == null && superImplementedInterfaces != null) {
 			directSuperEntities = new ArrayList<>(superImplementedInterfaces.size());
 			for (Class<? super I> superInterface : superImplementedInterfaces) {
-				ModelEntity<? super I> superEntity = ModelEntityLibrary.createOrGetModelEntityFromImplementingInterface(superInterface, true);
+				ModelEntity<? super I> superEntity = ModelEntityLibrary
+						.createOrGetModelEntityFromImplementingInterface(superInterface, true);
 				directSuperEntities.add(superEntity);
 			}
 		}
@@ -893,7 +899,8 @@ public class ModelEntity<I> {
 				xmlTag = xmlElement.xmlTag();
 				if (xmlTag == null || xmlTag.equals(XMLElement.DEFAULT_XML_TAG)) {
 					xmlTag = getImplementedInterface().getSimpleName();
-					//TODO this set the default name for the tag as the class in case not tag was given
+					// TODO this set the default name for the tag as the class in case not tag was
+					// given
 				}
 			}
 
@@ -921,7 +928,7 @@ public class ModelEntity<I> {
 										idFactory = xmlElement.idFactory();
 									}
 									primary |= superEntity.getXMLElement().primary();
-									//TODO this is a short syntax fo primary = primary OR xyz (not lazy)
+									// TODO this is a short syntax fo primary = primary OR xyz (not lazy)
 									primary |= xmlElement.primary();
 									xmlElement = new XMLElement.XMLElementImpl(xmlTag, context, namespace, primary,
 											idFactory);
@@ -946,7 +953,8 @@ public class ModelEntity<I> {
 			}
 			if (xmlTag == null || xmlTag.equals(XMLElement.DEFAULT_XML_TAG)) {
 				xmlTag = getImplementedInterface().getSimpleName();
-				//TODO why is this duplicated from the getXMLElement() method ? this suppose that getXMLElement might not be defined ? maybe I reading this incorrectly...
+				// TODO why is this duplicated from the getXMLElement() method ? this suppose
+				// that getXMLElement might not be defined ? maybe I reading this incorrectly...
 			}
 		}
 		return xmlTag;
@@ -1043,8 +1051,6 @@ public class ModelEntity<I> {
 		return false;
 	}
 
-
-
 	public boolean hasInitializers() throws ModelDefinitionException {
 		if (hasInitializers == null) {
 			if (initializers.size() > 0) {
@@ -1063,7 +1069,8 @@ public class ModelEntity<I> {
 
 	public ModelInitializer getInitializers(Method m) throws ModelDefinitionException {
 		if (m.getDeclaringClass() != implementedInterface) {
-			ModelEntity<?> aModelEntityFromMethod = ModelEntityLibrary.getModelEntityFromImplementingInterface(m.getDeclaringClass());
+			ModelEntity<?> aModelEntityFromMethod = ModelEntityLibrary
+					.getModelEntityFromImplementingInterface(m.getDeclaringClass());
 			// TODO idf have I seen this before ?
 			if (aModelEntityFromMethod == null) {
 				// TODO idf why this might raise an exception in case of testing
@@ -1401,6 +1408,7 @@ public class ModelEntity<I> {
 					return true;
 				}
 			}
+			//TODO maybe look into this for the JML approach ?
 			if (SpecifiableProxyObject.class.isAssignableFrom(getImplementedInterface())) {
 				if (PamelaUtils.methodIsEquivalentTo(method, ProxyMethodHandler.ENABLE_ASSERTION_CHECKING)
 						|| PamelaUtils.methodIsEquivalentTo(method, ProxyMethodHandler.DISABLE_ASSERTION_CHECKING)) {
@@ -1431,12 +1439,12 @@ public class ModelEntity<I> {
 	/**
 	 * Check that this entity provides an implementation for supplied method, given
 	 * a {@link PamelaModelFactory}
-	 *
-	 * @return true if an implementation was found
-	 * @throws ModelDefinitionException
-	 */
+	*
+	* @return true if an implementation was found
+	* @throws ModelDefinitionException
+	*/
 	private boolean checkMethodImplementationInDelegateImplementations(Method method, PamelaModelFactory factory)
-			throws ModelDefinitionException {
+	throws ModelDefinitionException {
 		// Look up in delegate implementation class
 		if (getDelegateImplementations().size() > 0) {
 			for (Class<? super I> delegateImplementationClass : getDelegateImplementations().keySet()) {
@@ -1459,11 +1467,12 @@ public class ModelEntity<I> {
 				}
 			}
 		}
-
+		
 		return false;
-
+		
 	}
-
+	
+	//TODO maybe look into this
 	private void registerJMLAnnotations() {
 		if (SpecifiableProxyObject.class.isAssignableFrom(getImplementedInterface())) {
 			if (getImplementedInterface().isAnnotationPresent(Invariant.class)) {
@@ -1472,6 +1481,7 @@ public class ModelEntity<I> {
 		}
 	}
 
+	//TODO maybe look into this
 	private JMLMethodDefinition<I> registerJMLAnnotations(Method method) {
 		if (JMLMethodDefinition.hasJMLAnnotations(method)) {
 			JMLMethodDefinition<I> returned = new JMLMethodDefinition<>(method, this);

@@ -14,7 +14,8 @@ import org.openflexo.toolbox.StringUtils;
  * @param <I>
  */
 public class ModelPropertyXMLTag<I> {
-	//TODO idf if i have to look into it as I am currently working on the SerializationTests case
+	// TODO idf and I might have to look at it again for DeserializationTests of IAuthenticator aand i have to look into it as I am currently working on the
+	// SerializationTests case
 	private final String tag;
 	private final ModelProperty<? super I> property;
 	private final ModelEntity<?> accessedEntity;
@@ -39,14 +40,16 @@ public class ModelPropertyXMLTag<I> {
 
 	public List<String> getDeprecatedTags() {
 		List<String> returned = new ArrayList<>();
-		if (accessedEntity.getXMLElement() != null && StringUtils.isNotEmpty(accessedEntity.getXMLElement().deprecatedXMLTags())) {
+		if (accessedEntity.getXMLElement() != null
+				&& StringUtils.isNotEmpty(accessedEntity.getXMLElement().deprecatedXMLTags())) {
 			StringTokenizer st = new StringTokenizer(accessedEntity.getXMLElement().deprecatedXMLTags(), ",");
 			while (st.hasMoreTokens()) {
 				String nextTag = st.nextToken();
 				returned.add(property.getXMLContext() + nextTag);
 			}
 		}
-		if (getProperty().getXMLElement() != null && StringUtils.isNotEmpty(getProperty().getXMLElement().deprecatedContext())) {
+		if (getProperty().getXMLElement() != null
+				&& StringUtils.isNotEmpty(getProperty().getXMLElement().deprecatedContext())) {
 			returned.add(getProperty().getXMLElement().deprecatedContext() + accessedEntity.getXMLTag());
 		}
 		if (returned.size() == 0) {

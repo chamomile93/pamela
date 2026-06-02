@@ -4,9 +4,24 @@ sidebar_position: 14
 
 # Validation API
 
-PAMELA framework natively offers a validation definition scheme at *ModelEntity* level. To be validable, the *ModelEntity* support interface must extends `Validable` interface. This allows to define a set of `ValidationRules`.
+PAMELA framework natively offers a validation definition scheme at *ModelEntity* level. To be validable, the *ModelEntity* must extends `Validable` interface. This allows to define a set of `ValidationRules`.
 
-Following excerpt of code shows how a `ValidationRule` should be declared on a *ModelEntity*, exposed as a inner static class annotated with `@DefineValidationRule` annotation. In this example, an instance of `Book` should have an ISBN code. Note that relatively to Java semantics, any instance of `Book` may have `null` ISBN code. Only the validation level raises a validation rule violation.
+```java
+@ModelEntity
+public interface Book extends AccessibleProxyObject, Validable {...}
+```
+
+Following excerpt of code shows how a `ValidationRule` should be declared on a *ModelEntity*, exposed as a *inner static class* annotated with `@DefineValidationRule` annotation.
+
+```java
+@DefineValidationRule
+	public static class BookShouldHaveAnISBN 
+		extends ValidationRule<BookShouldHaveAnISBN, Book> {...}
+```
+
+In this example, an instance of `Book` should have an ISBN code. Note that relatively to Java semantics, any instance of `Book` may have `null` ISBN code.
+
+Only the validation level raises a validation rule violation.
 
 ```java
 @ModelEntity
@@ -33,17 +48,20 @@ public interface Book extends AccessibleProxyObject, Validable {
 			return null;
 		}
 	}
-
 }
 ```
 
-Validation performing API is presented on following excerpt of code. A `ValidationReport` is generated as result artefact for the validation of a `Validable` object, given the `ValidationModel` directely computed from `ModelContext`.
+Validation performing API is presented on following excerpt of code.
+
+A `ValidationReport` is generated as result artefact for the validation of a `Validable` object, given the `ValidationModel` directly computed from `ModelContext`.
+<!-- TODO rename ModelContext as noted elsewhere -->
 
 ```java
 // Instantiate the model
 ModelContext modelContext = ModelContextLibrary.getModelContext(Library.class);
 ... 
 // instantiate here the factory and myLibrary object
+Library myLibrary = ...
 ValidationModel validationModel = new DefaultValidationModel(modelContext);
 ValidationReport validationReport = new ValidationReport(validationModel, myLibrary);
 
@@ -52,9 +70,4 @@ assertEquals(2, validationReport.getErrorsCount());
 // VALIDATION / ERROR: Book does not define ISBN code
 // VALIDATION / ERROR: Book does not define ISBN code
 ```
-
-
- 
-
-    
-  
+<!-- TODO rename ModelContextLibrary as noted elsewhere -->

@@ -36,7 +36,7 @@
  * 
  */
 
-package org.openflexo.pamela.test.serialization;
+package org.openflexo.pamela.test.persistance;
 
 import java.util.List;
 

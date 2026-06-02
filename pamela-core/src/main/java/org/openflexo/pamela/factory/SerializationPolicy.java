@@ -43,6 +43,7 @@ package org.openflexo.pamela.factory;
  * Enum representing different serialization policies.
  * //TODO it's lacking a description of what each policy means, I guess it's in the "XMLSerializer" class but it would be better to have it here as well
  */
+//TODO regroup with other enum's
 public enum SerializationPolicy {
 	RESTRICTIVE, PERMISSIVE, EXTENSIVE;
 }
