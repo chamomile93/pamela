@@ -1,9 +1,10 @@
-package org.openflexo.pamela.test.tests1;
+package org.openflexo.pamela.test.model.impl;
 
 import javassist.util.proxy.ProxyObject;
 
 import org.openflexo.pamela.factory.ProxyMethodHandler;
 import org.openflexo.pamela.model.ModelEntity;
+import org.openflexo.pamela.test.model.TestModelObject;
 
 public abstract class FlexoModelObjectImpl implements TestModelObject {
 

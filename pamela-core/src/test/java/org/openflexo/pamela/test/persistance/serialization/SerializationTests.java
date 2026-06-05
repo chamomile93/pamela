@@ -14,8 +14,8 @@ import org.openflexo.pamela.exceptions.RestrictiveSerializationException;
 import org.openflexo.pamela.factory.PamelaModelFactory;
 import org.openflexo.pamela.factory.SerializationPolicy;
 import org.openflexo.pamela.test.AbstractPAMELATest;
-import org.openflexo.pamela.test.tests1.FlexoProcess;
-import org.openflexo.pamela.test.tests1.MyNode;
+import org.openflexo.pamela.test.model.FlexoProcess;
+import org.openflexo.pamela.test.model.MyNode;
 import org.openflexo.toolbox.Duration;
 import org.openflexo.toolbox.Duration.DurationUnit;
 import org.openflexo.toolbox.FileFormat;
@@ -46,61 +46,21 @@ public class SerializationTests extends AbstractPAMELATest {
 	public void setUp() throws IOException, ModelDefinitionException {
 		file = File.createTempFile("PAMELA-TestSerialization", ".xml");
 
-		clearModelEntityLibrary(); // TODO is this necessary ?
+		clearModelEntityLibrary(); // TODO is this necessary ? likely not
 
 		aFlexoProcessPamelaModelFactory = new PamelaModelFactory(FlexoProcess.class);
 		aMyNodePamelaModelFactory = new PamelaModelFactory(MyNode.class);
 		/*
-		 * // TODO why not use `Node` defined in this "package" ? not sure it's really
-		 * // important, and would be less confusing to depend on something "outside"
-		 * this
-		 * // test
+		 * TODO why not use `Node` defined in this "package" ? not sure it's really
+		 * important, and would be less confusing to depend on something "outside"
+		 * this test
 		 */
 		process = (FlexoProcess) aFlexoProcessPamelaModelFactory.newInstance(FlexoProcess.class);
 		process.init();
-		/**
-		 * // TODO raising an exception when running class-level tests but not on single
-		 * // test ?
-		 * // TODO why at debug this is not raising an exception ?
-		 *
-		 * org.openflexo.pamela.exceptions.ModelExecutionException: Could not find
-		 * initializer for method public abstract
-		 * org.openflexo.pamela.test.tests1.TestModelObject
-		 * org.openflexo.pamela.test.tests1.TestModelObject.init(). Make sure that
-		 * org.openflexo.pamela.test.tests1.TestModelObject is annotated with
-		 * ModelEntity and has been imported.
-		 * at
-		 * org.openflexo.pamela.model.ModelEntity.getInitializers(ModelEntity.java:995)
-		 * at
-		 * org.openflexo.pamela.factory.ProxyMethodHandler._invoke(ProxyMethodHandler.
-		 * java:502)
-		 * at org.openflexo.pamela.factory.ProxyMethodHandler.invoke(ProxyMethodHandler.
-		 * java:356)
-		 * at org.openflexo.pamela.test.tests1.FlexoProcessImpl_$$_jvst9e_0.init(
-		 * FlexoProcessImpl_$$_jvst9e_0.java)
-		 * at org.openflexo.pamela.test.serialization.SerializationTests.setUp(
-		 * SerializationTests.java:57)
-		 */
+
 		node = (MyNode) aMyNodePamelaModelFactory.newInstance(MyNode.class);
 		node.init(NODE_NAME);
-		/**
-		 * // TODO raising an exception when running class-level tests but not on single
-		 * // test ?
-		 *
-		 * org.openflexo.pamela.exceptions.ModelExecutionException:
-		 * ModelExecutionException raised because of exception ModelExecutionException
-		 * message: Could not find initializer for method public abstract
-		 * org.openflexo.pamela.test.tests1.AbstractNode
-		 * org.openflexo.pamela.test.tests1.AbstractNode.init(). Make sure that
-		 * org.openflexo.pamela.test.tests1.AbstractNode is annotated with ModelEntity
-		 * and has been imported.
-		 * at org.openflexo.pamela.factory.PamelaModelFactory.newInstance(
-		 * PamelaModelFactory.java:472)
-		 * at org.openflexo.pamela.factory.PamelaModelFactory.newInstance(
-		 * PamelaModelFactory.java:442)
-		 * at org.openflexo.pamela.test.serialization.SerializationTests.setUp(
-		 * SerializationTests.java:58)
-		 */
+
 		node.setMyProperty(PROPERTY_VALUE);
 		node.setMyDuration(DURATION_VALUE);
 		node.setMyFileformat(FILEFORMAT_VALUE);
@@ -153,12 +113,17 @@ public class SerializationTests extends AbstractPAMELATest {
 		}
 	}
 
-	//TODO an EXTENSIVE fail case showing serialization of two entity with same model mapping
-	//TODO an EXTENSIVE fail case showing non-serializable entity (no model mapping)
+	// TODO an EXTENSIVE fail case showing serialization of two entity with same
+	// model mapping
+	// TODO an EXTENSIVE fail case showing non-serializable entity (no model
+	// mapping)
 
-	//TODO a PERMISSIVE pass case showing serialization of one entity with one model mapping
-	//TODO a PERMISSIVE fail case showing serialization of one entity with no model mapping
-	//TODO a PERMISSIVE fail case showing serialization of two entity with one model mapping
+	// TODO a PERMISSIVE pass case showing serialization of one entity with one
+	// model mapping
+	// TODO a PERMISSIVE fail case showing serialization of one entity with no model
+	// mapping
+	// TODO a PERMISSIVE fail case showing serialization of two entity with one
+	// model mapping
 
 	@Test
 	public void testRestrictiveSerializationWithOneProcessAndZeroNodesSucceed() throws Exception {
@@ -189,7 +154,7 @@ public class SerializationTests extends AbstractPAMELATest {
 		// THEN
 		try (FileOutputStream fos = new FileOutputStream(file)) {
 			aFlexoProcessPamelaModelFactory.serialize(process, fos, policy, true);
-			
+
 			// EXPECT
 			String message = policy.toString() + " serialization should not be allowed for "
 					+ node.getClass().getName();
@@ -222,15 +187,14 @@ public class SerializationTests extends AbstractPAMELATest {
 	// flexoProcessFactory = new PamelaModelFactory(FlexoProcess.class);
 	// assertRestrictiveDeserializationFails();
 
-	//TODO move deserialization tests to the DeserializationTests class
+	// TODO move deserialization tests to the DeserializationTests class
 	// process = deserializeProcess(DeserializationPolicy.EXTENSIVE);
-	
+
 	// // Keep the file serialized with the extensive policy so the round-trip stays
 	// // stable.
 	// assertSerializationSucceeds(process, SerializationPolicy.EXTENSIVE);
 
-
-	//TODO move deserialization tests to the DeserializationTests class
+	// TODO move deserialization tests to the DeserializationTests class
 	// flexoProcessFactory = new PamelaModelFactory(FlexoProcess.class);
 	// process = deserializeProcess(DeserializationPolicy.EXTENSIVE);
 
@@ -249,19 +213,19 @@ public class SerializationTests extends AbstractPAMELATest {
 	// // TODO is there a failing case? the following instructions still holds ?
 	// // factory = new PamelaModelFactory(FlexoProcess.class);
 	// // assertRestrictiveDeserializationFails();
-	
-	//TODO move deserialization tests to the DeserializationTests class
+
+	// TODO move deserialization tests to the DeserializationTests class
 	// // process = deserializeProcess(DeserializationPolicy.EXTENSIVE);
-	
+
 	// // // Keep the file serialized with the extensive policy so the round-trip
 	// stays
 	// // stable.
 	// // assertSerializationSucceeds(process, SerializationPolicy.EXTENSIVE);
-	
+
 	// // factory = new PamelaModelFactory(FlexoProcess.class);
-	//TODO move deserialization tests to the DeserializationTests class
+	// TODO move deserialization tests to the DeserializationTests class
 	// // process = deserializeProcess(DeserializationPolicy.EXTENSIVE);
-	
+
 	// // Assert.assertNull(factory.getModelContext().getModelEntity(MyNode.class));
 	// //
 	// Assert.assertNotNull(factory2.getModelContext().getModelEntity(MyNode.class));
@@ -278,10 +242,10 @@ public class SerializationTests extends AbstractPAMELATest {
 	// // TODO is there a failing case? the following instructions holds ?
 	// // factory = new PamelaModelFactory(FlexoProcess.class);
 	// // assertRestrictiveDeserializationFails();
-	
-	//TODO move deserialization tests to the DeserializationTests class
+
+	// TODO move deserialization tests to the DeserializationTests class
 	// // process = deserializeProcess(DeserializationPolicy.EXTENSIVE);
-	
+
 	// // // Keep the file serialized with the extensive policy so the round-trip
 	// stays
 	// // stable.
@@ -289,7 +253,7 @@ public class SerializationTests extends AbstractPAMELATest {
 
 	// // factory = new PamelaModelFactory(FlexoProcess.class);
 	// // process = deserializeProcess(DeserializationPolicy.EXTENSIVE);
-	
+
 	// // Assert.assertNull(factory.getModelContext().getModelEntity(MyNode.class));
 	// //
 	// Assert.assertNotNull(factory2.getModelContext().getModelEntity(MyNode.class));
@@ -300,14 +264,14 @@ public class SerializationTests extends AbstractPAMELATest {
 	// // Assert.assertTrue(aNode instanceof MyNode);
 	// // Assert.assertEquals(PROPERTY_VALUE, ((MyNode) aNode).getMyProperty());
 	// }
-	
+
 	// @Test
 	// public void testDeserializationRestrictiveSucceed() throws Exception {
 	// // TODO is there a passing case? the following instructions holds ?
 	// // factory = new PamelaModelFactory(FlexoProcess.class);
 	// // assertRestrictiveDeserializationFails();
-	
-	//TODO move deserialization tests to the DeserializationTests class
+
+	// TODO move deserialization tests to the DeserializationTests class
 	// // process = deserializeProcess(DeserializationPolicy.EXTENSIVE);
 
 	// // // Keep the file serialized with the extensive policy so the round-trip
@@ -353,6 +317,8 @@ public class SerializationTests extends AbstractPAMELATest {
 
 	/*
 	 * TODO things to test:
+	 * Pamela Equality
+	 * Equality Before/After Serialization/Deserialization
 	 * // Type/contract: Verify classes meant to be serializable implement
 	 * Serializable (or required interface) and have stable serialVersionUID when
 	 * applicable

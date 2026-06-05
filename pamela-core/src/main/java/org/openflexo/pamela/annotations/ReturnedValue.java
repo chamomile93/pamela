@@ -56,6 +56,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = ElementType.METHOD)
+//TODO j'avais pas fait attention à cette annotation
 public @interface ReturnedValue {
 
 	String value();

@@ -44,12 +44,12 @@ import org.openflexo.pamela.PamelaMetaModelLibrary;
 import org.openflexo.pamela.exceptions.ModelDefinitionException;
 import org.openflexo.pamela.model.ModelEntity;
 import org.openflexo.pamela.model.ModelEntityLibrary;
-import org.openflexo.pamela.test.tests1.AbstractNode;
-import org.openflexo.pamela.test.tests1.FlexoProcess;
-import org.openflexo.pamela.test.tests1.StartNode;
-import org.openflexo.pamela.test.tests1.TestModelObject;
-import org.openflexo.pamela.test.tests1.TokenEdge;
-import org.openflexo.pamela.test.tests1.WorkFlowObject;
+import org.openflexo.pamela.test.model.AbstractNode;
+import org.openflexo.pamela.test.model.FlexoProcess;
+import org.openflexo.pamela.test.model.StartNode;
+import org.openflexo.pamela.test.model.TestModelObject;
+import org.openflexo.pamela.test.model.TokenEdge;
+import org.openflexo.pamela.test.model.WorkFlowObject;
 
 import junit.framework.TestCase;
 
@@ -61,6 +61,7 @@ public abstract class AbstractPAMELATest extends TestCase {
 	 * purposes.
 	 */
 	protected void clearModelEntityLibrary() {
+		PamelaMetaModelLibrary.clearCache();
 		ModelEntityLibrary.clear();
 	}
 

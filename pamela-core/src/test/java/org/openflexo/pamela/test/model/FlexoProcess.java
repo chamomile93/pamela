@@ -1,4 +1,4 @@
-package org.openflexo.pamela.test.tests1;
+package org.openflexo.pamela.test.model;
 
 import java.util.List;
 
@@ -9,6 +9,7 @@ import org.openflexo.pamela.annotations.Embedded;
 import org.openflexo.pamela.annotations.Finder;
 import org.openflexo.pamela.annotations.Getter;
 import org.openflexo.pamela.annotations.Getter.Cardinality;
+import org.openflexo.pamela.test.model.impl.FlexoProcessImpl;
 import org.openflexo.pamela.annotations.ImplementationClass;
 import org.openflexo.pamela.annotations.Import;
 import org.openflexo.pamela.annotations.Imports;
@@ -25,8 +26,10 @@ import org.openflexo.pamela.annotations.XMLElement;
 @XMLElement(xmlTag = "FlexoProcess")
 @Imports({ @Import(ActivityNode.class), @Import(StartNode.class), @Import(EndNode.class), @Import(TokenEdge.class),
 		@Import(WorkFlowAnnotation.class) })
-		//TODO idf why these classes are "imported" and considered to be "embedded" in the "FlexoProcess" class
-		//TODO it seems to follow from the fact that AbstractNode, the parent class of this imports is "enclosed" by FlexoProcess and has the "@Embedded" annotation
+// TODO idf why these classes are "imported" and considered to be "embedded" in
+// the "FlexoProcess" class
+// TODO it seems to follow from the fact that AbstractNode, the parent class of
+// this imports is "enclosed" by FlexoProcess and has the "@Embedded" annotation
 public interface FlexoProcess extends WorkFlowObject {
 
 	String FOO = "foo";
@@ -36,7 +39,8 @@ public interface FlexoProcess extends WorkFlowObject {
 	@Initializer
 	TestModelObject init(String flexoId);
 
-	@Getter(value = FOO, defaultValue = "4")
+	// TODO I added this for testing only
+	@Getter(value = FOO, defaultValue = "42")
 	@XMLAttribute(xmlTag = FOO)
 	int getFoo();
 

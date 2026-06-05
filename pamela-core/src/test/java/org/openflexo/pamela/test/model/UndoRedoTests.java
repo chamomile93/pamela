@@ -1,4 +1,4 @@
-package org.openflexo.pamela.test.tests1;
+package org.openflexo.pamela.test.model;
 
 import org.junit.Before;
 import org.junit.Test;

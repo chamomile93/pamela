@@ -1,7 +1,5 @@
 package org.openflexo.pamela.test.persistance.deserialization;
 
-import static org.junit.Assert.*;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -18,14 +16,14 @@ import org.openflexo.pamela.exceptions.ModelDefinitionException;
 import org.openflexo.pamela.factory.DeserializationPolicy;
 import org.openflexo.pamela.factory.PamelaModelFactory;
 import org.openflexo.pamela.factory.SerializationPolicy;
-import org.openflexo.pamela.model.ModelEntityLibrary;
-import org.openflexo.pamela.test.persistance.Node;
-import org.openflexo.pamela.test.persistance.Node.NodeImpl;
+import org.openflexo.pamela.test.AbstractPAMELATest;
+import org.openflexo.pamela.test.model.Node;
+import org.openflexo.pamela.test.model.Node.NodeImpl;
 import org.openflexo.test.OrderedRunner;
 import org.openflexo.test.TestOrder;
 
 @RunWith(OrderedRunner.class)
-public class DeserializationTests {
+public class DeserializationTests extends AbstractPAMELATest {
 
 	private static File file;
 	private static PamelaMetaModel pamelaMetaModelLibrary;
@@ -33,9 +31,6 @@ public class DeserializationTests {
 
 	@BeforeClass
 	public static void setUpClass() throws IOException, ModelDefinitionException {
-		PamelaMetaModelLibrary.clearCache(); // TODO watchout this has been added by copilot while debugging an
-												// exception raised by SerializationTests.
-		ModelEntityLibrary.clear();
 		file = File.createTempFile("PAMELA-TestDeserialization", ".xml");
 
 		pamelaMetaModelLibrary = PamelaMetaModelLibrary.retrieveMetaModel(Node.class);

@@ -1,4 +1,4 @@
-package org.openflexo.pamela.test.tests1;
+package org.openflexo.pamela.test.model;
 
 import java.util.List;
 
@@ -49,11 +49,12 @@ public interface AbstractNode extends WorkFlowObject {
 	@Getter(value = INCOMING_EDGES, cardinality = Cardinality.LIST, inverse = Edge.END_NODE)
 	@XMLElement(context = "Incoming")
 	@Embedded(closureConditions = { Edge.START_NODE }, deletionConditions = { Edge.START_NODE })
-	/* TODO idf , the closureConditions is probably what's mentionned in the
-	// document of @Embedded, that I don't understand.
-	// i don't seem to be used by the Edge like described in the documentation
-	* it seems that the "closureCondition" is declaring that "Edge."
-	*/
+	/*
+	 * TODO idf the closureConditions it's probably what's mentionned in the
+	 * // document of @Embedded, that I don't understand.
+	 * // i don't seem to be used by the Edge like described in the documentation
+	 * it seems that the "closureCondition" is declaring that "Edge."
+	 */
 	@CloningStrategy(StrategyType.CLONE)
 	public List<Edge> getIncomingEdges();
 
@@ -66,14 +67,15 @@ public interface AbstractNode extends WorkFlowObject {
 	@Remover(INCOMING_EDGES)
 	public void removeFromIncomingEdges(Edge edge);
 
+	/*
+	 * TODO idf the closureConditions, it's probably what's mentionned in the
+	 * document of @Embedded, that I don't understand.
+	 * i don't seem to be used by the Edge like described in the documentation
+	 */
 	@Getter(value = OUTGOING_EDGES, cardinality = Cardinality.LIST, inverse = Edge.START_NODE)
 	@XMLElement(context = "Outgoing", primary = true)
 	@CloningStrategy(StrategyType.CLONE)
 	@Embedded(closureConditions = { Edge.END_NODE }, deletionConditions = { Edge.END_NODE })
-	/* TODO idf , the closureConditions is probably what's mentionned in the
-	// document of @Embedded, that I don't understand.
-	// i don't seem to be used by the Edge like described in the documentation
-	*/
 	public List<Edge> getOutgoingEdges();
 
 	@Setter(OUTGOING_EDGES)
@@ -84,7 +86,6 @@ public interface AbstractNode extends WorkFlowObject {
 
 	@Remover(OUTGOING_EDGES)
 	public void removeFromOutgoingEdges(Edge edge);
-
 
 	@Getter(value = PROCESS, inverse = FlexoProcess.NODES)
 	@Override

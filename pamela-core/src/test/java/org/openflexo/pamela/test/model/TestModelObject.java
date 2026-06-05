@@ -1,4 +1,4 @@
-package org.openflexo.pamela.test.tests1;
+package org.openflexo.pamela.test.model;
 
 import org.openflexo.pamela.AccessibleProxyObject;
 import org.openflexo.pamela.CloneableProxyObject;
@@ -12,6 +12,7 @@ import org.openflexo.pamela.annotations.Parameter;
 import org.openflexo.pamela.annotations.Setter;
 import org.openflexo.pamela.annotations.XMLAttribute;
 import org.openflexo.pamela.annotations.CloningStrategy.StrategyType;
+import org.openflexo.pamela.test.model.impl.FlexoModelObjectImpl;
 
 @ModelEntity(isAbstract = true)
 @ImplementationClass(FlexoModelObjectImpl.class)
