@@ -6,7 +6,9 @@ This security pattern is used to implement an authentication mechanism. A class 
 
 ![](../../../../../../../../img/authenticator.png)
 
-This pattern allows _Subject_ to be authenticated using a set of objects known as _Authentication Information_. These objects are used by an _Authenticator_ to generate a security token known as _Proof of Identity_. The authentication mechanism is the generation of _Proof of Identity_ by an _Authenticator_ from a _Subject_ _Authentication Information_ and its assignment in a specific field of the subject class.
+This pattern allows _Subject_ to be authenticated using a set of objects known as _Authentication Information_.
+These objects are used by an _Authenticator_ to generate a security token known as _Proof of Identity_.
+The authentication mechanism is the generation of _Proof of Identity_ by an _Authenticator_ from a _Subject_ _Authentication Information_ and its assignment in a specific field of the subject class.
 
 ## How to use the pattern?
 
@@ -26,7 +28,7 @@ public class MySubject {
 @ModelEntity
 @AuthenticatorSubject(patternID = "Authenticator pattern 1")
 public class MySubject {
-    
+
     @AuthenticationInformation(patternID = "Authenticator pattern 1", paramID = "username")
     public String getUsername(){
         ...
@@ -43,7 +45,7 @@ public class MySubject {
 @ModelEntity
 @AuthenticatorSubject(patternID = "Authenticator pattern 1")
 public class MySubject {
-    
+
     @AuthenticationInformation(patternID = "Authenticator pattern 1", paramID = "username")
     public String getUsername(){
         ...
@@ -70,7 +72,7 @@ public class MySubject {
 @ModelEntity
 @AuthenticatorSubject(patternID = "Authenticator pattern 1")
 public class MySubject {
-    
+
     @AuthenticationInformation(patternID = "Authenticator pattern 1", paramID = "username")
     public String getUsername(){
         ...
@@ -102,7 +104,7 @@ public class MySubject {
 @ModelEntity
 @AuthenticatorSubject(patternID = "Authenticator pattern 1")
 public class MySubject {
-    
+
     @AuthenticationInformation(patternID = "Authenticator pattern 1", paramID = "username")
     public String getUsername(){
         ...
@@ -133,7 +135,7 @@ public class MySubject {
         System.out.println("Authentication succeed, the proof of identity is now " + getSecurityToken());
     }
 }
-~~~   
+~~~
 
 ### Authenticator entity
 
@@ -150,7 +152,7 @@ public class MyAuthenticator {
 @ModelEntity
 @Authenticator(patternID = "Authenticator pattern 1")
 public class MyAuthenticator {
-    
+
     @RequestMethod(patternID = "Authenticator pattern 1")
     public SecurityToken createToken(@AuthenticationInformation(patternID = "Authenticator pattern 1", paramID = "username") String username, @AuthenticationInformation(patternID = "Authenticator pattern 1", paramID = "password") int password){
         ...
@@ -164,8 +166,6 @@ Once the _Subject_ and _Authenticator_ classes are correctly annotated, the PAME
 - That every call to the _authenticate_ method of any subject will update its _proof of identity_ with the result of its authenticator _request_ method.
 - That the _Proof of identity_ of every subject is always valid (that is the result of the _request_ method of its authenticator). This prevents the _Subjects_ from forging a _Proof of Identity_.
 - That the _Authentication information_ and _Authenticator_ fields of the _Subject_ class are final. Once they are assigned, their value should never change. This prevents the _Subjects_ from forging their _Authentication Information_ or their _Authenticator_.
-- That different _Subjects_ have different _Authentication Information_. In the example above, different couples (login, hash). 
-
+- That different _Subjects_ have different _Authentication Information_. In the example above, different couples (login, hash).
 
 Extra: You can annotate has many _Subject_ methods as you want with `@RequiresAuthentication(patternID = <patternID>`. This annotation will ensure that every call to the method will first trigger the authentication process (call to the _Subject authenticate_ method).
-

@@ -108,8 +108,11 @@ public class TestAuthenticator extends TestCase {
 	@Test
 	public void testAuthenticatorInvariant() throws Exception {
 		subject.setManager(manager);
+		subject.authenticate();
 		try {
-			subject.setManager(factory.newInstance(IAuthenticator.class));
+			IAuthenticator anotherManager = factory.newInstance(IAuthenticator.class);
+			anotherManager.setName("Bob");
+			subject.setManager(anotherManager);
 			fail();
 		} catch (ModelExecutionException e) {
 			e.printStackTrace();
