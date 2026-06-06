@@ -6,6 +6,8 @@ import org.openflexo.pamela.annotations.ImplementationClass;
 import org.openflexo.pamela.annotations.Initializer;
 import org.openflexo.pamela.annotations.ModelEntity;
 import org.openflexo.pamela.annotations.Setter;
+import org.openflexo.pamela.annotations.XMLAttribute;
+import org.openflexo.pamela.annotations.XMLElement;
 import org.openflexo.pamela.securitypatterns.authenticator.annotations.AuthenticateMethod;
 import org.openflexo.pamela.securitypatterns.authenticator.annotations.AuthenticationInformation;
 import org.openflexo.pamela.securitypatterns.authenticator.annotations.AuthenticatorGetter;
@@ -13,6 +15,7 @@ import org.openflexo.pamela.securitypatterns.authenticator.annotations.Authentic
 import org.openflexo.pamela.securitypatterns.authenticator.annotations.ProofOfIdentitySetter;
 import org.openflexo.pamela.securitypatterns.authenticator.annotations.RequiresAuthentication;
 
+@XMLElement
 @ModelEntity
 @ImplementationClass(ISubject.SubjectImp.class)
 @AuthenticatorSubject(patternID = ISubject.PATTERN_ID)
@@ -21,6 +24,13 @@ public interface ISubject extends AccessibleProxyObject {
 	String AUTH_INFO = "auth_info1";
 	String MANAGER = "manager";
 	String ID_PROOF = "id_proof";
+
+	@Initializer
+	default void init(IAuthenticator authenticator, String authInfo, int idProof) {
+		setManager(authenticator);
+		setAuthInfo(authInfo);
+		setIdProof(idProof);
+	}
 
 	@Initializer
 	default void init(IAuthenticator authenticator, String id) {
@@ -33,6 +43,11 @@ public interface ISubject extends AccessibleProxyObject {
 		setAuthInfo(id);
 	}
 
+	@Initializer
+	default void init() {
+	}
+
+	@XMLAttribute(xmlTag = AUTH_INFO)
 	@Getter(value = AUTH_INFO, defaultValue = AUTH_INFO)
 	@AuthenticationInformation(patternID = PATTERN_ID, paramID = IAuthenticator.ID)
 	String getAuthInfo();
@@ -40,6 +55,7 @@ public interface ISubject extends AccessibleProxyObject {
 	@Setter(AUTH_INFO)
 	void setAuthInfo(String val);
 
+	@XMLAttribute(xmlTag = ID_PROOF)
 	@Getter(value = ID_PROOF, defaultValue = "-1")
 	int getIDProof();
 
@@ -47,6 +63,7 @@ public interface ISubject extends AccessibleProxyObject {
 	@ProofOfIdentitySetter(patternID = PATTERN_ID)
 	void setIdProof(int val);
 
+	@XMLElement(xmlTag = MANAGER)
 	@Getter(MANAGER)
 	@AuthenticatorGetter(patternID = PATTERN_ID)
 	IAuthenticator getManager();

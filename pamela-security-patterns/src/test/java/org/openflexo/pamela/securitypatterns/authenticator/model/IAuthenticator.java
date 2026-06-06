@@ -4,30 +4,50 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.openflexo.pamela.annotations.Adder;
+import org.openflexo.pamela.annotations.CloningStrategy;
+import org.openflexo.pamela.annotations.CloningStrategy.StrategyType;
 import org.openflexo.pamela.annotations.Getter;
 import org.openflexo.pamela.annotations.ImplementationClass;
 import org.openflexo.pamela.annotations.Initializer;
 import org.openflexo.pamela.annotations.ModelEntity;
 import org.openflexo.pamela.annotations.Remover;
 import org.openflexo.pamela.annotations.Setter;
+import org.openflexo.pamela.annotations.XMLElement;
 import org.openflexo.pamela.patterns.PropertyParadigmType;
 import org.openflexo.pamela.patterns.annotations.Requires;
 import org.openflexo.pamela.securitypatterns.authenticator.annotations.AuthenticationInformation;
 import org.openflexo.pamela.securitypatterns.authenticator.annotations.Authenticator;
 import org.openflexo.pamela.securitypatterns.authenticator.annotations.RequestAuthentication;
 
+@XMLElement
 @ModelEntity
 @ImplementationClass(IAuthenticator.AuthenticatorImp.class)
 @Authenticator(patternID = ISubject.PATTERN_ID)
 public interface IAuthenticator {
 	String USERS = "users";
 	String ID = "id";
+	String NAME = "name";
 
 	@Initializer
 	default void init() {
 		setUsers(new ArrayList<>());
 	}
 
+	@Initializer
+	default void init(String name) {
+		setName(name);
+		init();
+	}
+
+	@XMLElement
+	@Getter(value = NAME, defaultValue = "defaultName")
+	@CloningStrategy(StrategyType.CLONE)
+	String getName();
+
+	@Setter(NAME)
+	void setName(String name);
+
+	@XMLElement
 	@Getter(value = USERS, cardinality = Getter.Cardinality.LIST)
 	List<String> getUsers();
 
