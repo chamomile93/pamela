@@ -12,6 +12,7 @@ import org.openflexo.pamela.annotations.Initializer;
 import org.openflexo.pamela.annotations.ModelEntity;
 import org.openflexo.pamela.annotations.Remover;
 import org.openflexo.pamela.annotations.Setter;
+import org.openflexo.pamela.annotations.XMLAttribute;
 import org.openflexo.pamela.annotations.XMLElement;
 import org.openflexo.pamela.patterns.PropertyParadigmType;
 import org.openflexo.pamela.patterns.annotations.Requires;
@@ -39,7 +40,7 @@ public interface IAuthenticator {
 		init();
 	}
 
-	@XMLElement
+	@XMLAttribute(xmlTag = NAME)
 	@Getter(value = NAME, defaultValue = "defaultName")
 	@CloningStrategy(StrategyType.CLONE)
 	String getName();
@@ -47,7 +48,7 @@ public interface IAuthenticator {
 	@Setter(NAME)
 	void setName(String name);
 
-	@XMLElement
+	@XMLElement(xmlTag = USERS)
 	@Getter(value = USERS, cardinality = Getter.Cardinality.LIST)
 	List<String> getUsers();
 
