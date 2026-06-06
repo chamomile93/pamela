@@ -1,4 +1,4 @@
-package org.openflexo.pamela.securitypatterns.authenticator.deserialization;
+package org.openflexo.pamela.securitypatterns.authenticator.persistance.deserialization;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -70,28 +70,19 @@ public class DeserializationTests extends TestCase {
 					DeserializationPolicy.EXTENSIVE);
 
 			assertNotNull(deserializedAuthenticator);
-			assertEquals(authenticator, deserializedAuthenticator); // by value
-			assertNotSame(authenticator, deserializedAuthenticator); // by referenc
 			assertEquals(authenticator.getName(), deserializedAuthenticator.getName());
-			
+			assertNotSame(authenticator, deserializedAuthenticator); // by referenc
+						
 			//TODO
 			// using PAMELA equality see [Equality computing support](./pamela-core/10-equality_computing.md)
-			// boolean result = authenticator.equalsObject(deserializedAuthenticator);
-			// assertEquals(true,result);
+			boolean result = authenticator.equalsObject(deserializedAuthenticator);
+			assertEquals(true,result);
 
 			// System.out.println(AuthenticatorImp.DESERIALIZATION_TRACE);
 		} catch (Exception e) {
 			// THEN
 			fail(e.getMessage());
 		}
-
-		// TODO
-
-		// assertEquals(
-		// " BEGIN:Root BEGIN:Node1 BEGIN:Node2 BEGIN:Node21 BEGIN:Node22 BEGIN:Node23
-		// BEGIN:Node3 END:Root END:Node1 END:Node2 END:Node21 END:Node22 END:Node23
-		// END:Node3",
-		// NodeImpl.DESERIALIZATION_TRACE);
 	}
 
 	// TODO following tests

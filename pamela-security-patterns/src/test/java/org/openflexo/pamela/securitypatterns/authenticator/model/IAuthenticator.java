@@ -3,6 +3,7 @@ package org.openflexo.pamela.securitypatterns.authenticator.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.openflexo.pamela.AccessibleProxyObject;
 import org.openflexo.pamela.annotations.Adder;
 import org.openflexo.pamela.annotations.CloningStrategy;
 import org.openflexo.pamela.annotations.CloningStrategy.StrategyType;
@@ -24,7 +25,7 @@ import org.openflexo.pamela.securitypatterns.authenticator.annotations.RequestAu
 @ModelEntity
 @ImplementationClass(IAuthenticator.AuthenticatorImp.class)
 @Authenticator(patternID = ISubject.PATTERN_ID)
-public interface IAuthenticator {
+public interface IAuthenticator extends AccessibleProxyObject {
 	String USERS = "users";
 	String ID = "id";
 	String NAME = "name";

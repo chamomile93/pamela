@@ -1,4 +1,4 @@
-package org.openflexo.pamela.securitypatterns.authenticator.serialization;
+package org.openflexo.pamela.securitypatterns.authenticator.persistance.serialization;
 
 import java.io.File;
 import java.io.FileOutputStream;
