@@ -15,7 +15,7 @@ import org.openflexo.pamela.securitypatterns.authenticator.annotations.Authentic
 import org.openflexo.pamela.securitypatterns.authenticator.annotations.ProofOfIdentitySetter;
 import org.openflexo.pamela.securitypatterns.authenticator.annotations.RequiresAuthentication;
 
-@XMLElement
+@XMLElement(xmlTag = "ISubject")
 @ModelEntity
 @ImplementationClass(ISubject.SubjectImp.class)
 @AuthenticatorSubject(patternID = ISubject.PATTERN_ID)

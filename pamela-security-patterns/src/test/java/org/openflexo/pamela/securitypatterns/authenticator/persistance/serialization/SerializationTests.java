@@ -126,6 +126,28 @@ public class SerializationTests extends TestCase {
 	}
 
 	@Test
+	public void testExtensiveSerializationWithOneAuthenticatorAndManySubjectSucceed() throws Exception {
+		// GIVEN
+		SerializationPolicy policy = SerializationPolicy.EXTENSIVE;
+		//TODO change this to the subject instead of the AuthInfo()
+		authenticator.addUser(subject);
+		authenticator.addUser(pamelaModelFactory.newInstance(ISubject.class, authenticator, "bobInfo"));
+
+		// THEN
+		try (FileOutputStream fos = new FileOutputStream(file)) {
+			pamelaModelFactory.serialize(authenticator, fos, policy, true);
+			// EXPECT
+			assertTrue(file.length() > 0);
+		}
+		// NotExpected
+		catch (RestrictiveSerializationException e) {
+			fail(policy.toString() + " serialization should be allowed for " + authenticator.getClass().getName());
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
+
+	@Test
 	public void testRestrictiveSerializationWithOneAuthenticatorAndZeroSubjectsSucceed() throws Exception {
 		// GIVEN
 		SerializationPolicy policy = SerializationPolicy.RESTRICTIVE;
