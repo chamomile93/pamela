@@ -19,6 +19,14 @@ import org.openflexo.pamela.factory.Clipboard;
 import org.openflexo.pamela.factory.EmbeddingType;
 import org.openflexo.pamela.factory.PamelaModelFactory;
 import org.openflexo.pamela.test.AbstractPAMELATest;
+import org.openflexo.pamela.test.model.AbstractNode;
+import org.openflexo.pamela.test.model.ActivityNode;
+import org.openflexo.pamela.test.model.Edge;
+import org.openflexo.pamela.test.model.EndNode;
+import org.openflexo.pamela.test.model.FlexoProcess;
+import org.openflexo.pamela.test.model.StartNode;
+import org.openflexo.pamela.test.model.TokenEdge;
+import org.openflexo.pamela.test.model.WKFAnnotation;
 import org.openflexo.toolbox.FileUtils;
 
 /**

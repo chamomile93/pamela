@@ -1,4 +1,8 @@
-package org.openflexo.pamela.test.tests1;
+package org.openflexo.pamela.test.model.impl;
+
+import org.openflexo.pamela.test.model.AbstractNode;
+import org.openflexo.pamela.test.model.Edge;
+import org.openflexo.pamela.test.model.TokenEdge;
 
 public abstract class TokenEdgeImpl extends EdgeImpl implements TokenEdge {
 

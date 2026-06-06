@@ -1,4 +1,4 @@
-package org.openflexo.pamela.test.tests1;
+package org.openflexo.pamela.test.model;
 
 import java.util.List;
 
@@ -9,6 +9,7 @@ import org.openflexo.pamela.annotations.Embedded;
 import org.openflexo.pamela.annotations.Finder;
 import org.openflexo.pamela.annotations.Getter;
 import org.openflexo.pamela.annotations.Getter.Cardinality;
+import org.openflexo.pamela.test.model.impl.FlexoProcessImpl;
 import org.openflexo.pamela.annotations.ImplementationClass;
 import org.openflexo.pamela.annotations.Import;
 import org.openflexo.pamela.annotations.Imports;

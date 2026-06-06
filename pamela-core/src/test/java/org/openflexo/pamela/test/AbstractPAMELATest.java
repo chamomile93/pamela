@@ -46,12 +46,12 @@ import org.openflexo.pamela.exceptions.ModelDefinitionException;
 import org.openflexo.pamela.model.ModelEntity;
 import org.openflexo.pamela.model.ModelEntityLibrary;
 import org.openflexo.pamela.model.ModelProperty;
-import org.openflexo.pamela.test.tests1.AbstractNode;
-import org.openflexo.pamela.test.tests1.FlexoProcess;
-import org.openflexo.pamela.test.tests1.StartNode;
-import org.openflexo.pamela.test.tests1.TestModelObject;
-import org.openflexo.pamela.test.tests1.TokenEdge;
-import org.openflexo.pamela.test.tests1.WKFObject;
+import org.openflexo.pamela.test.model.AbstractNode;
+import org.openflexo.pamela.test.model.FlexoProcess;
+import org.openflexo.pamela.test.model.StartNode;
+import org.openflexo.pamela.test.model.TestModelObject;
+import org.openflexo.pamela.test.model.TokenEdge;
+import org.openflexo.pamela.test.model.WKFObject;
 
 public abstract class AbstractPAMELATest extends TestCase {
 

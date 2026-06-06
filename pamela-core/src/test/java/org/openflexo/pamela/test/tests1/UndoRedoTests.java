@@ -6,6 +6,13 @@ import org.openflexo.pamela.PamelaMetaModel;
 import org.openflexo.pamela.factory.EditingContextImpl;
 import org.openflexo.pamela.factory.PamelaModelFactory;
 import org.openflexo.pamela.test.AbstractPAMELATest;
+import org.openflexo.pamela.test.model.AbstractNode;
+import org.openflexo.pamela.test.model.EndNode;
+import org.openflexo.pamela.test.model.FlexoProcess;
+import org.openflexo.pamela.test.model.StartNode;
+import org.openflexo.pamela.test.model.TestModelObject;
+import org.openflexo.pamela.test.model.TokenEdge;
+import org.openflexo.pamela.test.model.WKFObject;
 import org.openflexo.pamela.undo.CompoundEdit;
 import org.openflexo.pamela.undo.UndoManager;
 

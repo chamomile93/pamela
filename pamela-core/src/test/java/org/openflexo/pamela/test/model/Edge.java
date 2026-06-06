@@ -1,4 +1,4 @@
-package org.openflexo.pamela.test.tests1;
+package org.openflexo.pamela.test.model;
 
 import org.openflexo.pamela.annotations.CloningStrategy;
 import org.openflexo.pamela.annotations.Getter;
@@ -10,6 +10,7 @@ import org.openflexo.pamela.annotations.ReturnedValue;
 import org.openflexo.pamela.annotations.Setter;
 import org.openflexo.pamela.annotations.XMLElement;
 import org.openflexo.pamela.annotations.CloningStrategy.StrategyType;
+import org.openflexo.pamela.test.model.impl.EdgeImpl;
 
 @ModelEntity(isAbstract = true)
 @ImplementationClass(EdgeImpl.class)
