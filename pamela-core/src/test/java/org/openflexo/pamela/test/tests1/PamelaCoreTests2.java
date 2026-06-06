@@ -39,7 +39,7 @@ import org.openflexo.toolbox.FileUtils;
 /**
  * Basic tests regarding a sample PAMELA model
  *
- * @author sylvain
+ * @author chamomille93
  *
  */
 public class PamelaCoreTests2 extends AbstractPAMELATest {
@@ -64,7 +64,7 @@ public class PamelaCoreTests2 extends AbstractPAMELATest {
 	@Override
 	@Before
 	public void setUp() throws Exception {
-		file = File.createTempFile("PamelaCoreTests1", ".xml");
+		file = File.createTempFile("PamelaCoreTests2", ".xml");
 
 		clearModelEntityLibrary();
 		if (factory == null) {
