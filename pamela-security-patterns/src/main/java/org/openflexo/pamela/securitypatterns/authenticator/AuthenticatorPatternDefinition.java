@@ -64,6 +64,7 @@ import org.openflexo.pamela.securitypatterns.authenticator.annotations.RequiresA
  * @author Caine Silva, Sylvain Guerin
  *
  */
+// TODO create custom exception for this pattern, mainly for tracing purposes
 public class AuthenticatorPatternDefinition extends PatternDefinition {
 
 	public static final String SUBJECT_ROLE = "Subject";

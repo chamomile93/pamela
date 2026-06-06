@@ -19,6 +19,14 @@ import org.openflexo.pamela.factory.Clipboard;
 import org.openflexo.pamela.factory.EmbeddingType;
 import org.openflexo.pamela.factory.PamelaModelFactory;
 import org.openflexo.pamela.test.AbstractPAMELATest;
+import org.openflexo.pamela.test.model.AbstractNode;
+import org.openflexo.pamela.test.model.ActivityNode;
+import org.openflexo.pamela.test.model.Edge;
+import org.openflexo.pamela.test.model.EndNode;
+import org.openflexo.pamela.test.model.FlexoProcess;
+import org.openflexo.pamela.test.model.StartNode;
+import org.openflexo.pamela.test.model.TokenEdge;
+import org.openflexo.pamela.test.model.WKFAnnotation;
 import org.openflexo.toolbox.FileUtils;
 
 /**
@@ -31,6 +39,7 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 
 	private PamelaModelFactory factory;
 	private PamelaMetaModel pamelaMetaModel;
+	
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -55,7 +64,8 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 	}
 
 	/**
-	 * We declare here a basic mapping model, and we check that the model construction is right
+	 * We declare here a basic mapping model, and we check that the model
+	 * construction is right
 	 * 
 	 * @throws Exception
 	 */
@@ -267,12 +277,19 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 
 	public void test5() throws Exception {
 		/*
-		 * FlexoProcess process = loadProcessFromFile(); ActivityNode activityNode = (ActivityNode) process.getNodeNamed("MyActivity");
-		 * StartNode startNode = (StartNode) process.getNodeNamed("Start"); WKFAnnotation annotation1 = startNode.getMasterAnnotation();
-		 * WKFAnnotation annotation2 = startNode.getOtherAnnotations().get(0); TokenEdge edge1 = (TokenEdge) process.getEdgeNamed("edge1");
-		 * TokenEdge edge2 = (TokenEdge) process.getEdgeNamed("edge2"); assertTrue(activityNode.getIncomingEdges().contains(edge1));
-		 * startNode.delete(); assertTrue(startNode.isDeleted()); assertTrue(edge1.isDeleted()); assertTrue(annotation1.isDeleted());
-		 * assertTrue(annotation2.isDeleted()); assertNull(process.getNodeNamed("Start")); assertNull(process.getEdgeNamed("edge1"));
+		 * FlexoProcess process = loadProcessFromFile(); ActivityNode activityNode =
+		 * (ActivityNode) process.getNodeNamed("MyActivity");
+		 * StartNode startNode = (StartNode) process.getNodeNamed("Start");
+		 * WKFAnnotation annotation1 = startNode.getMasterAnnotation();
+		 * WKFAnnotation annotation2 = startNode.getOtherAnnotations().get(0); TokenEdge
+		 * edge1 = (TokenEdge) process.getEdgeNamed("edge1");
+		 * TokenEdge edge2 = (TokenEdge) process.getEdgeNamed("edge2");
+		 * assertTrue(activityNode.getIncomingEdges().contains(edge1));
+		 * startNode.delete(); assertTrue(startNode.isDeleted());
+		 * assertTrue(edge1.isDeleted()); assertTrue(annotation1.isDeleted());
+		 * assertTrue(annotation2.isDeleted());
+		 * assertNull(process.getNodeNamed("Start"));
+		 * assertNull(process.getEdgeNamed("edge1"));
 		 * assertTrue(!activityNode.getIncomingEdges().contains(edge1));
 		 */
 	}
@@ -561,8 +578,7 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 		for (Object o : (List<?>) pasted) {
 			if (o instanceof ActivityNode) {
 				newActivity = (ActivityNode) o;
-			}
-			else if (o instanceof StartNode) {
+			} else if (o instanceof StartNode) {
 				newStartNode = (StartNode) o;
 			}
 		}
@@ -594,7 +610,8 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 
 		ActivityNode activityNode = factory.newInstance(ActivityNode.class);
 		assertFalse(activityNode.isModified());
-		// Here we verify that if we use an initializer, the object is marked as modified
+		// Here we verify that if we use an initializer, the object is marked as
+		// modified
 		ActivityNode activityNode2 = factory.newInstance(ActivityNode.class, "MyActivity");
 		assertTrue(activityNode2.isModified());
 
@@ -626,8 +643,10 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 
 		serializeObject(process);
 
-		assertFalse(process.isModified());// Here we verify that process has been marked as not-modified (by the serialization mechanism)
-		assertTrue(activityNode.isModified()); // And that activity node is no longer synched with its previous container process.
+		assertFalse(process.isModified());// Here we verify that process has been marked as not-modified (by the
+											// serialization mechanism)
+		assertTrue(activityNode.isModified()); // And that activity node is no longer synched with its previous
+												// container process.
 	}
 
 	public void testDeletion() {
@@ -677,8 +696,7 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 				for (Object e : inEdges) {
 					if (e == null) {
 						returned.append("null     Incoming: " + null + "\n");
-					}
-					else {
+					} else {
 						returned.append(Integer.toHexString(e.hashCode()) + " Incoming: " + e + "\n");
 					}
 				}
@@ -688,8 +706,7 @@ public class PamelaCoreTests1 extends AbstractPAMELATest {
 				for (Object e : outEdges) {
 					if (e == null) {
 						returned.append("null     Outgoing: " + null + "\n");
-					}
-					else {
+					} else {
 						returned.append(Integer.toHexString(e.hashCode()) + " Outgoing: " + e + "\n");
 					}
 				}

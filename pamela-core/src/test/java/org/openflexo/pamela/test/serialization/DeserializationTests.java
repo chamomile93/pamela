@@ -18,7 +18,8 @@ import org.openflexo.pamela.factory.DeserializationPolicy;
 import org.openflexo.pamela.factory.PamelaModelFactory;
 import org.openflexo.pamela.factory.SerializationPolicy;
 import org.openflexo.pamela.model.ModelEntityLibrary;
-import org.openflexo.pamela.test.serialization.Node.NodeImpl;
+import org.openflexo.pamela.test.model.Node;
+import org.openflexo.pamela.test.model.Node.NodeImpl;
 import org.openflexo.test.OrderedRunner;
 import org.openflexo.test.TestOrder;
 

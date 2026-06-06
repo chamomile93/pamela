@@ -18,7 +18,7 @@ import org.openflexo.pamela.securitypatterns.authenticator.annotations.RequestAu
 
 @ModelEntity
 @ImplementationClass(IAuthenticator.AuthenticatorImp.class)
-@Authenticator(patternID = Subject.PATTERN_ID)
+@Authenticator(patternID = ISubject.PATTERN_ID)
 public interface IAuthenticator {
 	String USERS = "users";
 	String ID = "id";
@@ -40,11 +40,11 @@ public interface IAuthenticator {
 	@Remover(USERS)
 	void removeUser(String val);
 
-	@Requires(patternID = Subject.PATTERN_ID, type = PropertyParadigmType.Java, property = "prout")
+	@Requires(patternID = ISubject.PATTERN_ID, type = PropertyParadigmType.Java, property = "prout")
 	public void aMethodGuardedWithAPrecondition();
 
-	@RequestAuthentication(patternID = Subject.PATTERN_ID)
-	int request(@AuthenticationInformation(patternID = Subject.PATTERN_ID, paramID = ID) String id);
+	@RequestAuthentication(patternID = ISubject.PATTERN_ID)
+	int request(@AuthenticationInformation(patternID = ISubject.PATTERN_ID, paramID = ID) String id);
 
 	int generateFromAuthInfo(String id);
 

@@ -62,6 +62,11 @@ import org.openflexo.toolbox.HasPropertyChangeSupport;
  * <li>Enforcing preconditions of the {@link Authenticator} annotated class.</li>
  * <li>Enforcing postconditions of the {@link Authenticator} annotated class.</li>
  * </ul>
+ * 
+ * @param <A>  the type of the Authenticator
+ * @param <S>  the type of the Subject
+ * @param <AI> the type of the Authentication Information
+ * @param <PI> the type of the Proof of Identity
  *
  * @author Caine Silva, Sylvain Guerin
  */

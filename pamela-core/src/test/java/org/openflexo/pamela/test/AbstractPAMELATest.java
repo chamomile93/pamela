@@ -39,60 +39,93 @@
 
 package org.openflexo.pamela.test;
 
-import junit.framework.TestCase;
-
 import org.openflexo.pamela.PamelaMetaModel;
+import org.openflexo.pamela.PamelaMetaModelLibrary;
 import org.openflexo.pamela.exceptions.ModelDefinitionException;
 import org.openflexo.pamela.model.ModelEntity;
 import org.openflexo.pamela.model.ModelEntityLibrary;
-import org.openflexo.pamela.model.ModelProperty;
-import org.openflexo.pamela.test.tests1.AbstractNode;
-import org.openflexo.pamela.test.tests1.FlexoProcess;
-import org.openflexo.pamela.test.tests1.StartNode;
-import org.openflexo.pamela.test.tests1.TestModelObject;
-import org.openflexo.pamela.test.tests1.TokenEdge;
-import org.openflexo.pamela.test.tests1.WKFObject;
+import org.openflexo.pamela.test.model.AbstractNode;
+import org.openflexo.pamela.test.model.FlexoProcess;
+import org.openflexo.pamela.test.model.StartNode;
+import org.openflexo.pamela.test.model.TestModelObject;
+import org.openflexo.pamela.test.model.TokenEdge;
+import org.openflexo.pamela.test.model.WKFObject;
+
+import junit.framework.TestCase;
 
 public abstract class AbstractPAMELATest extends TestCase {
+
+	//TODO pull up the factory and pamelametamodel as they are becoming more general
 
 	/**
 	 * Little hack to access the library clear() method. This is only for testing purposes.
 	 */
 	protected void clearModelEntityLibrary() {
 		ModelEntityLibrary.clear();
+		PamelaMetaModelLibrary.clearCache();
 	}
 
 	protected void validateBasicModelContext(PamelaMetaModel pamelaMetaModel) throws ModelDefinitionException {
-		ModelEntity<TestModelObject> modelObjectEntity = pamelaMetaModel.getModelEntity(TestModelObject.class);
-		ModelEntity<FlexoProcess> processEntity = pamelaMetaModel.getModelEntity(FlexoProcess.class);
-		ModelEntity<AbstractNode> abstractNodeEntity = pamelaMetaModel.getModelEntity(AbstractNode.class);
-		ModelEntity<StartNode> startNodeEntity = pamelaMetaModel.getModelEntity(StartNode.class);
-		ModelEntity<TokenEdge> tokenEdgeEntity = pamelaMetaModel.getModelEntity(TokenEdge.class);
-		ModelEntity<WKFObject> wkfObjectEntity = pamelaMetaModel.getModelEntity(WKFObject.class);
+		ModelEntity<TestModelObject> aTestModelObjectEntity = pamelaMetaModel.getModelEntity(TestModelObject.class);
+		ModelEntity<FlexoProcess> aProcessEntity = pamelaMetaModel.getModelEntity(FlexoProcess.class);
+		ModelEntity<AbstractNode> aAbstractNodeEntity = pamelaMetaModel.getModelEntity(AbstractNode.class);
+		ModelEntity<StartNode> aStartNodeEntity = pamelaMetaModel.getModelEntity(StartNode.class);
+		ModelEntity<TokenEdge> aTokenEdgeEntity = pamelaMetaModel.getModelEntity(TokenEdge.class);
+		ModelEntity<WKFObject> aWorkFlowObjectEntity = pamelaMetaModel.getModelEntity(WKFObject.class);
 
-		assertNotNull(processEntity);
-		assertNotNull(abstractNodeEntity);
-		assertNotNull(startNodeEntity);
-		assertNotNull(tokenEdgeEntity);
-		assertNotNull(wkfObjectEntity);
+		assertNotNull(aProcessEntity);
+		assertNotNull(aAbstractNodeEntity);
+		assertNotNull(aStartNodeEntity);
+		assertNotNull(aTokenEdgeEntity);
+		assertNotNull(aWorkFlowObjectEntity);
 
-		ModelProperty<? super FlexoProcess> nodesProperty = processEntity.getModelProperty(FlexoProcess.NODES);
-		assertNotNull(nodesProperty);
-		ModelProperty<? super FlexoProcess> fooProperty = processEntity.getModelProperty(FlexoProcess.FOO);
-		assertNotNull(fooProperty);
-		assertNotNull(modelObjectEntity.getModelProperty(TestModelObject.FLEXO_ID));
-		assertNotNull(processEntity.getModelProperty(TestModelObject.FLEXO_ID));
-		assertNotNull(wkfObjectEntity.getModelProperty(TestModelObject.FLEXO_ID));
-		assertNotNull(wkfObjectEntity.getModelProperty(TestModelObject.FLEXO_ID).getSetter());
+		assertNotNull(aTestModelObjectEntity.getModelProperty(TestModelObject.FLEXO_ID));
+		assertNotNull(aTestModelObjectEntity.getModelProperty(TestModelObject.NAME));
+		
+		assertNull(aTestModelObjectEntity.getModelProperty(TestModelObject.DELETED));
 
-		ModelProperty<? super WKFObject> wkfObjectProcessProperty = wkfObjectEntity.getModelProperty(WKFObject.PROCESS);
-		assertNotNull(wkfObjectProcessProperty);
-		assertNull(wkfObjectProcessProperty.getInverseProperty(processEntity));
-		assertNotNull(wkfObjectProcessProperty.getSetter());
-		ModelProperty<? super AbstractNode> abstractNodeProcessProperty = abstractNodeEntity.getModelProperty(WKFObject.PROCESS);
-		assertNotNull(abstractNodeProcessProperty);
-		assertNotNull(abstractNodeProcessProperty.getInverseProperty(processEntity));
-		assertNotNull(abstractNodeProcessProperty.getSetter());
-		assertTrue(modelObjectEntity.getAllDescendants(pamelaMetaModel).contains(processEntity));
+		// see that properties are inherited
+		assertNotNull(aProcessEntity.getModelProperty(FlexoProcess.FLEXO_ID));
+		assertNotNull(aProcessEntity.getModelProperty(FlexoProcess.NAME));
+		
+		assertNull(aProcessEntity.getModelProperty(FlexoProcess.DELETED));
+		
+		assertNotNull(aProcessEntity.getModelProperty(FlexoProcess.PROCESS));
+		assertNotNull(aProcessEntity.getModelProperty(FlexoProcess.NODES));
+		assertNotNull(aProcessEntity.getModelProperty(FlexoProcess.FOO));
+
+		assertNotNull(aAbstractNodeEntity.getModelProperty(WKFObject.FLEXO_ID));
+		assertNotNull(aAbstractNodeEntity.getModelProperty(WKFObject.NAME));
+		
+		assertNull(aAbstractNodeEntity.getModelProperty(WKFObject.DELETED));
+		
+		assertNotNull(aAbstractNodeEntity.getModelProperty(WKFObject.PROCESS));
+		assertNotNull(aAbstractNodeEntity.getModelProperty(AbstractNode.INCOMING_EDGES));
+		assertNotNull(aAbstractNodeEntity.getModelProperty(AbstractNode.OUTGOING_EDGES));
+		assertNotNull(aAbstractNodeEntity.getModelProperty(AbstractNode.MASTER_ANNOTATION));
+		assertNotNull(aAbstractNodeEntity.getModelProperty(AbstractNode.OTHER_ANNOTATIONS));
+		
+		assertNotNull(aAbstractNodeEntity.getModelProperty(WKFObject.PROCESS).getInverseProperty(aProcessEntity));
+		assertNotNull(aAbstractNodeEntity.getModelProperty(WKFObject.PROCESS).getSetter());
+		
+		// TODO check that the models have all properties covered
+		// TODO property of StartNode
+		// TODO property of TokenEdge
+
+		assertNotNull(aWorkFlowObjectEntity.getModelProperty(TestModelObject.FLEXO_ID));
+		assertNotNull(aWorkFlowObjectEntity.getModelProperty(TestModelObject.FLEXO_ID).getSetter());
+
+		assertNotNull(aWorkFlowObjectEntity.getModelProperty(WKFObject.PROCESS));
+		assertNull(aWorkFlowObjectEntity.getModelProperty(WKFObject.PROCESS).getInverseProperty(aProcessEntity));
+		assertNotNull(aWorkFlowObjectEntity.getModelProperty(WKFObject.PROCESS).getSetter());
+
+		assertTrue(aTestModelObjectEntity.getAllDescendants(pamelaMetaModel).contains(aProcessEntity));
+
+		// TODO check that adding this may not break the unit where this method
+		// "validateBasicModelContext" is used ?
+		assertTrue(aTestModelObjectEntity.getAllDescendants(pamelaMetaModel).contains(aAbstractNodeEntity));
+		assertTrue(aTestModelObjectEntity.getAllDescendants(pamelaMetaModel).contains(aStartNodeEntity));
+		assertTrue(aTestModelObjectEntity.getAllDescendants(pamelaMetaModel).contains(aTokenEdgeEntity));
+		assertTrue(aTestModelObjectEntity.getAllDescendants(pamelaMetaModel).contains(aWorkFlowObjectEntity));
 	}
 }

@@ -991,7 +991,9 @@ public class ModelEntity<I> {
 		if (m.getDeclaringClass() != implementedInterface) {
 			ModelEntity<?> e = ModelEntityLibrary.get(m.getDeclaringClass());
 			if (e == null) {
-				throw new ModelExecutionException("Could not find initializer for method " + m.toGenericString() + ". Make sure that "
+				throw new ModelExecutionException("Could not find a ModelEntity of " + m.getDeclaringClass()
+						+ ", while searching for the initializer of method " + m.toGenericString()
+						+ ".\n Make sure that "
 						+ m.getDeclaringClass().getName() + " is annotated with ModelEntity and has been imported.");
 			}
 			return e.getInitializers(m);
