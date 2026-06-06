@@ -34,7 +34,7 @@ import org.openflexo.pamela.test.model.WKFAnnotation;
  * @author chamomille93
  *
  */
-public class PamelaCoreTests2 extends AbstractPAMELATest {
+public class PamelaCoreTests1A extends AbstractPAMELATest {
 
 	private static final int GIVEN_FOO_VALUE = 42;
 	private static final String GIVEN_PROCESS_NAME = "NewProcess";
