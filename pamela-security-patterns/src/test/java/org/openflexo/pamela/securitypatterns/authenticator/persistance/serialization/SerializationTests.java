@@ -109,7 +109,7 @@ public class SerializationTests extends TestCase {
 		// GIVEN
 		SerializationPolicy policy = SerializationPolicy.EXTENSIVE;
 		//TODO change this to the subject instead of the AuthInfo()
-		authenticator.addUser(subject.getAuthInfo());
+		authenticator.addUser(subject);
 
 		// THEN
 		try (FileOutputStream fos = new FileOutputStream(file)) {

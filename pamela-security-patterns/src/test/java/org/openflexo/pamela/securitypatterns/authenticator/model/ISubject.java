@@ -81,7 +81,7 @@ public interface ISubject extends AccessibleProxyObject {
 
 		@Override
 		public void thisMethodRequiresToBeAuthenticated() {
-			System.out.println("I need to be authenticated to execute this");
+			System.out.println("I needed to be authenticated to execute this");
 		}
 	}
 }

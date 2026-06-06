@@ -59,7 +59,7 @@ public class TestAuthenticator extends TestCase {
 	public void testAuthenticateValid() throws Exception {
 
 		subject.setManager(manager);
-		manager.addUser(subject.getAuthInfo());
+		manager.addUser(subject);
 		subject.authenticate();
 		assertEquals(subject.getIDProof(), manager.generateFromAuthInfo(subject.getAuthInfo()));
 		System.out.println("IDProof=" + subject.getIDProof());
@@ -68,7 +68,7 @@ public class TestAuthenticator extends TestCase {
 	@Test
 	public void testRequiresAuthentication() throws Exception {
 		subject.setManager(manager);
-		manager.addUser(subject.getAuthInfo());
+		manager.addUser(subject);
 		// We haven't call the authenticate() method, but this method is tagged with "@RequiresAuthentication", thus this call the
 		// authenticate() method
 		subject.thisMethodRequiresToBeAuthenticated();
@@ -140,7 +140,7 @@ public class TestAuthenticator extends TestCase {
 	public void testIdProofForgery() throws Exception {
 		subject.setManager(manager);
 		subject.setIdProof(-1);
-		manager.addUser(subject.getAuthInfo());
+		manager.addUser(subject);
 		subject.authenticate();
 		subject.setIdProof(subject.getIDProof());
 		try {
@@ -160,7 +160,7 @@ public class TestAuthenticator extends TestCase {
 		
 		subject.authenticate();
 		assertEquals(subject.getIDProof(), manager.getDefaultToken());
-		manager.addUser(subject.getAuthInfo());
+		manager.addUser(subject);
 		subject.getAuthInfo();
 		subject.authenticate();
 	}

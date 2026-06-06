@@ -51,16 +51,16 @@ public interface IAuthenticator extends AccessibleProxyObject {
 
 	@XMLElement(xmlTag = USERS)
 	@Getter(value = USERS, cardinality = Getter.Cardinality.LIST)
-	List<String> getUsers();
+	List<ISubject> getUsers();
 
 	@Setter(USERS)
-	void setUsers(List<String> users);
+	void setUsers(List<ISubject> users);
 
 	@Adder(USERS)
-	void addUser(String val);
+	void addUser(ISubject user);
 
 	@Remover(USERS)
-	void removeUser(String val);
+	void removeUser(ISubject user);
 
 	@Requires(patternID = ISubject.PATTERN_ID, type = PropertyParadigmType.Java, property = "prout")
 	public void aMethodGuardedWithAPrecondition();
@@ -84,8 +84,8 @@ public interface IAuthenticator extends AccessibleProxyObject {
 		}
 
 		private boolean check(String id) {
-			for (String userID : this.getUsers()) {
-				if (userID.compareTo(id) == 0)
+			for (ISubject userID : this.getUsers()) {
+				if (userID.getAuthInfo().compareTo(id) == 0)
 					return true;
 			}
 			return false;
