@@ -72,11 +72,11 @@ public class DeserializationTests extends TestCase {
 			assertNotNull(deserializedAuthenticator);
 			assertEquals(authenticator.getName(), deserializedAuthenticator.getName());
 			assertNotSame(authenticator, deserializedAuthenticator); // by referenc
-						
-			//TODO
-			// using PAMELA equality see [Equality computing support](./pamela-core/10-equality_computing.md)
+
+			// using PAMELA equality see
+			// [Equality computing support](./pamela-core/10-equality_computing.md)
 			boolean result = authenticator.equalsObject(deserializedAuthenticator);
-			assertEquals(true,result);
+			assertEquals(true, result);
 
 			// System.out.println(AuthenticatorImp.DESERIALIZATION_TRACE);
 		} catch (Exception e) {
@@ -86,60 +86,62 @@ public class DeserializationTests extends TestCase {
 	}
 
 	// TODO following tests
-	// @Test
-	// @TestOrder(1)
-	// public void testDeserializeOneSubjectSucceed() {
-	// 	// GIVEN
-	// 	subject = (ISubject) pamelaModelFactory.newInstance(ISubject.class, authenticator, ISubject.AUTH_INFO);
-	// 	subject.init(authenticator, ISubject.AUTH_INFO);
-	// 	subject.setIdProof(42);
-	// 	// TODO which other value could be demonstrated for serialization ?
+	@Test
+	@TestOrder(1)
+	public void testDeserializeOneSubjectSucceed() {
+		// GIVEN
+		subject = (ISubject) pamelaModelFactory.newInstance(ISubject.class, authenticator, ISubject.AUTH_INFO);
 
-	// 	// WHEN
+		// WHEN
+		try (FileOutputStream fos = new FileOutputStream(file)) {
+			pamelaModelFactory.serialize(subject, fos, SerializationPolicy.EXTENSIVE, true);
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
 
-	// 	try (FileInputStream fis = new FileInputStream(file)) {
-	// 		// TODO
-	// 		// rootNode = (Node) factory.deserialize(fis, DeserializationPolicy.EXTENSIVE);
-	// 	} catch (Exception e) {
-	// 		// THEN
-	// 		fail(e.getMessage());
-	// 	}
+		try (FileInputStream fis = new FileInputStream(file)) {
+			ISubject deserializedSubject = (ISubject) pamelaModelFactory.deserialize(fis,
+					DeserializationPolicy.EXTENSIVE);
 
-	// 	// TODO
-	// 	// System.out.println(NodeImpl.DESERIALIZATION_TRACE);
+			// THEN
+			assertEquals(subject.getAuthInfo(), deserializedSubject.getAuthInfo());
 
-	// 	// assertEquals(
-	// 	// " BEGIN:Root BEGIN:Node1 BEGIN:Node2 BEGIN:Node21 BEGIN:Node22 BEGIN:Node23
-	// 	// BEGIN:Node3 END:Root END:Node1 END:Node2 END:Node21 END:Node22 END:Node23
-	// 	// END:Node3",
-	// 	// NodeImpl.DESERIALIZATION_TRACE);
-	// }
+			// using PAMELA equality see
+			// [Equality computing support](./pamela-core/10-equality_computing.md)
+			boolean result = subject.equalsObject(deserializedSubject);
+			assertEquals(true, result);
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
 
 	// @Test
 	// @TestOrder(1)
 	// public void testDeserializeOneAuthenticatorWithOneSubjectSucceed() {
-	// 	// GIVEN
+	// // GIVEN
 
-	// 	// WHEN
+	// // WHEN
 
-	// 	try (FileInputStream fis = new FileInputStream(file)) {
-	// 		// TODO
-	// 		// rootNode = (Node) factory.deserialize(fis, DeserializationPolicy.EXTENSIVE);
-	// 	} catch (Exception e) {
-	// 		// THEN
-	// 		fail(e.getMessage());
-	// 	}
+	// try (FileInputStream fis = new FileInputStream(file)) {
+	// // TODO
+	// // rootNode = (Node) factory.deserialize(fis,
+	// DeserializationPolicy.EXTENSIVE);
+	// } catch (Exception e) {
+	// // THEN
+	// fail(e.getMessage());
+	// }
 
-	// 	// TODO
-	// 	// assertNotNull(rootNode);
+	// // TODO
+	// // assertNotNull(rootNode);
 
-	// 	// TODO
-	// 	// System.out.println(NodeImpl.DESERIALIZATION_TRACE);
+	// // TODO
+	// // System.out.println(NodeImpl.DESERIALIZATION_TRACE);
 
-	// 	// assertEquals(
-	// 	// " BEGIN:Root BEGIN:Node1 BEGIN:Node2 BEGIN:Node21 BEGIN:Node22 BEGIN:Node23
-	// 	// BEGIN:Node3 END:Root END:Node1 END:Node2 END:Node21 END:Node22 END:Node23
-	// 	// END:Node3",
-	// 	// NodeImpl.DESERIALIZATION_TRACE);
+	// // assertEquals(
+	// // " BEGIN:Root BEGIN:Node1 BEGIN:Node2 BEGIN:Node21 BEGIN:Node22
+	// BEGIN:Node23
+	// // BEGIN:Node3 END:Root END:Node1 END:Node2 END:Node21 END:Node22 END:Node23
+	// // END:Node3",
+	// // NodeImpl.DESERIALIZATION_TRACE);
 	// }
 }
