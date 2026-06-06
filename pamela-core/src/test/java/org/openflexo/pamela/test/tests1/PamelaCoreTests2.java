@@ -2,13 +2,11 @@ package org.openflexo.pamela.test.tests1;
 
 import static org.junit.Assert.*;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.List;
 import java.util.Objects;
 
 import org.junit.After;
@@ -17,24 +15,18 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.function.ThrowingRunnable;
-import org.openflexo.pamela.AccessibleProxyObject;
 import org.openflexo.pamela.PamelaMetaModel;
 import org.openflexo.pamela.PamelaMetaModelLibrary;
 import org.openflexo.pamela.exceptions.UnitializedEntityException;
-import org.openflexo.pamela.factory.Clipboard;
-import org.openflexo.pamela.factory.EmbeddingType;
 import org.openflexo.pamela.factory.PamelaModelFactory;
 import org.openflexo.pamela.model.ModelEntityLibrary;
 import org.openflexo.pamela.test.AbstractPAMELATest;
-import org.openflexo.pamela.test.model.AbstractNode;
 import org.openflexo.pamela.test.model.ActivityNode;
-import org.openflexo.pamela.test.model.Edge;
 import org.openflexo.pamela.test.model.EndNode;
 import org.openflexo.pamela.test.model.FlexoProcess;
 import org.openflexo.pamela.test.model.StartNode;
 import org.openflexo.pamela.test.model.TokenEdge;
 import org.openflexo.pamela.test.model.WKFAnnotation;
-import org.openflexo.toolbox.FileUtils;
 
 /**
  * Basic tests regarding a sample PAMELA model
@@ -44,6 +36,9 @@ import org.openflexo.toolbox.FileUtils;
  */
 public class PamelaCoreTests2 extends AbstractPAMELATest {
 
+	private static final int GIVEN_FOO_VALUE = 42;
+	private static final String GIVEN_PROCESS_NAME = "NewProcess";
+	private static final String GIVEN_FLEXO_ID = "234XX";
 	private File file;
 	private PamelaModelFactory factory;
 	private PamelaMetaModel pamelaMetaModel;
@@ -72,9 +67,9 @@ public class PamelaCoreTests2 extends AbstractPAMELATest {
 		factory = new PamelaModelFactory(pamelaMetaModel);
 
 		aProcessInitialized = factory.newInstance(FlexoProcess.class);
-		aProcessInitialized.init("234XX");
-		aProcessInitialized.setName("NewProcess");
-		aProcessInitialized.setFoo(8);
+		aProcessInitialized.init(GIVEN_FLEXO_ID);
+		aProcessInitialized.setName(GIVEN_PROCESS_NAME);
+		aProcessInitialized.setFoo(GIVEN_FOO_VALUE);
 
 		anotherProcessNotInitialized = factory.newInstance(FlexoProcess.class);
 	}
@@ -93,298 +88,195 @@ public class PamelaCoreTests2 extends AbstractPAMELATest {
 	 *
 	 * @throws Exception
 	 */
-	public void testShouldConstructCorrectSimplePamelaMetaModel() throws Exception {
+	public void testShouldConstructCorrectSimplePamelaMetaModelSucceed() throws Exception {
 		// System.out.println(pamelaMetaModel.debug());
-		assertEquals(11, pamelaMetaModel.getEntityCount());
+		int expectedEntityCount = 11;
+		assertEquals(expectedEntityCount, pamelaMetaModel.getEntityCount());
 
 		// why countEntity returns "11" ? I would expect one entity,
 		// namely a FlexoProcess that is not correct, since other entity are referenced
-		assertFalse(Objects.equals(1, pamelaMetaModel.getEntityCount()));
+		expectedEntityCount = 1;
+		assertFalse(Objects.equals(expectedEntityCount, pamelaMetaModel.getEntityCount()));
 
 		validateBasicModelContext(pamelaMetaModel);
 	}
 
-	public void testShouldNotRaiseAnExceptionAfterProccesIsInitialized() throws Exception {
+	public void testShouldNotRaiseAnExceptionAfterProccesIsInitializedSucceed() throws Exception {
 		// GIVEN
 		FlexoProcess aProcess = factory.newInstance(FlexoProcess.class);
 		try {
-			aProcess.init("234X1");
+			String givenFlexoId = "234X1";
+			aProcess.init(givenFlexoId);
 			aProcess.getName();
 			// WHEN
 		} catch (UnitializedEntityException e) {
 		}
-		// THEN
-		// TODO move to another test this has nothing to do with the current
-		// assertTrue(aProcess instanceof FlexoProcess);
-		// assertEquals("NewProcess", aProcess.getName());
-		// assertEquals("234XX", aProcess.getFlexoID());
-		// assertEquals(8, aProcess.getFoo());
 	}
 
-	// public void testShouldRaiseExceptionWhenGetNameBeforeProcessIsInitialized() throws Exception {
-	// 	// GIVEN
-	// 	try {
-	// 		anotherProcessNotInitialized.getName();
-	// 		fail("getName() must not be invoke until init() has been called");
-	// 	} catch (UnitializedEntityException e) {
-	// 	}
-	// }
+	public void testShouldRaiseExceptionWhenGetNameBeforeProcessIsInitializedSucceed() throws Exception {
+		// GIVEN
+		try {
+			anotherProcessNotInitialized.getName();
+			fail("getName() must not be invoke until init() has been called");
+		} catch (UnitializedEntityException e) {
+		}
+	}
 
-	// public void testShouldThrowsAnExceptionWhenGetNameBeforeProcessIsInitialized() throws Exception {
-	// 	// GIVEN
-	// 	FlexoProcess anotherProcessNotInitialized = factory.newInstance(FlexoProcess.class);
-	// 	Assert.assertThrows(UnitializedEntityException.class,
-	// 			new ThrowingRunnable() {
-	// 				@Override
-	// 				public void run() throws Throwable {
-	// 					anotherProcessNotInitialized.getName();
-	// 				}
-	// 			});
-	// }
+	public void testShouldThrowsAnExceptionWhenGetNameBeforeProcessIsInitializedSucceed() throws Exception {
+		// GIVEN
+		FlexoProcess anotherProcessNotInitialized = factory.newInstance(FlexoProcess.class);
+		Assert.assertThrows(UnitializedEntityException.class,
+				new ThrowingRunnable() {
+					@Override
+					public void run() throws Throwable {
+						anotherProcessNotInitialized.getName();
+					}
+				});
+	}
 
-	// public void testShouldThrowsAnExceptionWhenSetNameBeforeProcessIsInitialized() throws Exception {
-	// 	// GIVEN
-	// 	FlexoProcess anotherProcessNotInitialized = factory.newInstance(FlexoProcess.class);
-	// 	Assert.assertThrows(UnitializedEntityException.class,
-	// 			new ThrowingRunnable() {
-	// 				@Override
-	// 				public void run() throws Throwable {
-	// 					anotherProcessNotInitialized.setName("NewProcess");
-	// 				}
-	// 			});
-	// }
+	public void testShouldThrowsAnExceptionWhenSetNameBeforeProcessIsInitializedSucceed() throws Exception {
+		// GIVEN
+		FlexoProcess anotherProcessNotInitialized = factory.newInstance(FlexoProcess.class);
+		Assert.assertThrows(UnitializedEntityException.class,
+				new ThrowingRunnable() {
+					@Override
+					public void run() throws Throwable {
+						anotherProcessNotInitialized.setName(GIVEN_PROCESS_NAME);
+					}
+				});
+	}
 
-	// // TODO rename the test
-	// public void testInitializedActivityHasDefaultValueAndSettingPropertyWorksAndEmbeddingWorksAndContainmentWorksAndParentsWorks()
-	// 		throws Exception {
-	// 	ActivityNode activityNode = factory.newInstance(ActivityNode.class);
-	// 	activityNode.init();
+	// TODO rename the test
+	public void testInitializedActivityHasDefaultValueAndSettingPropertyWorksAndEmbeddingWorksAndContainmentWorksAndParentsSucceed()
+			throws Exception {
+		ActivityNode activityNode = factory.newInstance(ActivityNode.class);
+		activityNode.init();
 
-	// 	assertTrue(activityNode instanceof ActivityNode);
-	// 	assertEquals("0000", activityNode.getFlexoID());
+		assertTrue(activityNode instanceof ActivityNode);
+		String expectedDefaultFlexoId = "0000";
+		assertEquals(expectedDefaultFlexoId, activityNode.getFlexoID());
 
-	// 	activityNode.setFlexoID("1");
-	// 	assertEquals("1", activityNode.getFlexoID());
+		String aFlexoID = "1";
+		activityNode.setFlexoID(aFlexoID);
+		assertEquals(aFlexoID, activityNode.getFlexoID());
 
-	// 	activityNode.setName("MyActivity");
-	// 	assertEquals("MyActivity", activityNode.getName());
+		String activityName = "MyActivity";
+		activityNode.setName(activityName);
+		assertEquals(activityName, activityNode.getName());
 
-	// 	aProcessInitialized.addToNodes(activityNode);
-	// 	assertTrue(aProcessInitialized.getNodes().contains(activityNode));
+		aProcessInitialized.addToNodes(activityNode);
+		assertTrue(aProcessInitialized.getNodes().contains(activityNode));
 
-	// 	assertEquals(aProcessInitialized, activityNode.getProcess());
-	// }
+		assertEquals(aProcessInitialized, activityNode.getProcess());
+	}
 
-	// // TODO fix
-	// public void testShouldConstructCorrectProcessWithNodesAndEdgesAndSDemonstrateThatReturnedValueSucceedandSerialize()
-	// 		throws Exception {
+	// TODO rename and maybe refactor
+	public void testShouldConstructCorrectProcessWithNodesAndEdgesAndSDemonstrateThatReturnedValueSucceed()
+			throws Exception {
 
-	// 	ActivityNode activityNode = factory.newInstance(ActivityNode.class);
-	// 	activityNode.init();
+		String givenActivityNodeName = "MyActivity";
+		ActivityNode activityNode = factory.newInstance(ActivityNode.class, givenActivityNodeName);
+		String givenStartNodeName = "Start";
+		StartNode startNode = factory.newInstance(StartNode.class, givenStartNodeName);
+		String givenEndNodeName = "End";
+		EndNode endNode = factory.newInstance(EndNode.class, givenEndNodeName);
+		String givenEdgeName = "edge1";
+		TokenEdge edge1 = factory.newInstance(TokenEdge.class, givenEdgeName, startNode, activityNode);
+		String givenEdgeAnotherName = "edge2";
+		TokenEdge edge2 = factory.newInstance(TokenEdge.class, givenEdgeAnotherName, activityNode, endNode);
 
-	// 	StartNode startNode = factory.newInstance(StartNode.class);
-
-	// 	// TODO the following comment might not hold anymore since I split the test
-	// 	// TODO why id=3? my expectation was id=2 since this seems to be an internal
-	// 	// identifier generated on object creation and this is the second object created
-	// 	// after the process itself but here id=2 is an OutgoingTokenEdge being a
-	// 	// successor to this node id=3
-
-	// 	startNode.init();
-	// 	startNode.setName("Start");
-	// 	aProcessInitialized.addToNodes(startNode);
-
-	// 	EndNode endNode = factory.newInstance(EndNode.class);
-	// 	endNode.init();
-	// 	endNode.setName("End");
-	// 	aProcessInitialized.addToNodes(endNode);
-
-	// 	// TODO the following comment might not hold anymore since I split the test
-	// 	// TODO id=5 idem, expect id=3
-	// 	// maybe this has to do with the way nodes are "serialized" ? doesn't seem to
-	// 	// hold,
-	// 	// if this was the case that this is DFS then
-	// 	// the first incomingTokenEdge not yet created at this point would have id=2
-	// 	// but in the xml doesn't have one, that's because it doesn't belong to this
-	// 	// activity node but is a "reference" thus the "idref=2" in the xml which refer
-	// 	// to the edge with id=2 but "belong to" the startNode above
-	// 	// and moreover the node after is id=4; this is normal, since it was affected
-	// 	// has "belong to" this "activity node" and there's not "idRef" on this one.
-	// 	// that does not follow.
-
-	// 	TokenEdge edge1 = (TokenEdge) factory.newInstance(TokenEdge.class).init(startNode, activityNode);
-	// 	edge1.setName("edge1");
-	// 	assertEquals(aProcessInitialized, edge1.getProcess());
-	// 	startNode.addToOutgoingEdges(edge1);
-	// 	assertEquals(aProcessInitialized, edge1.getProcess());
-	// 	activityNode.addToIncomingEdges(edge1);
-	// 	assertEquals(aProcessInitialized, edge1.getProcess());
-
-	// 	TokenEdge edge2 = factory.newInstance(TokenEdge.class, "edge2", activityNode, endNode);
-	// 	// TODO idf why this needs to be cast to the type when the previous invocation
-	// 	// did not ?
-	// 	// TokenEdge edge2 = (TokenEdge)
-	// 	// factory.newInstance(TokenEdge.class).init("edge2", activityNode, endNode);
-
-	// 	// TODO is this redundant with the newInstance constructors with args given per
-	// 	// PAMELA semantic ?
-	// 	// TODO what could have been the "intention" of this in this test ?
-	// 	edge2.setStartNode(activityNode);
-	// 	edge2.setEndNode(endNode);
-
-	// 	// Why the actual is not equal the process ? because the "@ReturnedValue" of an
-	// 	// Edge says to return the value of the startNode which is "activityNode", which
-	// 	// is null.
-	// 	assertNotEquals(edge2.getProcess(), aProcessInitialized);
-
-	// 	// TODO the following might not be appropriate to have in the test
-	// 	try (FileOutputStream fos = new FileOutputStream("/tmp/TestFile.xml")) {
-	// 		factory.serialize(aProcessInitialized, fos);
-	// 		fos.flush();
-	// 	} catch (FileNotFoundException e) {
-	// 		fail(e.getMessage());
-	// 	} catch (IOException e) {
-	// 		fail(e.getMessage());
-	// 	}
-	// }
-
-	// public void testShouldCompareDeserializationAreEqualsWithNonBreakingChangesOnModel() throws Exception {
-	// 	// TODO what is this testing ?
-	// 	// TODO might be too long, should be split in several tests,
-	// 	// each testing a specific aspect of the model construction and serialization
-
-	// 	ActivityNode activityNode = factory.newInstance(ActivityNode.class, "MyActivity");
-	// 	StartNode startNode = factory.newInstance(StartNode.class, "Start");
-	// 	EndNode endNode = factory.newInstance(EndNode.class, "End");
-	// 	// TODO why ini this one and not the others ?
-	// 	// endNode.init();
-	// 	TokenEdge edge1 = factory.newInstance(TokenEdge.class, "edge1", startNode, activityNode);
-	// 	TokenEdge edge2 = factory.newInstance(TokenEdge.class, "edge2", activityNode, endNode);
-
-	// 	aProcessInitialized.addToNodes(activityNode);
-	// 	aProcessInitialized.addToNodes(startNode);
-	// 	aProcessInitialized.addToNodes(endNode);
-
-	// 	WKFAnnotation annotation1 = factory.newInstance(WKFAnnotation.class, "Annotation 1");
-	// 	WKFAnnotation annotation2 = factory.newInstance(WKFAnnotation.class, "Annotation 2");
-	// 	startNode.setMasterAnnotation(annotation1);
-	// 	startNode.addToOtherAnnotations(annotation2);
-
-	// 	// TODO why test this here ?
-	// 	// assertEquals("MyActivity", activityNode.getName());
-	// 	// assertEquals("Start", startNode.getName());
-	// 	// assertEquals("End", endNode.getName());
-	// 	// assertEquals(activityNode, edge2.getStartNode());
-	// 	// assertTrue(activityNode.getOutgoingEdges().contains(edge2));
-	// 	// assertEquals(1, startNode.getOutgoingEdges().size());
-	// 	// assertEquals(1, activityNode.getOutgoingEdges().size());
-
-	// 	// TODO there is no need to have three serialization as this try to test
-	// 	// something else than serialization=deserialization
+		aProcessInitialized.addToNodes(startNode);
+		aProcessInitialized.addToNodes(endNode);
+		assertEquals(aProcessInitialized, edge1.getProcess());
 		
-	// 	try (FileOutputStream fos = new FileOutputStream(file)) {
-	// 		factory.serialize(aProcessInitialized, fos);
-	// 	} catch (FileNotFoundException e) {
-	// 		fail(e.getMessage());
-	// 	} catch (IOException e) {
-	// 		fail(e.getMessage());
-	// 	}
+		startNode.addToOutgoingEdges(edge1);
+		assertEquals(aProcessInitialized, edge1.getProcess());
+		
+		activityNode.addToIncomingEdges(edge1);
+		assertEquals(aProcessInitialized, edge1.getProcess());
 
-	// 	String anXml = FileUtils.fileContents(file);
+		edge2.setStartNode(activityNode);
+		edge2.setEndNode(endNode);
 
-	// 	edge2.setStartNode(startNode);
+		assertNotEquals(edge2.getProcess(), aProcessInitialized);
+	}
 
-	// 	// TODO idf why test this here ?
-	// 	// assertEquals(startNode, edge2.getStartNode());
-	// 	// assertTrue(startNode.getOutgoingEdges().contains(edge2));
-	// 	// assertEquals(2, startNode.getOutgoingEdges().size());
-	// 	// assertEquals(0, activityNode.getOutgoingEdges().size());
+	public void testDeserializationEqualsSerializationSucceed() throws Exception {
+		//GIVEN
+		String givenActivityNodeName = "MyActivity";
+		ActivityNode activityNode = factory.newInstance(ActivityNode.class, givenActivityNodeName);
+		String givenStartNodeName = "Start";
+		StartNode startNode = factory.newInstance(StartNode.class, givenStartNodeName);
+		String givenEndNodeName = "End";
+		EndNode endNode = factory.newInstance(EndNode.class, givenEndNodeName);
+		String givenEdgeName = "edge1";
+		TokenEdge edge1 = factory.newInstance(TokenEdge.class, givenEdgeName, startNode, activityNode);
+		String givenEdgeAnotherName = "edge2";
+		TokenEdge edge2 = factory.newInstance(TokenEdge.class, givenEdgeAnotherName, activityNode, endNode);
 
-	// 	try (FileOutputStream fos = new FileOutputStream(file)) {
-	// 		factory.serialize(aProcessInitialized, fos);
-	// 	} catch (FileNotFoundException e) {
-	// 		fail(e.getMessage());
-	// 	} catch (IOException e) {
-	// 		fail(e.getMessage());
-	// 	}
+		aProcessInitialized.addToNodes(activityNode);
+		aProcessInitialized.addToNodes(startNode);
+		aProcessInitialized.addToNodes(endNode);
 
-	// 	String anotherXml = FileUtils.fileContents(file);
-	// 	assertNotEquals(anXml, anotherXml);
+		String givenAnnotationName = "Annotation 1";
+		WKFAnnotation annotation1 = factory.newInstance(WKFAnnotation.class, givenAnnotationName);
+		String givenAnnotationAnotherName = "Annotation 2";
+		WKFAnnotation annotation2 = factory.newInstance(WKFAnnotation.class, givenAnnotationAnotherName);
+		
+		startNode.setMasterAnnotation(annotation1);
+		startNode.addToOtherAnnotations(annotation2);
 
-	// 	// TODO that's weird but why not
-	// 	activityNode.addToOutgoingEdges(edge2);
+		//WHEN
+		try (FileOutputStream fos = new FileOutputStream(file)) {
+			factory.serialize(aProcessInitialized, fos);
+		} catch (FileNotFoundException e) {
+			fail(e.getMessage());
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
 
-	// 	// TODO why test this here ?
-	// 	// with the above this should belong to another test case
+		try (FileInputStream fis = new FileInputStream(file)) {
+			aProcessInitialized = (FlexoProcess) factory.deserialize(fis);
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+		
+		//THEN
+		activityNode = (ActivityNode) aProcessInitialized.getNodeNamed(givenActivityNodeName);
+		startNode = (StartNode) aProcessInitialized.getNodeNamed(givenStartNodeName);
+		endNode = (EndNode) aProcessInitialized.getNodeNamed(givenEndNodeName);
+		edge1 = (TokenEdge) aProcessInitialized.getEdgeNamed(givenEdgeName);
+		edge2 = (TokenEdge) aProcessInitialized.getEdgeNamed(givenEdgeAnotherName);
 
-	// 	// assertEquals(activityNode, edge2.getStartNode());
-	// 	// assertFalse(startNode.getOutgoingEdges().contains(edge2));
-	// 	// assertTrue(activityNode.getOutgoingEdges().contains(edge2));
-	// 	// assertEquals(1, startNode.getOutgoingEdges().size());
-	// 	// assertEquals(1, activityNode.getOutgoingEdges().size());
+		assertTrue(aProcessInitialized instanceof FlexoProcess);
+		assertEquals(GIVEN_PROCESS_NAME, aProcessInitialized.getName());
+		assertEquals(GIVEN_FLEXO_ID, aProcessInitialized.getFlexoID());
+		assertEquals(GIVEN_FOO_VALUE, aProcessInitialized.getFoo());
 
-	// 	try (FileOutputStream fos = new FileOutputStream(file)) {
-	// 		factory.serialize(aProcessInitialized, fos);
-	// 	} catch (FileNotFoundException e) {
-	// 		fail(e.getMessage());
-	// 	} catch (IOException e) {
-	// 		fail(e.getMessage());
-	// 	}
+		assertNotNull(activityNode);
+		assertEquals(givenActivityNodeName, activityNode.getName());
+		assertTrue(aProcessInitialized.getNodes().contains(activityNode));
+		assertEquals(aProcessInitialized, activityNode.getProcess());
 
-	// 	String anotherXmlToo = FileUtils.fileContents(file, "UTF-8");
+		assertNotNull(startNode);
+		assertNotNull(startNode.getMasterAnnotation());
+		assertEquals(givenAnnotationName, startNode.getMasterAnnotation().getText());
+		
+		int expectedAnnotationCount = 1;
+		assertEquals(expectedAnnotationCount, startNode.getOtherAnnotations().size());
 
-	// 	// TODO are these tests necessary regarding our current test ?
-	// 	// TODO maybe split this
-	// 	assertNotEquals(anotherXml, anotherXmlToo);
-	// 	assertEquals(anXml, anotherXmlToo);
+		assertNotNull(endNode);
+		assertNotNull(edge1);
 
-	// 	// TODO why did they named this a test4 ?
-	// 	// test4
-
-	// 	try (FileInputStream fis = new FileInputStream(file)) {
-	// 		aProcessInitialized = (FlexoProcess) factory.deserialize(fis);
-	// 	} catch (Exception e) {
-	// 		// TODO fails because procces is not initialized, why ?
-	// 		fail(e.getMessage());
-	// 	}
-
-	// 	assertTrue(aProcessInitialized instanceof FlexoProcess);
-	// 	assertEquals("NewProcess", aProcessInitialized.getName());
-	// 	assertEquals("234XX", aProcessInitialized.getFlexoID());
-	// 	assertEquals(8, aProcessInitialized.getFoo());
-
-	// 	activityNode = (ActivityNode) aProcessInitialized.getNodeNamed("MyActivity");
-
-	// 	assertNotNull(activityNode);
-	// 	assertEquals("MyActivity", activityNode.getName());
-	// 	assertTrue(aProcessInitialized.getNodes().contains(activityNode));
-	// 	assertEquals(aProcessInitialized, activityNode.getProcess());
-
-	// 	startNode = (StartNode) aProcessInitialized.getNodeNamed("Start");
-
-	// 	assertNotNull(startNode);
-	// 	assertNotNull(startNode.getMasterAnnotation());
-	// 	assertEquals("Annotation 1", startNode.getMasterAnnotation().getText());
-	// 	assertEquals(1, startNode.getOtherAnnotations().size());
-
-	// 	endNode = (EndNode) aProcessInitialized.getNodeNamed("End");
-
-	// 	assertNotNull(endNode);
-
-	// 	edge1 = (TokenEdge) aProcessInitialized.getEdgeNamed("edge1");
-
-	// 	assertNotNull(edge1);
-
-	// 	edge2 = (TokenEdge) aProcessInitialized.getEdgeNamed("edge2");
-
-	// 	assertNotNull(edge2);
-	// 	assertEquals(aProcessInitialized, edge1.getProcess());
-	// 	assertEquals(aProcessInitialized, edge2.getProcess());
-	// 	assertEquals(activityNode, edge2.getStartNode());
-	// 	assertTrue(activityNode.getOutgoingEdges().contains(edge2));
-	// 	assertEquals(1, startNode.getOutgoingEdges().size());
-	// 	assertEquals(1, activityNode.getOutgoingEdges().size());
-	// }
+		int expectedEdgeCount = 1;
+		assertNotNull(edge2);
+		assertEquals(aProcessInitialized, edge1.getProcess());
+		assertEquals(aProcessInitialized, edge2.getProcess());
+		assertEquals(activityNode, edge2.getStartNode());
+		assertTrue(activityNode.getOutgoingEdges().contains(edge2));
+		assertEquals(expectedEdgeCount, startNode.getOutgoingEdges().size());
+		assertEquals(expectedEdgeCount, activityNode.getOutgoingEdges().size());
+	}
 
 	// public void testDeletionAfterDeserializationShouldSucceed() throws Exception {
 	// 	// TODO refactor this test with another one that serialize the appropriate model
