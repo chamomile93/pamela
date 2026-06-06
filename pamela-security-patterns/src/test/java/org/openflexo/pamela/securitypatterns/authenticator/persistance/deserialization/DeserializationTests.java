@@ -34,9 +34,9 @@ public class DeserializationTests extends TestCase {
 
 	@Before
 	public void setUp() throws IOException, ModelDefinitionException {
-		PamelaMetaModelLibrary.clearCache(); // TODO watchout this has been added while debugging
+		PamelaMetaModelLibrary.clearCache();
 		ModelEntityLibrary.clear();
-		// exception raised by SerializationTests.
+
 		file = File.createTempFile("PAMELA-TestDeserialization", ".xml");
 
 		PamelaMetaModel context = PamelaMetaModelLibrary.retrieveMetaModel(ISubject.class, IAuthenticator.class);
@@ -62,7 +62,6 @@ public class DeserializationTests extends TestCase {
 			fail(e.getMessage());
 		}
 
-		System.out.println(pamelaModelFactory.stringRepresentation(authenticator));
 		// WHEN
 
 		try (FileInputStream fis = new FileInputStream(file)) {
@@ -71,21 +70,19 @@ public class DeserializationTests extends TestCase {
 
 			assertNotNull(deserializedAuthenticator);
 			assertEquals(authenticator.getName(), deserializedAuthenticator.getName());
-			assertNotSame(authenticator, deserializedAuthenticator); // by referenc
+			assertNotSame(authenticator, deserializedAuthenticator);
 
 			// using PAMELA equality see
 			// [Equality computing support](./pamela-core/10-equality_computing.md)
 			boolean result = authenticator.equalsObject(deserializedAuthenticator);
 			assertEquals(true, result);
 
-			// System.out.println(AuthenticatorImp.DESERIALIZATION_TRACE);
 		} catch (Exception e) {
 			// THEN
 			fail(e.getMessage());
 		}
 	}
 
-	// TODO following tests
 	@Test
 	@TestOrder(1)
 	public void testDeserializeOneSubjectSucceed() {
@@ -115,33 +112,38 @@ public class DeserializationTests extends TestCase {
 		}
 	}
 
-	// @Test
-	// @TestOrder(1)
-	// public void testDeserializeOneAuthenticatorWithOneSubjectSucceed() {
-	// // GIVEN
+	// TODO following tests
+	@Test
+	@TestOrder(1)
+	public void testDeserializeOneAuthenticatorWithOneSubjectSucceed() {
+		// GIVEN
+		authenticator = (IAuthenticator) pamelaModelFactory.newInstance(IAuthenticator.class);
+		authenticator.init();
+		authenticator.setName("Bob");
+		subject = (ISubject) pamelaModelFactory.newInstance(ISubject.class, authenticator, ISubject.AUTH_INFO);
 
-	// // WHEN
+		try (FileOutputStream fos = new FileOutputStream(file)) {
+			pamelaModelFactory.serialize(authenticator, fos, SerializationPolicy.EXTENSIVE, true);
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
 
-	// try (FileInputStream fis = new FileInputStream(file)) {
-	// // TODO
-	// // rootNode = (Node) factory.deserialize(fis,
-	// DeserializationPolicy.EXTENSIVE);
-	// } catch (Exception e) {
-	// // THEN
-	// fail(e.getMessage());
-	// }
+		// WHEN
 
-	// // TODO
-	// // assertNotNull(rootNode);
+		try (FileInputStream fis = new FileInputStream(file)) {
+			IAuthenticator deserializedAuthenticator = (IAuthenticator) pamelaModelFactory.deserialize(fis,
+					DeserializationPolicy.EXTENSIVE);
 
-	// // TODO
-	// // System.out.println(NodeImpl.DESERIALIZATION_TRACE);
+			// THEN
+			assertNotNull(deserializedAuthenticator);
+			assertEquals(authenticator.getName(), deserializedAuthenticator.getName());
+			assertNotSame(authenticator, deserializedAuthenticator);
 
-	// // assertEquals(
-	// // " BEGIN:Root BEGIN:Node1 BEGIN:Node2 BEGIN:Node21 BEGIN:Node22
-	// BEGIN:Node23
-	// // BEGIN:Node3 END:Root END:Node1 END:Node2 END:Node21 END:Node22 END:Node23
-	// // END:Node3",
-	// // NodeImpl.DESERIALIZATION_TRACE);
-	// }
+			boolean result = authenticator.equalsObject(deserializedAuthenticator);
+			assertEquals(true, result);
+
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
 }
