@@ -76,6 +76,7 @@ public class PamelaCoreTests2 extends AbstractPAMELATest {
 		aProcessInitialized.setName("NewProcess");
 		aProcessInitialized.setFoo(8);
 
+		//TODO uncomment this for tests that depends on it
 		// anotherProcessNotInitialized = factory.newInstance(FlexoProcess.class);
 	}
 
@@ -104,22 +105,22 @@ public class PamelaCoreTests2 extends AbstractPAMELATest {
 		validateBasicModelContext(pamelaMetaModel);
 	}
 
-	// public void testShouldNotRaiseAnExceptionAfterProccesIsInitialized() throws Exception {
-	// 	// GIVEN
-	// 	FlexoProcess aProcess = factory.newInstance(FlexoProcess.class);
-	// 	try {
-	// 		aProcess.init("234X1");
-	// 		aProcess.getName();
-	// 		// WHEN
-	// 	} catch (UnitializedEntityException e) {
-	// 	}
-	// 	// THEN
-	// 	// TODO move to another test this has nothing to do with the current
-	// 	// assertTrue(aProcess instanceof FlexoProcess);
-	// 	// assertEquals("NewProcess", aProcess.getName());
-	// 	// assertEquals("234XX", aProcess.getFlexoID());
-	// 	// assertEquals(8, aProcess.getFoo());
-	// }
+	public void testShouldNotRaiseAnExceptionAfterProccesIsInitialized() throws Exception {
+		// GIVEN
+		FlexoProcess aProcess = factory.newInstance(FlexoProcess.class);
+		try {
+			aProcess.init("234X1");
+			aProcess.getName();
+			// WHEN
+		} catch (UnitializedEntityException e) {
+		}
+		// THEN
+		// TODO move to another test this has nothing to do with the current
+		// assertTrue(aProcess instanceof FlexoProcess);
+		// assertEquals("NewProcess", aProcess.getName());
+		// assertEquals("234XX", aProcess.getFlexoID());
+		// assertEquals(8, aProcess.getFoo());
+	}
 
 	// public void testShouldRaiseExceptionWhenGetNameBeforeProcessIsInitialized() throws Exception {
 	// 	// GIVEN
