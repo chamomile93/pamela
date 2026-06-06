@@ -65,18 +65,19 @@ public class ModelEntityLibrary {
 		ModelEntity<I> modelEntity = (ModelEntity<I>) entities.get(implementedInterface);
 		//TODO entities the first is empty, then modelEntity is null
 		if (modelEntity == null) {
-			modelEntity = createOrGetModelEntityFromImplementingInterface(implementedInterface, true);
+			modelEntity = get(implementedInterface, true);
 			//TODO idf the previous method has modified "newEntities"
 			for (ModelEntity<?> aNewEntity : newEntities) {
 				aNewEntity.mergeProperties();
 				//TODO idf
 			}
+			newEntities.clear();
 			//TODO idf
 		}
 		return modelEntity;
 	}
 
-	static <I> ModelEntity<I> createOrGetModelEntityFromImplementingInterface(Class<I> implementedInterface, boolean create) throws ModelDefinitionException {
+	static <I> ModelEntity<I> get(Class<I> implementedInterface, boolean create) throws ModelDefinitionException {
 		ModelEntity<I> modelEntity = (ModelEntity<I>) entities.get(implementedInterface);
 		if (modelEntity == null && create) {
 			//TODO I suppose this is the case the first time I reach here with a FlexoProcess interface class as argument, given that "entities" is empty at the beginning, so we create a new ModelEntity for this class and put it in the "entities" map
@@ -105,7 +106,7 @@ public class ModelEntityLibrary {
 	static <I> ModelEntity<I> getModelEntityFromImplementingInterface(Class<I> implementedInterface) {
 		//TODO this seems to be an overloaded method of the previous one
 		try {
-			return createOrGetModelEntityFromImplementingInterface(implementedInterface, false);
+			return get(implementedInterface, false);
 		} catch (ModelDefinitionException e) {
 			// Never happens
 			//TODO idf the previous existing comment
@@ -122,6 +123,6 @@ public class ModelEntityLibrary {
 	 */
 	public static void clear() {
 		entities.clear();
-		newEntities.clear(); //TODO watchout this has been added while debugging an exception raised by SerializationTests.
+		// newEntities.clear(); //TODO watchout this has been added while debugging an exception raised by SerializationTests.
 	}
 }

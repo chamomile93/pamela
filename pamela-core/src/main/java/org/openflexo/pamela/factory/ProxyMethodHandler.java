@@ -53,10 +53,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.IdentityHashMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -282,23 +282,22 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 		return createdByCloning;
 	}
 
+	// override javaassit.ProxyHandler
 	@Override
 	public Object invoke(Object self, Method method, Method proceed, Object[] args) throws Throwable {
-		// TODO it's marked override, but override what ? the JVM default invoke ?
-		// TODO do I need to understand this ?
-		if (PamelaUtils.methodIsEquivalentTo(method, IProxyMethodHandler.REGISTER_RUNTIME_METHOD)) {
-			registerRuntimeMethod((String) args[0], (RuntimeMethod) args[1]);
-			return null;
-		}
-		if (PamelaUtils.methodIsEquivalentTo(method, IProxyMethodHandler.HAS_RUNTIME_METHOD)) {
-			return hasRuntimeMethod((String) args[0]);
-		}
-		if (PamelaUtils.methodIsEquivalentTo(method, IProxyMethodHandler.INVOKE_RUNTIME_METHOD)) {
-			return invokeRuntimeMethod((String) args[0],
-					args != null && args.length > 1 ? (Object[]) args[1] : new Object[0]);
-		}
+		// if (PamelaUtils.methodIsEquivalentTo(method, IProxyMethodHandler.REGISTER_RUNTIME_METHOD)) {
+		// 	registerRuntimeMethod((String) args[0], (RuntimeMethod) args[1]);
+		// 	return null;
+		// }
+		// if (PamelaUtils.methodIsEquivalentTo(method, IProxyMethodHandler.HAS_RUNTIME_METHOD)) {
+		// 	return hasRuntimeMethod((String) args[0]);
+		// }
+		// if (PamelaUtils.methodIsEquivalentTo(method, IProxyMethodHandler.INVOKE_RUNTIME_METHOD)) {
+		// 	return invokeRuntimeMethod((String) args[0],
+		// 			args != null && args.length > 1 ? (Object[]) args[1] : new Object[0]);
+		// }
 
-		// :TODO review the args in above code
+		// :TODO review the args in abovereturn internallyInvokeToString() code
 
 		boolean assertionChecking = false;
 		boolean keepGoing = true;
@@ -2612,13 +2611,13 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 
 	private String internallyInvokeToString(Set<Object> visitedObjects) throws ModelDefinitionException {
 		//TODO this overloadding was added by copilot after a suggestion during a debug session
-		Object currentObject = getObject();
-		if (currentObject != null) {
-			if (!visitedObjects.add(currentObject)) {
-				//TODO this branch was added by copilot after a suggestion during a debug session	
-				return getModelEntity().getImplementedInterface().getSimpleName() + "[<cycle>]";
-			}
-		}
+		// Object currentObject = getObject();
+		// if (currentObject != null) {
+		// 	if (!visitedObjects.add(currentObject)) {
+		// 		//TODO this branch was added by copilot after a suggestion during a debug session	
+		// 		return getModelEntity().getImplementedInterface().getSimpleName() + "[<cycle>]";
+		// 	}
+		// }
 		StringBuilder sb = new StringBuilder();
 		sb.append(getModelEntity().getImplementedInterface().getSimpleName() + "[");
 		List<String> variables = new ArrayList<>(propertyImplementations.keySet());
@@ -2629,20 +2628,21 @@ public class ProxyMethodHandler<I> extends IProxyMethodHandler implements Method
 			if (obj != null) {
 				if (!(obj instanceof ProxyObject)) {
 					s = indent(obj.toString(), var.length() + 1);
-				} else {
-					ProxyMethodHandler nestedHandler = (ProxyMethodHandler) ((ProxyObject) obj).getHandler();
-					s = nestedHandler.getModelEntity().getImplementedInterface().getSimpleName();
-					//TODO this was modified by copilot after a suggestion during a debug session
 				}
+				//  else {
+				// 	ProxyMethodHandler nestedHandler = (ProxyMethodHandler) ((ProxyObject) obj).getHandler();
+				// 	s = nestedHandler.getModelEntity().getImplementedInterface().getSimpleName();
+				// 	//TODO this was modified by copilot after a suggestion during a debug session
+				// }
 
 			}
 			sb.append(var).append("=").append(s).append('\n');
 		}
 		sb.append("]");
-		if (currentObject != null) {
-		//TODO this branch was added by copilot after a suggestion during a debug session	
-			visitedObjects.remove(currentObject);
-		}
+		// if (currentObject != null) {
+		// //TODO this branch was added by copilot after a suggestion during a debug session	
+		// 	visitedObjects.remove(currentObject);
+		// }
 		return sb.toString();
 	}
 

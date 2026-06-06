@@ -422,7 +422,7 @@ public class ModelEntity<I> {
 					&& !property.getType().isEnum() && !property.isStringConvertable() && !property.ignoreType()) {
 				try {
 					embeddedEntities.add(ModelEntityLibrary
-							.createOrGetModelEntityFromImplementingInterface(property.getType(), true));
+							.get(property.getType(), true));
 				} catch (ModelDefinitionException e) {
 					throw new ModelDefinitionException(
 							"Could not retrieve model entity for property " + property + " and entity " + this,
@@ -436,7 +436,7 @@ public class ModelEntity<I> {
 		if (imports != null) {
 			for (Import imp : imports.value()) {
 				embeddedEntities
-						.add(ModelEntityLibrary.createOrGetModelEntityFromImplementingInterface(imp.value(), true));
+						.add(ModelEntityLibrary.get(imp.value(), true));
 			}
 		}
 
@@ -629,7 +629,7 @@ public class ModelEntity<I> {
 			directSuperEntities = new ArrayList<>(superImplementedInterfaces.size());
 			for (Class<? super I> superInterface : superImplementedInterfaces) {
 				ModelEntity<? super I> superEntity = ModelEntityLibrary
-						.createOrGetModelEntityFromImplementingInterface(superInterface, true);
+						.get(superInterface, true);
 				directSuperEntities.add(superEntity);
 			}
 		}
