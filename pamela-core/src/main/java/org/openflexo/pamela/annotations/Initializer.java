@@ -47,12 +47,13 @@ import java.lang.annotation.Target;
 /**
  * Annotation for a 'constructor'<br>
  * 
- * This annotation should be placed in a method and indicates that this method may be used as a constructor (with ou without parameters) for
+ * This annotation should be use with method and indicates that this method may be used as a constructor (with ou without parameters) for
  * related {@link ModelEntity}
  * 
  * @author Guillaume
  * 
  */
+//TODO sed "should"/"must" ?
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Initializer {

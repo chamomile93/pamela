@@ -40,6 +40,7 @@
 package org.openflexo.pamela.test;
 
 import org.openflexo.pamela.PamelaMetaModel;
+import org.openflexo.pamela.PamelaMetaModelLibrary;
 import org.openflexo.pamela.exceptions.ModelDefinitionException;
 import org.openflexo.pamela.model.ModelEntity;
 import org.openflexo.pamela.model.ModelEntityLibrary;
@@ -59,6 +60,7 @@ public abstract class AbstractPAMELATest extends TestCase {
 	 */
 	protected void clearModelEntityLibrary() {
 		ModelEntityLibrary.clear();
+		PamelaMetaModelLibrary.clearCache();
 	}
 
 	protected void validateBasicModelContext(PamelaMetaModel pamelaMetaModel) throws ModelDefinitionException {

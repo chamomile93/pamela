@@ -64,26 +64,25 @@ public class PamelaCoreTests2 extends AbstractPAMELATest {
 	@Override
 	@Before
 	public void setUp() throws Exception {
+
 		file = File.createTempFile("PamelaCoreTests2", ".xml");
 
 		clearModelEntityLibrary();
-		if (factory == null) {
-			pamelaMetaModel = PamelaMetaModelLibrary.retrieveMetaModel(FlexoProcess.class);
-			factory = new PamelaModelFactory(pamelaMetaModel);
-		}
+		pamelaMetaModel = PamelaMetaModelLibrary.retrieveMetaModel(FlexoProcess.class);
+		factory = new PamelaModelFactory(pamelaMetaModel);
+
 		aProcessInitialized = factory.newInstance(FlexoProcess.class);
 		aProcessInitialized.init("234XX");
 		aProcessInitialized.setName("NewProcess");
 		aProcessInitialized.setFoo(8);
 
-		//TODO uncomment this for tests that depends on it
-		// anotherProcessNotInitialized = factory.newInstance(FlexoProcess.class);
+		anotherProcessNotInitialized = factory.newInstance(FlexoProcess.class);
 	}
 
 	@Override
 	@After
 	public void tearDown() throws Exception {
-		// TODO should reset the model entity library ?
+		// TODO is this redundant ?
 		clearModelEntityLibrary();
 		// file.delete();
 	}
@@ -95,7 +94,7 @@ public class PamelaCoreTests2 extends AbstractPAMELATest {
 	 * @throws Exception
 	 */
 	public void testShouldConstructCorrectSimplePamelaMetaModel() throws Exception {
-		System.out.println(pamelaMetaModel.debug());
+		// System.out.println(pamelaMetaModel.debug());
 		assertEquals(11, pamelaMetaModel.getEntityCount());
 
 		// why countEntity returns "11" ? I would expect one entity,
